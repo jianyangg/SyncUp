@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "894771916019",
+    "project_id": "syncup-278db",
+    "storage_bucket": "syncup-278db.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:894771916019:android:9817df468e56b08837db86",
+        "android_client_info": {
+          "package_name": "com.jianyang.sync_up"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "894771916019-lqrmngjp9sriih5fiped1ffg9d4tp8o7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jianyang.sync_up",
+            "certificate_hash": "695d2dd8763e8f738414323479ec89f584c972c6"
+          }
+        },
+        {
+          "client_id": "894771916019-vvd332mb4et2emp8e9kg7gqgbm1h5f2i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBaL8jbzUkcvR4jBv_CSKTvUHMiQKKxGqI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "894771916019-6qks3kbnci5ps9c6oq5etnl7ti6p1gca.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "894771916019-beaamr5kki43iv0v3m4s1o4cadunlf60.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.syncUp.RunnerTests"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
