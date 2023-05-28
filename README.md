@@ -48,3 +48,6 @@ Our project aims to transform the way scheduling is done, making it a breeze for
     ### GitHub Repository
     
     [https://github.com/jianyangg/SyncUp.git](https://github.com/jianyangg/SyncUp.git)
+    
+    ### APK File
+    Download [here](https://drive.google.com/file/d/1KwKZMehNzoRoXcXHkB4MkQOrylQ3PAOL/view?usp=share_link)
