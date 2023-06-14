@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sync_up/components/my_textfield.dart';
 import 'package:sync_up/components/signIn_signUp_button.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:sync_up/pages/forgot_password_page.dart';
@@ -15,8 +16,6 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginState extends State<LoginPage> {
-  bool _passwordVisible = true;
-
   // add sign user in method
   void signUserIn() async {
     // show loading
@@ -83,10 +82,7 @@ class _LoginState extends State<LoginPage> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    _passwordVisible = true;
-  }
+  void initState() {}
 
   @override
   Widget build(BuildContext context) {
@@ -132,87 +128,25 @@ class _LoginState extends State<LoginPage> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                // const Text(
-                //   'an Orbital project',
-                //   textAlign: TextAlign.center,
-                //   style: TextStyle(
-                //       fontFamily: 'Courier New',
-                //       color: Colors.black,
-                //       fontSize: 15,
-                //       // fontStyle: FontStyle.italic,
-                //       fontWeight: FontWeight.bold),
-                // ),
                 const SizedBox(height: 30),
-                Padding(
-                  // set input text to be white
-                  padding: const EdgeInsets.symmetric(horizontal: 40.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      border: Border.all(
-                          color: const Color.fromARGB(255, 197, 197, 197)),
-                      borderRadius: const BorderRadius.all(Radius.circular(10)),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 15.0),
-                      child: TextField(
-                        controller: emailController,
-                        style: const TextStyle(color: Colors.white),
-                        decoration: const InputDecoration(
-                            hintText: 'Email (i.e., e1234567@u.nus.edu)',
-                            hintStyle: TextStyle(
-                              color: Color.fromARGB(255, 115, 115, 115),
-                            ),
-                            border: InputBorder.none),
-                      ),
-                    ),
-                  ),
-                ),
+                //email textfield
+                MyTextField(
+                    controller: emailController,
+                    hintText: "Email (e.g., e1234567@u.nus.edu)",
+                    obscureText: false,
+                    isPassword: false),
+
                 const SizedBox(
                   height: 30,
                 ),
-                Padding(
-                  // set input text to be white
-                  padding: const EdgeInsets.symmetric(horizontal: 40.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      border: Border.all(
-                          color: const Color.fromARGB(255, 197, 197, 197)),
-                      borderRadius: const BorderRadius.all(Radius.circular(10)),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 15.0),
-                      child: TextField(
-                        controller: passwordController,
-                        obscureText: _passwordVisible,
-                        style: const TextStyle(color: Colors.white),
-                        decoration: InputDecoration(
-                          hintText: 'Password',
-                          hintStyle: const TextStyle(
-                            color: Color.fromARGB(255, 115, 115, 115),
-                          ),
-                          border: InputBorder.none,
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _passwordVisible
-                                  ? Icons.visibility
-                                  : Icons.visibility_off,
-                              color: const Color.fromARGB(255, 115, 115, 115),
-                            ),
-                            onPressed: () {
-                              setState(
-                                () {
-                                  _passwordVisible = !_passwordVisible;
-                                },
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+
+                //password textfield
+                MyTextField(
+                    controller: passwordController,
+                    hintText: "Password",
+                    obscureText: true,
+                    isPassword: true),
+
                 const SizedBox(
                   height: 30,
                 ),
