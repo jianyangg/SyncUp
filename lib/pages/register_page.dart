@@ -103,7 +103,7 @@ class _RegisterState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 22, 22, 22),
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -122,7 +122,7 @@ class _RegisterState extends State<RegisterPage> {
                     ),
                     Icon(
                       Icons.sync,
-                      color: Colors.white,
+                      color: Colors.black,
                       size: 40,
                     ),
                     Icon(
@@ -132,25 +132,27 @@ class _RegisterState extends State<RegisterPage> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
-                Text(
-                  '< SyncUp >',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.bebasNeue(
-                    fontSize: 90,
-                    color: Colors.white,
-                  ),
-                ),
+                const SizedBox(height: 10),
                 const Text(
-                  'an Orbital project',
+                  'SyncUp',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                      fontFamily: 'Courier New',
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontStyle: FontStyle.italic,
-                      fontWeight: FontWeight.bold),
+                    fontFamily: 'Arial',
+                    fontSize: 70,
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
+                // const Text(
+                //   'an Orbital project',
+                //   textAlign: TextAlign.center,
+                //   style: TextStyle(
+                //       fontFamily: 'Courier New',
+                //       color: Colors.white,
+                //       fontSize: 15,
+                //       fontStyle: FontStyle.italic,
+                //       fontWeight: FontWeight.bold),
+                // ),
                 const SizedBox(height: 30),
                 Padding(
                   // set input text to be white
@@ -158,7 +160,8 @@ class _RegisterState extends State<RegisterPage> {
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.transparent,
-                      border: Border.all(color: Colors.white),
+                      border: Border.all(
+                          color: const Color.fromARGB(255, 197, 197, 197)),
                       borderRadius: const BorderRadius.all(Radius.circular(10)),
                     ),
                     child: Padding(
@@ -185,7 +188,8 @@ class _RegisterState extends State<RegisterPage> {
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.transparent,
-                      border: Border.all(color: Colors.white),
+                      border: Border.all(
+                          color: const Color.fromARGB(255, 197, 197, 197)),
                       borderRadius: const BorderRadius.all(Radius.circular(10)),
                     ),
                     child: Padding(
@@ -230,7 +234,8 @@ class _RegisterState extends State<RegisterPage> {
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.transparent,
-                      border: Border.all(color: Colors.white),
+                      border: Border.all(
+                          color: const Color.fromARGB(255, 197, 197, 197)),
                       borderRadius: const BorderRadius.all(Radius.circular(10)),
                     ),
                     child: Padding(
@@ -295,8 +300,11 @@ class _RegisterState extends State<RegisterPage> {
                         child: const Text(
                           ' Login!',
                           style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Arial',
+                            color: Colors.black,
+                            fontSize: 15,
+                            fontStyle: FontStyle.italic,
+                            // fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),

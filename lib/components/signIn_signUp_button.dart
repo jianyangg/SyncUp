@@ -15,11 +15,11 @@ class SignInOrSignUpButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color.fromARGB(255, 22, 22, 22),
+          backgroundColor: Colors.blue.shade800,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
             side: const BorderSide(
-              color: Colors.white,
+              color: Colors.transparent,
               width: 2,
             ),
           ),

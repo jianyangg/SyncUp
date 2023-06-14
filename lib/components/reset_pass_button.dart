@@ -14,17 +14,20 @@ class ResetPassButton extends StatelessWidget {
         padding: const EdgeInsets.all(10),
         margin: const EdgeInsets.symmetric(horizontal: 40),
         decoration: BoxDecoration(
-          color: const Color.fromARGB(255, 22, 22, 22),
+          color: Colors.blue.shade800,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: Colors.white,
+            color: Colors.transparent,
             width: 2,
           ),
         ),
         child: Center(
           child: Text(
             text,
-            style: const TextStyle(color: Colors.white, fontSize: 20),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 15,
+            ),
           ),
         ),
       ),

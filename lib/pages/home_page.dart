@@ -2,6 +2,7 @@ import 'package:dot_navigation_bar/dot_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:sync_up/pages/account_page.dart';
 import 'package:sync_up/pages/calendar_page.dart';
+import 'package:sync_up/pages/group_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -43,7 +44,7 @@ class _HomeState extends State<HomePage> {
         Navigator.pushReplacement(
           context,
           PageRouteBuilder(
-            pageBuilder: (context, animation1, animation2) => const HomePage(),
+            pageBuilder: (context, animation1, animation2) => const GroupPage(),
             transitionDuration: Duration.zero,
             reverseTransitionDuration: Duration.zero,
           ),
@@ -76,7 +77,7 @@ class _HomeState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xff73544C),
+      backgroundColor: Colors.blue.shade800,
       extendBody: true,
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -84,9 +85,9 @@ class _HomeState extends State<HomePage> {
             padding: EdgeInsets.only(left: 10),
             child: Text(
               "Hello, usr_admin",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
             )),
-        backgroundColor: const Color(0xff73544C),
+        backgroundColor: Colors.blue.shade800,
         shadowColor: Colors.transparent,
         actions: [
           IconButton(
@@ -125,7 +126,7 @@ class _HomeState extends State<HomePage> {
                       onPressed: () {},
                       style: ElevatedButton.styleFrom(
                         shadowColor: Colors.transparent,
-                        backgroundColor: const Color.fromARGB(239, 115, 84, 76),
+                        backgroundColor: Colors.blue.shade800,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -414,7 +415,7 @@ class _HomeState extends State<HomePage> {
         ),
       ),
       bottomNavigationBar: DotNavigationBar(
-        backgroundColor: const Color.fromARGB(226, 115, 84, 76),
+        backgroundColor: Colors.blue.shade800,
         enableFloatingNavBar: true,
         margin: const EdgeInsets.only(left: 10, right: 10),
         currentIndex: _SelectedTab.values.indexOf(_selectedTab),
@@ -437,7 +438,7 @@ class _HomeState extends State<HomePage> {
 
           /// Search
           DotNavigationBarItem(
-            icon: const Icon(Icons.storage),
+            icon: const Icon(Icons.group),
             selectedColor: Colors.white,
           ),
 
@@ -452,7 +453,7 @@ class _HomeState extends State<HomePage> {
   }
 }
 
-enum _SelectedTab { home, calendar, database, account }
+enum _SelectedTab { home, calendar, group, account }
 
 // import 'dart:math';
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dot_navigation_bar/dot_navigation_bar.dart';
 import 'package:sync_up/pages/calendar_page.dart';
+import 'package:sync_up/pages/group_page.dart';
 import 'package:sync_up/pages/home_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:sync_up/pages/main_page.dart';
@@ -48,7 +49,7 @@ class _AccountPageState extends State<AccountPage> {
         Navigator.pushReplacement(
           context,
           PageRouteBuilder(
-            pageBuilder: (context, animation1, animation2) => const HomePage(),
+            pageBuilder: (context, animation1, animation2) => const GroupPage(),
             transitionDuration: Duration.zero,
             reverseTransitionDuration: Duration.zero,
           ),
@@ -71,16 +72,16 @@ class _AccountPageState extends State<AccountPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xff73544c),
+      backgroundColor: Colors.blue.shade800,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: const Padding(
             padding: EdgeInsets.only(left: 10),
             child: Text(
               "Hello, usr_admin",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
             )),
-        backgroundColor: const Color(0xff73544C),
+        backgroundColor: Colors.blue.shade800,
         shadowColor: Colors.transparent,
         actions: [
           IconButton(
@@ -107,17 +108,70 @@ class _AccountPageState extends State<AccountPage> {
             color: Colors.white,
             borderRadius: BorderRadius.circular(30),
           ),
-          child: const SingleChildScrollView(
+          child: SingleChildScrollView(
             child: Padding(
-              padding: EdgeInsets.all(10),
+              padding: const EdgeInsets.all(10),
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   CircleAvatar(
                     radius: 50,
-                    backgroundColor: Color.fromARGB(255, 151, 151, 151),
+                    backgroundColor: Colors.blue.shade600,
                     // backgroundImage: AssetImage('assets/images/user.png'),
                   ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    "usr_admin",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 7),
+                  const Text(
+                    'Joined in 2023',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 20),
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          TextButton(
+                            onPressed: () {},
+                            style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all<Color>(
+                                  Colors.orange.shade400),
+                            ),
+                            child: const Text(
+                              'Sync with Google',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          TextButton(
+                            style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all<Color>(
+                                  Colors.blueAccent.shade100),
+                            ),
+                            onPressed: () {},
+                            child: const Text(
+                              'Sync with Apple',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
                 ],
               ),
             ),
@@ -126,7 +180,7 @@ class _AccountPageState extends State<AccountPage> {
       ),
       extendBody: true,
       bottomNavigationBar: DotNavigationBar(
-        backgroundColor: const Color.fromARGB(226, 115, 84, 76),
+        backgroundColor: Colors.blue.shade800,
         enableFloatingNavBar: true,
         margin: const EdgeInsets.only(left: 10, right: 10),
         currentIndex: _SelectedTab.values.indexOf(_selectedTab),
@@ -148,7 +202,7 @@ class _AccountPageState extends State<AccountPage> {
 
           /// Search
           DotNavigationBarItem(
-            icon: const Icon(Icons.storage),
+            icon: const Icon(Icons.group),
             selectedColor: Colors.white,
           ),
 
@@ -175,4 +229,4 @@ class _AccountPageState extends State<AccountPage> {
   }
 }
 
-enum _SelectedTab { home, calendar, database, account }
+enum _SelectedTab { home, calendar, group, account }
