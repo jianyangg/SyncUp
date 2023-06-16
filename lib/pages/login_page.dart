@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:sync_up/components/my_textfield.dart';
 import 'package:sync_up/components/signIn_signUp_button.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
@@ -82,9 +81,6 @@ class _LoginState extends State<LoginPage> {
   }
 
   @override
-  void initState() {}
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       // backgroundColor: const Color.fromARGB(255, 22, 22, 22),
@@ -117,13 +113,13 @@ class _LoginState extends State<LoginPage> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 20),
                 const Text(
                   'SyncUp',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontFamily: 'Arial',
-                    fontSize: 70,
+                    fontSize: 90,
                     color: Colors.black,
                     fontWeight: FontWeight.bold,
                   ),
@@ -231,7 +227,8 @@ class _LoginState extends State<LoginPage> {
                       child: Text(
                         'alternative options',
                         style: TextStyle(
-                            color: Colors.black, fontStyle: FontStyle.italic),
+                            color: Color.fromARGB(255, 134, 134, 134),
+                            fontStyle: FontStyle.italic),
                       ),
                     ),
                     Expanded(

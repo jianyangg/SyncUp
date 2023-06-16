@@ -1,6 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:dot_navigation_bar/dot_navigation_bar.dart';
-import 'package:sync_up/pages/calendar_page.dart';
+import 'package:sync_up/pages/own_event_page.dart';
 import 'package:sync_up/pages/group_page.dart';
 import 'package:sync_up/pages/home_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,6 +13,32 @@ class AccountPage extends StatefulWidget {
 
   @override
   State<AccountPage> createState() => _AccountPageState();
+}
+
+Future<String> getUserName() async {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final User? user = _auth.currentUser;
+  final uid = user!.uid;
+  return FirebaseFirestore.instance
+      .collection("users")
+      .doc(uid)
+      .get()
+      .then((value) {
+    return value.data()!["name"];
+  });
+}
+
+Future<String> getUserPhotoUrl() async {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final User? user = _auth.currentUser;
+  final uid = user!.uid;
+  return FirebaseFirestore.instance
+      .collection("users")
+      .doc(uid)
+      .get()
+      .then((value) {
+    return value.data()!["photoUrl"];
+  });
 }
 
 class _AccountPageState extends State<AccountPage> {
@@ -39,7 +66,7 @@ class _AccountPageState extends State<AccountPage> {
           context,
           PageRouteBuilder(
             pageBuilder: (context, animation1, animation2) =>
-                const CalendarPage(),
+                const OwnEventPage(),
             transitionDuration: Duration.zero,
             reverseTransitionDuration: Duration.zero,
           ),
@@ -69,18 +96,36 @@ class _AccountPageState extends State<AccountPage> {
     }
   }
 
+  String userName = "";
+  String url = "";
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.blue.shade800,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Padding(
-            padding: EdgeInsets.only(left: 10),
-            child: Text(
-              "Hello, usr_admin",
-              style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-            )),
+        title: Padding(
+          padding: const EdgeInsets.only(left: 10),
+          child: FutureBuilder<String>(
+            future: getUserName(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData && snapshot.data != null) {
+                userName = snapshot.data!;
+                return Text(
+                  "Hello, ${snapshot.data}",
+                  style: const TextStyle(
+                      fontSize: 25, fontWeight: FontWeight.bold),
+                );
+              } else {
+                return const Text(
+                  "Hello, User",
+                  style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                );
+              }
+            },
+          ),
+        ),
         backgroundColor: Colors.blue.shade800,
         shadowColor: Colors.transparent,
         actions: [
@@ -116,24 +161,40 @@ class _AccountPageState extends State<AccountPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const SizedBox(height: 20),
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundColor: Colors.blue.shade600,
-                    // backgroundImage: AssetImage('assets/images/user.png'),
+                  FutureBuilder<String>(
+                    future: getUserPhotoUrl(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData && snapshot.data != null) {
+                        url = snapshot.data!;
+                        return CircleAvatar(
+                          radius: 50,
+                          backgroundColor: Colors.blue.shade600,
+                          backgroundImage: Image.network(url).image,
+                          // backgroundImage: AssetImage('assets/images/user.png'),
+                        );
+                      } else {
+                        return CircleAvatar(
+                          radius: 50,
+                          backgroundColor: Colors.blue.shade600,
+                          // backgroundImage: Image.network().image,
+                        );
+                      }
+                    },
                   ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    "usr_admin",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 7),
-                  const Text(
-                    'Joined in 2023',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
+
+                  // const SizedBox(height: 20),
+                  // Text(
+                  //   userName,
+                  //   style: const TextStyle(
+                  //     fontSize: 20,
+                  //     fontWeight: FontWeight.bold,
+                  //   ),
+                  // ),
+                  // // const SizedBox(height: 7),
+                  // // const Text(
+                  // //   'Joined in 2023',
+                  // //   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  // // ),
                   const SizedBox(height: 20),
                   Center(
                     child: Padding(

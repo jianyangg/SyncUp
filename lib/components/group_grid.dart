@@ -1,0 +1,209 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:sync_up/pages/group_events_page.dart';
+
+import '../pages/group_page.dart';
+
+class GroupGrid extends StatelessWidget {
+  final String userId;
+  const GroupGrid({super.key, required this.userId});
+
+  @override
+  Widget build(BuildContext context) {
+    // create a firestore instnace to access the database
+    final _firestore = FirebaseFirestore.instance;
+
+    // using the userId, retrieve id of the groups associated with the user
+    // and save it in a list
+    List<String> groupNames = [];
+
+    // return a future builder to get the data from the database
+    Future getGroupIds() async {
+      final snapshot = await _firestore.collection("users").doc(userId).get();
+      final data = snapshot.data();
+      final groupIds = data?["groups"] as List<dynamic>;
+      // retrieve the group names
+      for (var groupId in groupIds) {
+        final groupSnapshot =
+            await _firestore.collection("groups").doc(groupId).get();
+        final groupData = groupSnapshot.data();
+        final groupName = groupData?["name"] as String;
+        groupNames.add(groupName);
+      }
+      return groupIds;
+    }
+
+    return RefreshIndicator(
+      onRefresh: () async {
+        // refresh the page
+        Navigator.pushReplacement(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (context, animation1, animation2) => const GroupPage(),
+            transitionDuration: Duration.zero,
+            reverseTransitionDuration: Duration.zero,
+          ),
+        );
+      },
+      child: FutureBuilder(
+        future: getGroupIds(),
+        builder: (context, snapshot) {
+          // TODO: This first if statement isn't working
+          if (snapshot.data == null) {
+            return Container();
+            // return const Center(
+            //   child: Text(
+            //     "No groups found. Create one now!",
+            //     style: TextStyle(fontSize: 20),
+            //   ),
+            // );
+          } else if (snapshot.connectionState == ConnectionState.done &&
+              snapshot.hasData) {
+            final groupIds = snapshot.data!;
+            return SizedBox(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height * 4 / 5,
+              child: GridView.builder(
+                itemCount: groupIds.length,
+                // make it blue and evenly spaced out with 2 columns
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 15,
+                ),
+                itemBuilder: (context, index) {
+                  return GestureDetector(
+                    onTap: () {
+                      // navigate to group page
+                      // print(context);
+                      // push to group_events_page
+                      Navigator.pushReplacement(
+                        context,
+                        PageRouteBuilder(
+                          pageBuilder: (context, animation1, animation2) =>
+                              GroupEventsPage(
+                            userId: userId,
+                            groupId: groupIds[index],
+                            groupName: groupNames[index],
+                          ),
+                          transitionDuration: Duration.zero,
+                          reverseTransitionDuration: Duration.zero,
+                        ),
+                      );
+                    },
+                    child: Stack(
+                      children: [
+                        Container(
+                          margin: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.shade600,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Center(
+                            child: Text(
+                              // retrieve group name from firestore
+                              groupNames[index],
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          top: 10,
+                          right: 4,
+                          child: PopupMenuButton(
+                            itemBuilder: (context) => [
+                              PopupMenuItem(
+                                value: 'leave_group',
+                                child: const Text('Leave Group'),
+                                onTap: () {
+                                  // remove the group from the user's list of groups
+                                  // if the user is the owner of the group,
+                                  // delete the group
+                                  _firestore
+                                      .collection("groups")
+                                      .doc(groupIds[index])
+                                      .get()
+                                      .then((value) {
+                                    final data = value.data();
+                                    final ownerId = data?["owner"] as String;
+                                    if (ownerId == userId) {
+                                      // delete the group from all users
+                                      _firestore
+                                          .collection("users")
+                                          .get()
+                                          .then((value) {
+                                        for (var doc in value.docs) {
+                                          final userData = doc.data();
+                                          final userGroups =
+                                              userData["groups"] as List;
+                                          if (userGroups
+                                              .contains(groupIds[index])) {
+                                            _firestore
+                                                .collection("users")
+                                                .doc(doc.id)
+                                                .update({
+                                              "groups": FieldValue.arrayRemove(
+                                                  [groupIds[index]])
+                                            });
+                                          }
+                                        }
+                                      });
+                                      _firestore
+                                          .collection("groups")
+                                          .doc(groupIds[index])
+                                          .delete();
+                                    } else {
+                                      _firestore
+                                          .collection("groups")
+                                          .doc(groupIds[index])
+                                          .update({
+                                        "members":
+                                            FieldValue.arrayRemove([userId])
+                                      });
+                                      _firestore
+                                          .collection("users")
+                                          .doc(userId)
+                                          .update({
+                                        "groups": FieldValue.arrayRemove(
+                                            [groupIds[index]])
+                                      });
+                                    }
+                                  });
+                                },
+                              ),
+                              PopupMenuItem(
+                                value: 'copy_grp_name',
+                                child: const Text('Copy Group Name'),
+                                onTap: () {
+                                  Clipboard.setData(
+                                      ClipboardData(text: groupNames[index]));
+                                },
+                              ),
+                              const PopupMenuItem(
+                                  value: 'back', child: Text('Back')),
+                            ],
+                            icon: const Icon(Icons.more_vert),
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            );
+          } else {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+        },
+      ),
+    );
+  }
+}

@@ -1,7 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:sync_up/components/signIn_signUp_button.dart';
+
+import '../components/my_textfield.dart';
 
 class RegisterPage extends StatefulWidget {
   final Function()? onTap;
@@ -132,146 +133,43 @@ class _RegisterState extends State<RegisterPage> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 20),
                 const Text(
                   'SyncUp',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontFamily: 'Arial',
-                    fontSize: 70,
+                    fontSize: 90,
                     color: Colors.black,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                // const Text(
-                //   'an Orbital project',
-                //   textAlign: TextAlign.center,
-                //   style: TextStyle(
-                //       fontFamily: 'Courier New',
-                //       color: Colors.white,
-                //       fontSize: 15,
-                //       fontStyle: FontStyle.italic,
-                //       fontWeight: FontWeight.bold),
-                // ),
                 const SizedBox(height: 30),
-                Padding(
-                  // set input text to be white
-                  padding: const EdgeInsets.symmetric(horizontal: 40.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      border: Border.all(
-                          color: const Color.fromARGB(255, 197, 197, 197)),
-                      borderRadius: const BorderRadius.all(Radius.circular(10)),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 15.0),
-                      child: TextField(
-                        controller: emailController,
-                        style: const TextStyle(color: Colors.white),
-                        decoration: const InputDecoration(
-                            hintText: 'Email (i.e., e1234567@u.nus.edu)',
-                            hintStyle: TextStyle(
-                              color: Color.fromARGB(255, 115, 115, 115),
-                            ),
-                            border: InputBorder.none),
-                      ),
-                    ),
-                  ),
+                MyTextField(
+                    controller: emailController,
+                    hintText: "Email (e.g., e1234567@u.nus.edu)",
+                    obscureText: false,
+                    isPassword: false),
+                const SizedBox(
+                  height: 30,
+                ),
+                MyTextField(
+                  controller: passwordController,
+                  hintText: 'Password',
+                  obscureText: _passwordVisible1,
+                  isPassword: true,
                 ),
                 const SizedBox(
                   height: 30,
                 ),
-                Padding(
-                  // set input text to be white
-                  padding: const EdgeInsets.symmetric(horizontal: 40.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      border: Border.all(
-                          color: const Color.fromARGB(255, 197, 197, 197)),
-                      borderRadius: const BorderRadius.all(Radius.circular(10)),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 15.0),
-                      child: TextField(
-                        controller: passwordController,
-                        obscureText: _passwordVisible1,
-                        style: const TextStyle(color: Colors.white),
-                        decoration: InputDecoration(
-                          hintText: 'Password',
-                          hintStyle: const TextStyle(
-                            color: Color.fromARGB(255, 115, 115, 115),
-                          ),
-                          border: InputBorder.none,
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _passwordVisible1
-                                  ? Icons.visibility
-                                  : Icons.visibility_off,
-                              color: const Color.fromARGB(255, 115, 115, 115),
-                            ),
-                            onPressed: () {
-                              setState(
-                                () {
-                                  _passwordVisible1 = !_passwordVisible1;
-                                },
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                MyTextField(
+                  controller: cfmPasswordController,
+                  hintText: 'Confirm Password',
+                  obscureText: _passwordVisible2,
+                  isPassword: true,
                 ),
-                // for confirming password
                 const SizedBox(
                   height: 30,
-                ),
-                Padding(
-                  // set input text to be white
-                  padding: const EdgeInsets.symmetric(horizontal: 40.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      border: Border.all(
-                          color: const Color.fromARGB(255, 197, 197, 197)),
-                      borderRadius: const BorderRadius.all(Radius.circular(10)),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 15.0),
-                      child: TextField(
-                        controller: cfmPasswordController,
-                        obscureText: _passwordVisible2,
-                        style: const TextStyle(color: Colors.white),
-                        decoration: InputDecoration(
-                          hintText: 'Confirm Password',
-                          hintStyle: const TextStyle(
-                            color: Color.fromARGB(255, 115, 115, 115),
-                          ),
-                          border: InputBorder.none,
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _passwordVisible2
-                                  ? Icons.visibility
-                                  : Icons.visibility_off,
-                              color: const Color.fromARGB(255, 115, 115, 115),
-                            ),
-                            onPressed: () {
-                              setState(
-                                () {
-                                  _passwordVisible2 = !_passwordVisible2;
-                                },
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(
-                  height: 25,
                 ),
                 // forgot password
                 SignInOrSignUpButton(
