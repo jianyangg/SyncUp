@@ -1,9 +1,23 @@
 import "package:flutter/material.dart";
 import 'package:dot_navigation_bar/dot_navigation_bar.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
+import 'package:googleapis/firestore/v1.dart';
 import 'package:sync_up/pages/group_page.dart';
 import 'package:sync_up/pages/home_page.dart';
 import 'package:sync_up/pages/account_page.dart';
+import 'package:googleapis/calendar/v3.dart' as cal;
+import "package:googleapis_auth/auth_io.dart" as auth;
+import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
+import 'package:intl/intl.dart';
+
+/// Provides the `GoogleSignIn` class
+import 'package:google_sign_in/google_sign_in.dart';
+
+import '../components/event_tile.dart';
+
+final GoogleSignIn _googleSignIn = GoogleSignIn(
+  scopes: [cal.CalendarApi.calendarScope],
+);
 
 class CalendarPage extends StatefulWidget {
   const CalendarPage({super.key});
@@ -15,6 +29,60 @@ class CalendarPage extends StatefulWidget {
 enum _SelectedTab { home, calendar, group, account }
 
 class _CalendarPageState extends State<CalendarPage> {
+  GoogleSignInAccount? _currentUser;
+
+  late DateTime selectedDate;
+  late DateTime todayDate;
+
+  @override
+  void initState() {
+    super.initState();
+    DateTime now = DateTime.now();
+    todayDate = DateTime(now.year, now.month, now.day);
+    selectedDate = DateTime(now.year, now.month, now.day);
+    _googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
+      setState(() {
+        _currentUser = account;
+      });
+      if (_currentUser != null) {
+        _handleGetEvents();
+      }
+    });
+    _googleSignIn.signInSilently();
+  }
+
+  Future<List<cal.Event>> _handleGetEvents() async {
+    setState(() {
+      // somethin
+    });
+    // Retrieve an [auth.AuthClient] from the current [GoogleSignIn] instance.
+    final auth.AuthClient? client = await _googleSignIn.authenticatedClient();
+    assert(client != null, 'Authenticated client missing!');
+
+    // Prepare a gcal authenticated client.
+    final cal.CalendarApi gcalApi = cal.CalendarApi(client!);
+    // calEvents should contain the events on the selected date.
+    final cal.Events calEvents = await gcalApi.events.list(
+      "primary",
+      timeMin: selectedDate,
+      timeMax:
+          selectedDate.add(const Duration(hours: 23, minutes: 59, seconds: 59)),
+    );
+    final List<cal.Event> appointments = <cal.Event>[];
+
+    // add all events to appointments which is a Future<List<Event>>
+    if (calEvents.items != null) {
+      for (int i = 0; i < calEvents.items!.length; i++) {
+        final cal.Event event = calEvents.items![i];
+        if (event.start == null) {
+          continue;
+        }
+        appointments.add(event);
+      }
+    }
+    return appointments;
+  }
+
   var _selectedTab = _SelectedTab.calendar;
 
   Color hexToColor(String code) {
@@ -24,6 +92,7 @@ class _CalendarPageState extends State<CalendarPage> {
         0xFF000000);
   }
 
+  // Method to handle Nav bar click events
   void _handleIndexChanged(int i) {
     setState(() {
       _selectedTab = _SelectedTab.values[i];
@@ -93,11 +162,30 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   String _getWeekdayAbbreviation(int weekday) {
-    List<String> weekdayAbbreviations = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+    List<String> weekdayAbbreviations = [
+      'SUN',
+      'MON',
+      'TUE',
+      'WED',
+      'THU',
+      'FRI',
+      'SAT'
+    ];
     return weekdayAbbreviations[weekday - 1];
   }
 
-  DateTime? selectedDate = DateTime.now();
+  void _showDatePicker() {
+    showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2025),
+    ).then((value) => {
+          setState(() {
+            selectedDate = value!;
+          })
+        });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,18 +195,49 @@ class _CalendarPageState extends State<CalendarPage> {
         automaticallyImplyLeading: false,
         backgroundColor: Colors.blue.shade800,
         shadowColor: Colors.transparent,
-        title: const Padding(
-          padding: EdgeInsets.only(left: 10),
-          child: Text(
-            "Your Events",
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 25,
+        title: Row(
+          children: [
+            Container(
+              margin: EdgeInsets.only(bottom: 0.0),
+              child: TextButton(
+                onPressed: () {
+                  setState(() {
+                    selectedDate = todayDate;
+                  });
+                },
+                style: ButtonStyle(
+                  padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+                      const EdgeInsets.all(10.0)),
+                  backgroundColor:
+                      MaterialStateProperty.all<Color>(Colors.blue.shade700),
+                  shape: MaterialStateProperty.all<OutlinedBorder>(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                child: const Text(
+                  "Today",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
             ),
-          ),
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Text(DateFormat('dd MMM yyyy').format(selectedDate),
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+            ),
+          ],
         ),
         actions: [
+          IconButton(
+            onPressed: _showDatePicker,
+            icon: const Icon(Icons.calendar_month),
+          ),
           IconButton(
             onPressed: () {},
             icon: const Icon(Icons.add),
@@ -167,17 +286,20 @@ class _CalendarPageState extends State<CalendarPage> {
           child: Column(
             children: [
               const SizedBox(height: 10),
+              // all dates here
               Padding(
                 padding: const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 0),
                 child: SizedBox(
                   height: 70,
+                  // this entire thing is all the clickable days of the year
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
                     itemCount: 365,
                     itemBuilder: (context, index) {
                       DateTime date = DateTime.now();
+                      date = DateTime(date.year, date.month, date.day);
                       bool isSelected = date.add(Duration(days: index)).day ==
-                          selectedDate?.day;
+                          selectedDate.day;
                       return GestureDetector(
                         onTap: () {
                           setState(() {
@@ -250,6 +372,39 @@ class _CalendarPageState extends State<CalendarPage> {
                   thickness: 1,
                 ),
               ),
+              FutureBuilder<List<cal.Event>>(
+                  future: _handleGetEvents(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(
+                        child:
+                            CircularProgressIndicator(), // Display a loading indicator
+                      );
+                    } else if (snapshot.hasError) {
+                      return Center(
+                        child: Text(
+                            'Error: ${snapshot.error}'), // Display an error message
+                      );
+                    } else if (snapshot.hasData) {
+                      final List<cal.Event> events = snapshot.data!;
+                      return events.length > 0
+                          ? Expanded(
+                              child: ListView.builder(
+                                itemCount: events.length,
+                                itemBuilder: (context, index) {
+                                  final event = events[index];
+                                  return EventTile(event);
+                                },
+                              ),
+                            )
+                          : Center(child: Text('You\'re clear for the day!'));
+                    } else {
+                      return Center(
+                        child: Text(
+                            'No data available'), // Display a message when no data is available
+                      );
+                    }
+                  }),
             ],
           ),
         ),

@@ -150,12 +150,12 @@ class _LoginState extends State<LoginPage> {
                 const SizedBox(
                   height: 30,
                 ),
-                // forgot password
                 SignInOrSignUpButton(
                   text: 'Sign in',
                   onPressed: signUserIn,
                 ),
                 const SizedBox(
+                  // forgot password
                   height: 25,
                 ),
                 GestureDetector(
@@ -186,6 +186,7 @@ class _LoginState extends State<LoginPage> {
                 const SizedBox(
                   height: 8,
                 ),
+                // sign up link
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 40.0),
                   child: Row(
