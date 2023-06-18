@@ -48,6 +48,7 @@ dependencies:
   extension_google_sign_in_as_googleapis_auth: ^2.0.10
   intl: ^0.18.1
   flutter_html: ^3.0.0-beta.2
+  date_picker_timeline: ^1.2.5
 
 dev_dependencies:
   flutter_test:

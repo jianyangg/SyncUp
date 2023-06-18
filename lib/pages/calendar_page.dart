@@ -1,6 +1,5 @@
 import "package:flutter/material.dart";
 import 'package:dot_navigation_bar/dot_navigation_bar.dart';
-import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:googleapis/firestore/v1.dart';
 import 'package:sync_up/pages/group_page.dart';
 import 'package:sync_up/pages/home_page.dart';
@@ -8,11 +7,14 @@ import 'package:sync_up/pages/account_page.dart';
 import 'package:googleapis/calendar/v3.dart' as cal;
 import "package:googleapis_auth/auth_io.dart" as auth;
 import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
-import 'package:intl/intl.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:date_picker_timeline/date_picker_timeline.dart';
 
 /// Provides the `GoogleSignIn` class
 import 'package:google_sign_in/google_sign_in.dart';
 
+import '../components/date_scroller.dart';
+import '../components/date_tile.dart';
 import '../components/event_tile.dart';
 
 final GoogleSignIn _googleSignIn = GoogleSignIn(
@@ -30,15 +32,13 @@ enum _SelectedTab { home, calendar, group, account }
 
 class _CalendarPageState extends State<CalendarPage> {
   GoogleSignInAccount? _currentUser;
-
   late DateTime selectedDate;
-  late DateTime todayDate;
 
   @override
   void initState() {
     super.initState();
+
     DateTime now = DateTime.now();
-    todayDate = DateTime(now.year, now.month, now.day);
     selectedDate = DateTime(now.year, now.month, now.day);
     _googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
       setState(() {
@@ -143,48 +143,54 @@ class _CalendarPageState extends State<CalendarPage> {
     }
   }
 
-  String _getMonthAbbreviation(int month) {
-    List<String> monthAbbreviations = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec'
-    ];
-    return monthAbbreviations[month - 1];
-  }
-
-  String _getWeekdayAbbreviation(int weekday) {
-    List<String> weekdayAbbreviations = [
-      'SUN',
-      'MON',
-      'TUE',
-      'WED',
-      'THU',
-      'FRI',
-      'SAT'
-    ];
-    return weekdayAbbreviations[weekday - 1];
-  }
-
   void _showDatePicker() {
+    DateTime initialDate = DateTime.now();
+    DateTime firstDate = initialDate.subtract(const Duration(days: 365));
+    DateTime lastDate = initialDate.add(const Duration(days: 365));
     showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2025),
-    ).then((value) => {
-          setState(() {
-            selectedDate = value!;
-          })
-        });
+      initialDate: initialDate,
+      firstDate: firstDate,
+      lastDate: lastDate,
+      selectableDayPredicate: (DateTime date) {
+        // Check if the date is unavailable
+        if (date.isBefore(firstDate) || date.isAfter(lastDate)) {
+          return false;
+        }
+        return true;
+      },
+    ).then((newDate) {
+      // THIS IS NECESSARY - there is something about the widget
+      // that won't update properly unless we use a new DateTime.now() object
+      if (newDate!.day == initialDate.day &&
+          newDate.month == initialDate.month &&
+          newDate.year == initialDate.year) {
+        updateSelectedDate(DateTime.now());
+      } else {
+        updateSelectedDate(newDate);
+      }
+    });
+  }
+
+  void updateSelectedDate(DateTime newDate) {
+    setState(() {
+      selectedDate = newDate;
+      _dateScrollerController.setDateAndAnimate(newDate);
+    });
+  }
+
+  final DatePickerController _dateScrollerController = DatePickerController();
+
+  void executeAfterBuild() {
+    updateSelectedDate(DateTime.now());
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    WidgetsBinding.instance?.addPostFrameCallback((_) {
+      executeAfterBuild();
+    });
   }
 
   @override
@@ -193,43 +199,33 @@ class _CalendarPageState extends State<CalendarPage> {
       backgroundColor: Colors.blue.shade800,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: Colors.blue.shade800,
+        backgroundColor: Theme.of(context).primaryColor,
         shadowColor: Colors.transparent,
         title: Row(
           children: [
-            Container(
-              margin: EdgeInsets.only(bottom: 0.0),
-              child: TextButton(
-                onPressed: () {
-                  setState(() {
-                    selectedDate = todayDate;
-                  });
-                },
-                style: ButtonStyle(
-                  padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                      const EdgeInsets.all(10.0)),
-                  backgroundColor:
-                      MaterialStateProperty.all<Color>(Colors.blue.shade700),
-                  shape: MaterialStateProperty.all<OutlinedBorder>(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-                child: const Text(
-                  "Today",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
+            TextButton(
+              onPressed: () {
+                updateSelectedDate(DateTime.now());
+              },
+              style: ButtonStyle(
+                padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+                    const EdgeInsets.all(10.0)),
+                backgroundColor:
+                    MaterialStateProperty.all<Color>(Colors.blue.shade700),
+                shape: MaterialStateProperty.all<OutlinedBorder>(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 8.0),
-              child: Text(DateFormat('dd MMM yyyy').format(selectedDate),
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+              child: const Text(
+                "Today",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                ),
+              ),
             ),
           ],
         ),
@@ -246,11 +242,12 @@ class _CalendarPageState extends State<CalendarPage> {
           //   onPressed: () {},
           //   icon: const Icon(Icons.sync),
           // ),
+
+          // Groups Button
           TextButton(
             onPressed: () {},
             style: ElevatedButton.styleFrom(
-                // backgroundColor: Color.fromARGB(255, 189, 255, 144),
-                backgroundColor: Colors.blue.shade800,
+                backgroundColor: Theme.of(context).primaryColor,
                 foregroundColor: Colors.white,
                 padding:
                     const EdgeInsets.symmetric(vertical: 0, horizontal: 10)),
@@ -284,87 +281,12 @@ class _CalendarPageState extends State<CalendarPage> {
             borderRadius: BorderRadius.circular(30),
           ),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 10),
               // all dates here
-              Padding(
-                padding: const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 0),
-                child: SizedBox(
-                  height: 70,
-                  // this entire thing is all the clickable days of the year
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: 365,
-                    itemBuilder: (context, index) {
-                      DateTime date = DateTime.now();
-                      date = DateTime(date.year, date.month, date.day);
-                      bool isSelected = date.add(Duration(days: index)).day ==
-                          selectedDate.day;
-                      return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            selectedDate = date.add(Duration(days: index));
-                            // selectedDate = date;
-                          });
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
-                          child: Container(
-                            width: 45,
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? Colors.blue.shade700
-                                  : Colors.transparent,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Column(
-                              children: [
-                                const SizedBox(height: 7),
-                                Text(
-                                    _getWeekdayAbbreviation(date
-                                        .add(Duration(days: index))
-                                        .weekday),
-                                    style: TextStyle(
-                                        color: isSelected
-                                            ? Colors.white
-                                            : Colors.grey[400],
-                                        fontWeight: isSelected
-                                            ? FontWeight.bold
-                                            : FontWeight.normal,
-                                        fontSize: 12)),
-                                Text(
-                                  '${date.add(Duration(days: index)).day}',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: isSelected
-                                        ? Colors.white
-                                        : Colors.black,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  _getMonthAbbreviation(
-                                      date.add(Duration(days: index)).month),
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: isSelected
-                                        ? Colors.white
-                                        : Colors.black,
-                                    fontWeight: isSelected
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
+              DateScroller(
+                  selectedDate, updateSelectedDate, _dateScrollerController),
+              // divider
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Divider(
@@ -372,6 +294,11 @@ class _CalendarPageState extends State<CalendarPage> {
                   thickness: 1,
                 ),
               ),
+              // Currently selected Date:
+              DateTile(
+                  selectedDate, Color.fromARGB(255, 71, 50, 252), Colors.white),
+              // all events for the day:
+              const SizedBox(height: 10),
               FutureBuilder<List<cal.Event>>(
                   future: _handleGetEvents(),
                   builder: (context, snapshot) {
