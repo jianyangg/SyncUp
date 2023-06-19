@@ -1,13 +1,11 @@
 import "package:flutter/material.dart";
 import 'package:dot_navigation_bar/dot_navigation_bar.dart';
-import 'package:googleapis/firestore/v1.dart';
 import 'package:sync_up/pages/group_page.dart';
 import 'package:sync_up/pages/home_page.dart';
 import 'package:sync_up/pages/account_page.dart';
 import 'package:googleapis/calendar/v3.dart' as cal;
 import "package:googleapis_auth/auth_io.dart" as auth;
 import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:date_picker_timeline/date_picker_timeline.dart';
 
 /// Provides the `GoogleSignIn` class
@@ -52,9 +50,6 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   Future<List<cal.Event>> _handleGetEvents() async {
-    setState(() {
-      // somethin
-    });
     // Retrieve an [auth.AuthClient] from the current [GoogleSignIn] instance.
     final auth.AuthClient? client = await _googleSignIn.authenticatedClient();
     assert(client != null, 'Authenticated client missing!');
@@ -188,7 +183,7 @@ class _CalendarPageState extends State<CalendarPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       executeAfterBuild();
     });
   }

@@ -3,10 +3,10 @@ import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class DateTile extends StatelessWidget {
-  final DateTime selectedDate;
+  final DateTime dateToDisplay;
   final Color bgColor;
   final Color textColor;
-  const DateTile(this.selectedDate, this.bgColor, this.textColor, {super.key});
+  const DateTile(this.dateToDisplay, this.bgColor, this.textColor, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +20,7 @@ class DateTile extends StatelessWidget {
         ),
         alignment: Alignment.center,
         child: Text(
-          DateFormat('EEE, dd MMM yyyy').format(selectedDate), // date prop
+          DateFormat('EEE, dd MMM yyyy').format(dateToDisplay), // date prop
           style: GoogleFonts.lato(
             fontSize: 16,
             textStyle: TextStyle(fontWeight: FontWeight.bold, color: textColor),
