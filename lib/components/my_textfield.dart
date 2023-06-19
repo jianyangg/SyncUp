@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
+// ignore: must_be_immutable
 class MyTextField extends StatefulWidget {
-  final controller;
+  final TextEditingController controller;
   final String hintText;
   final bool isPassword;
   bool obscureText;
