@@ -19,16 +19,16 @@ final GoogleSignIn _googleSignIn = GoogleSignIn(
   scopes: [cal.CalendarApi.calendarScope],
 );
 
-class CalendarPage extends StatefulWidget {
-  const CalendarPage({super.key});
+class OwnEventPage extends StatefulWidget {
+  const OwnEventPage({super.key});
 
   @override
-  State<CalendarPage> createState() => _CalendarPageState();
+  State<OwnEventPage> createState() => _OwnEventPageState();
 }
 
 enum _SelectedTab { home, calendar, group, account }
 
-class _CalendarPageState extends State<CalendarPage> {
+class _OwnEventPageState extends State<OwnEventPage> {
   GoogleSignInAccount? _currentUser;
   late DateTime selectedDate;
 
@@ -108,7 +108,7 @@ class _CalendarPageState extends State<CalendarPage> {
           context,
           PageRouteBuilder(
             pageBuilder: (context, animation1, animation2) =>
-                const CalendarPage(),
+                const OwnEventPage(),
             transitionDuration: Duration.zero,
             reverseTransitionDuration: Duration.zero,
           ),
