@@ -18,8 +18,6 @@ class GoogleAuthService {
         idToken: gAuth.idToken,
       );
 
-      // finally, sign in.
-      return await FirebaseAuth.instance.signInWithCredential(credential);
       // add firebase auth to cloud_firestore
       final db = FirebaseFirestore.instance;
       final res = await FirebaseAuth.instance.signInWithCredential(credential);
@@ -35,6 +33,7 @@ class GoogleAuthService {
           // create empty groups array
           'groups': [],
         });
+        return res;
       }
       // return await FirebaseAuth.instance.signInWithCredential(credential);
     } catch (e) {

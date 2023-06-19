@@ -3,12 +3,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:date_picker_timeline/date_picker_timeline.dart';
 
 class DateScroller extends StatelessWidget {
-  final DateTime selectedDate;
+  final DateTime dateToDisplay;
   final DatePickerController _controller;
   final Function(DateTime) updateSelectedDate;
 
   const DateScroller(
-      this.selectedDate, this.updateSelectedDate, this._controller,
+      this.dateToDisplay, this.updateSelectedDate, this._controller,
       {super.key});
 
   @override
