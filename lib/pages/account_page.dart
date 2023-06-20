@@ -16,8 +16,8 @@ class AccountPage extends StatefulWidget {
 }
 
 Future<String> getUserName() async {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final User? user = _auth.currentUser;
+  final FirebaseAuth auth = FirebaseAuth.instance;
+  final User? user = auth.currentUser;
   final uid = user!.uid;
   return FirebaseFirestore.instance
       .collection("users")
@@ -29,8 +29,8 @@ Future<String> getUserName() async {
 }
 
 Future<String> getUserPhotoUrl() async {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final User? user = _auth.currentUser;
+  final FirebaseAuth auth = FirebaseAuth.instance;
+  final User? user = auth.currentUser;
   final uid = user!.uid;
   return FirebaseFirestore.instance
       .collection("users")

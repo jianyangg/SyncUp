@@ -20,7 +20,7 @@ class DateScroller extends StatelessWidget {
           height: 80,
           width: 64,
           initialSelectedDate: DateTime.now(),
-          selectionColor: Theme.of(context).primaryColor,
+          selectionColor: Theme.of(context).primaryColorLight,
           selectedTextColor: Colors.white,
           monthTextStyle: GoogleFonts.lato(
             textStyle: const TextStyle(
