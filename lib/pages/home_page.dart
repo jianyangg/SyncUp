@@ -30,7 +30,6 @@ class _HomeState extends State<HomePage> {
           ),
         );
         break;
-      // TODO: fix the case 1 and 2 once Calendar and Database pages are done.
       case 1:
         Navigator.pushReplacement(
           context,
@@ -110,12 +109,15 @@ class _HomeState extends State<HomePage> {
       extendBody: true,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Padding(
-            padding: const EdgeInsets.only(left: 10),
-            child: Text(
+        title: Row(
+          children: [
+            const SizedBox(width: 10),
+            Text(
               "Hello, $username",
               style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-            )),
+            ),
+          ],
+        ),
         backgroundColor: Colors.blue.shade800,
         shadowColor: Colors.transparent,
         actions: [
@@ -136,13 +138,15 @@ class _HomeState extends State<HomePage> {
               },
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.only(right: 10),
-            child: IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: () {},
-            ),
-          ),
+          // User shoudl go to group to create event.
+          // we can add an additional feature to shortcut this using the add button in future versions
+          // IconButton(
+          //   icon: const Icon(Icons.add),
+          //   onPressed: () {},
+          // ),
+          const SizedBox(
+            width: 15,
+          )
         ],
       ),
       body: Center(

@@ -7,7 +7,6 @@ import 'package:sync_up/pages/home_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:sync_up/pages/main_page.dart';
 
-// this will be the logout page.
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
 
@@ -105,26 +104,28 @@ class _AccountPageState extends State<AccountPage> {
       backgroundColor: Colors.blue.shade800,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Padding(
-          padding: const EdgeInsets.only(left: 10),
-          child: FutureBuilder<String>(
-            future: getUserName(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData && snapshot.data != null) {
-                userName = snapshot.data!;
-                return Text(
-                  "Hello, ${snapshot.data}",
-                  style: const TextStyle(
-                      fontSize: 25, fontWeight: FontWeight.bold),
-                );
-              } else {
-                return const Text(
-                  "Hello, User",
-                  style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                );
-              }
-            },
-          ),
+        title: Row(
+          children: [
+            const SizedBox(width: 10),
+            FutureBuilder<String>(
+              future: getUserName(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData && snapshot.data != null) {
+                  userName = snapshot.data!;
+                  return Text(
+                    "Hello, ${snapshot.data}",
+                    style: const TextStyle(
+                        fontSize: 25, fontWeight: FontWeight.bold),
+                  );
+                } else {
+                  return const Text(
+                    "Hello, User",
+                    style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                  );
+                }
+              },
+            ),
+          ],
         ),
         backgroundColor: Colors.blue.shade800,
         shadowColor: Colors.transparent,
@@ -133,15 +134,13 @@ class _AccountPageState extends State<AccountPage> {
             icon: const Icon(Icons.settings),
             onPressed: () {},
           ),
-          Padding(
-            padding: const EdgeInsets.only(right: 10),
-            child: IconButton(
-              icon: const Icon(Icons.logout),
-              onPressed: () {
-                _signOut();
-              },
-            ),
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () {
+              _signOut();
+            },
           ),
+          const SizedBox(width: 15),
         ],
       ),
       body: Center(

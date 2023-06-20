@@ -1,8 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dot_navigation_bar/dot_navigation_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:sync_up/components/calendar_scroll.dart';
-import '../components/my_textfield.dart';
 import 'account_page.dart';
 import 'notification_page.dart';
 import 'own_event_page.dart';
@@ -10,6 +8,21 @@ import 'group_page.dart';
 import 'home_page.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import '../components/date_scroller.dart';
+import '../components/date_tile.dart';
+import '../components/event_tile.dart';
+import 'package:googleapis/calendar/v3.dart' as cal;
+import "package:googleapis_auth/auth_io.dart" as auth;
+import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
+import 'package:date_picker_timeline/date_picker_timeline.dart';
+
+// TODO: The add event page is only complete on the front end side! We need to add the event to the database and the calendar
+// once we have figured out the calendar API.
+
+final GoogleSignIn _googleSignIn = GoogleSignIn(
+  scopes: [cal.CalendarApi.calendarScope],
+);
 
 class GroupEventsPage extends StatefulWidget {
   final String userId;
@@ -26,41 +39,8 @@ class GroupEventsPage extends StatefulWidget {
 }
 
 class _GroupEventsPageState extends State<GroupEventsPage> {
-  String _selectedDate = '';
-  String _dateCount = '';
-  String _range = '';
-  String _rangeCount = '';
-
-  /// The method for [DateRangePickerSelectionChanged] callback, which will be
-  /// called whenever a selection changed on the date picker widget.
-  void _onSelectionChanged(DateRangePickerSelectionChangedArgs args) {
-    /// The argument value will return the changed date as [DateTime] when the
-    /// widget [SfDateRangeSelectionMode] set as single.
-    ///
-    /// The argument value will return the changed dates as [List<DateTime>]
-    /// when the widget [SfDateRangeSelectionMode] set as multiple.
-    ///
-    /// The argument value will return the changed range as [PickerDateRange]
-    /// when the widget [SfDateRangeSelectionMode] set as range.
-    ///
-    /// The argument value will return the changed ranges as
-    /// [List<PickerDateRange] when the widget [SfDateRangeSelectionMode] set as
-    /// multi range.
-    setState(() {
-      if (args.value is PickerDateRange) {
-        _range = '${DateFormat('dd/MM/yyyy').format(args.value.startDate)} -'
-            // ignore: lines_longer_than_80_chars
-            ' ${DateFormat('dd/MM/yyyy').format(args.value.endDate ?? args.value.startDate)}';
-      } else if (args.value is DateTime) {
-        _selectedDate = args.value.toString();
-      } else if (args.value is List<DateTime>) {
-        _dateCount = args.value.length.toString();
-      } else {
-        _rangeCount = args.value.length.toString();
-      }
-    });
-  }
-
+  GoogleSignInAccount? _currentUser;
+  late DateTime selectedDate;
   var _selectedTab = _SelectedTab.group;
   void _handleIndexChanged(int i) {
     setState(() {
@@ -77,7 +57,6 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
           ),
         );
         break;
-      // TODO: fix the case 1 and 2 once Calendar and Database pages are done.
       case 1:
         Navigator.pushReplacement(
           context,
@@ -123,15 +102,143 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
     return false;
   }
 
+  Future<List<cal.Event>> _handleGetEvents() async {
+    // Retrieve an [auth.AuthClient] from the current [GoogleSignIn] instance.
+    final auth.AuthClient? client = await _googleSignIn.authenticatedClient();
+    assert(client != null, 'Authenticated client missing!');
+
+    // Prepare a gcal authenticated client.
+    final cal.CalendarApi gcalApi = cal.CalendarApi(client!);
+    // calEvents should contain the events on the selected date.
+    final cal.Events calEvents = await gcalApi.events.list(
+      "primary",
+      timeMin: selectedDate,
+      timeMax:
+          selectedDate.add(const Duration(hours: 23, minutes: 59, seconds: 59)),
+    );
+    final List<cal.Event> appointments = <cal.Event>[];
+
+    // add all events to appointments which is a Future<List<Event>>
+    if (calEvents.items != null) {
+      for (int i = 0; i < calEvents.items!.length; i++) {
+        final cal.Event event = calEvents.items![i];
+        if (event.start == null) {
+          continue;
+        }
+        appointments.add(event);
+      }
+    }
+    return appointments;
+  }
+
+  void _showDatePicker() {
+    DateTime initialDate = DateTime.now();
+    DateTime firstDate = initialDate.subtract(const Duration(days: 365));
+    DateTime lastDate = initialDate.add(const Duration(days: 365));
+    showDatePicker(
+      builder: (context, child) {
+        return Theme(
+          data: ThemeData(
+            dialogTheme: const DialogTheme(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(30)))),
+            colorScheme: ColorScheme.light(
+              primary: Colors.orange.shade800, // header background color
+              onPrimary: Colors.white, // header text color
+              onSurface: Colors.black, // body text color
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.orange.shade800, // button text color
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
+      context: context,
+      initialDate: initialDate,
+      firstDate: firstDate,
+      lastDate: lastDate,
+      selectableDayPredicate: (DateTime date) {
+        // Check if the date is unavailable
+        if (date.isBefore(firstDate) || date.isAfter(lastDate)) {
+          return false;
+        }
+        return true;
+      },
+    ).then((newDate) {
+      // THIS IS NECESSARY - there is something about the widget
+      // that won't update properly unless we use a new DateTime.now() object
+      if (newDate!.day == initialDate.day &&
+          newDate.month == initialDate.month &&
+          newDate.year == initialDate.year) {
+        updateSelectedDate(DateTime.now());
+      } else {
+        updateSelectedDate(newDate);
+      }
+    });
+  }
+
+  void updateSelectedDate(DateTime newDate) {
+    setState(() {
+      selectedDate = newDate;
+      _dateScrollerController.setDateAndAnimate(newDate);
+    });
+  }
+
+  final DatePickerController _dateScrollerController = DatePickerController();
+
   final TextEditingController _eventNameController = TextEditingController();
   String? _selectedPeriod = "Should not be chosen";
-  String selectedDateRangeText = '';
+  String selectedDateRangeText =
+      '${DateFormat('yyyy-MM-dd').format(DateTime.now())} to ${DateFormat('yyyy-MM-dd').format(DateTime.now().add(const Duration(days: 7)))}';
+
+  @override
+  void initState() {
+    super.initState();
+
+    DateTime now = DateTime.now();
+    selectedDate = DateTime(now.year, now.month, now.day);
+    _googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
+      setState(() {
+        _currentUser = account;
+      });
+      if (_currentUser != null) {
+        _handleGetEvents();
+      }
+    });
+    _googleSignIn.signInSilently();
+  }
+
+  void executeAfterBuild() {
+    updateSelectedDate(DateTime.now());
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      executeAfterBuild();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     // show userId and groupId
     // using text widget for now
+
     return MaterialApp(
+      // supposedly allows for swipe back gesture
+      // for easier access to general group page.
+      theme: ThemeData(
+        pageTransitionsTheme: const PageTransitionsTheme(
+          builders: {
+            TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+            TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+          },
+        ),
+      ),
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         backgroundColor: Colors.grey.shade100,
@@ -169,6 +276,13 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
           ),
           actions: [
             IconButton(
+              onPressed: _showDatePicker,
+              icon: const Icon(
+                Icons.calendar_month,
+                color: Colors.black,
+              ),
+            ),
+            IconButton(
               onPressed: () {
                 Navigator.push(
                     context,
@@ -181,9 +295,9 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                 future: checkRequests(),
                 builder: (context, snapshot) {
                   if (snapshot.hasData && snapshot.data == true) {
-                    return const Icon(
+                    return Icon(
                       Icons.notifications_active_sharp,
-                      color: Colors.red,
+                      color: Colors.orange.shade800,
                     );
                   } else {
                     return const Icon(Icons.notifications, color: Colors.black);
@@ -217,7 +331,7 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                     "< Back",
                                     style: TextStyle(
                                         fontSize: 20,
-                                        color: Theme.of(context).primaryColor),
+                                        color: Colors.orange.shade800),
                                   ),
                                 ),
                                 const Spacer(),
@@ -227,7 +341,7 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                     style: TextStyle(
                                         fontSize: 20,
                                         fontWeight: FontWeight.bold,
-                                        color: Theme.of(context).primaryColor),
+                                        color: Colors.orange.shade800),
                                   ),
                                   onPressed: () {
                                     // show availability of members for the event
@@ -260,9 +374,8 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                                       child: Text(
                                                         "< Back",
                                                         style: TextStyle(
-                                                            color: Theme.of(
-                                                                    context)
-                                                                .primaryColor,
+                                                            color: Colors.orange
+                                                                .shade800,
                                                             fontSize: 20),
                                                       ),
                                                     ),
@@ -305,9 +418,8 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                                       child: Text(
                                                         "Create",
                                                         style: TextStyle(
-                                                            color: Theme.of(
-                                                                    context)
-                                                                .primaryColor,
+                                                            color: Colors.orange
+                                                                .shade800,
                                                             fontSize: 20,
                                                             fontWeight:
                                                                 FontWeight
@@ -318,8 +430,8 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                                 ),
                                                 const SizedBox(height: 20),
                                                 Column(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.start,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
                                                   children: [
                                                     Text(
                                                       "Event Name: ${_eventNameController.text}",
@@ -370,12 +482,19 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                               child: TextField(
                                 autofocus: true,
                                 controller: _eventNameController,
+                                cursorColor: Colors.orange.shade800,
                                 decoration: InputDecoration(
+                                  focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                      borderSide: BorderSide(
+                                          color: Colors.orange.shade800,
+                                          width: 2)),
                                   hintText: "Event Name",
                                   suffixIcon: IconButton(
                                       onPressed: _eventNameController.clear,
-                                      icon: const Icon(
+                                      icon: Icon(
                                         Icons.clear,
+                                        color: Colors.orange.shade800,
                                         size: 20,
                                       )),
                                   border: OutlineInputBorder(
@@ -392,10 +511,14 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                 children: [
                                   DropdownButtonFormField<String>(
                                     hint: const Text("Event Duration"),
+                                    focusColor: Colors.orange.shade800,
                                     value: _selectedPeriod,
                                     decoration: InputDecoration(
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(10),
+                                        borderSide: BorderSide(
+                                            color: Colors.orange.shade800,
+                                            width: 2),
                                       ),
                                       contentPadding: const EdgeInsets.all(15),
                                     ),
@@ -444,6 +567,21 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                               child: Column(
                                 children: [
                                   TextButton(
+                                    style: ButtonStyle(
+                                      shape: MaterialStateProperty.all<
+                                              RoundedRectangleBorder>(
+                                          RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(10.0),
+                                      )),
+                                      backgroundColor:
+                                          MaterialStateProperty.all<Color>(
+                                              const Color.fromARGB(
+                                                  211, 244, 244, 244)),
+                                      padding:
+                                          MaterialStateProperty.all<EdgeInsets>(
+                                              const EdgeInsets.all(15)),
+                                    ),
                                     onPressed: () async {
                                       PickerDateRange? pickedDateRange;
 
@@ -453,13 +591,24 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                         context: context,
                                         builder: (BuildContext context) {
                                           return AlertDialog(
-                                            content: Container(
+                                            content: SizedBox(
                                               height: 500,
                                               width: MediaQuery.of(context)
                                                       .size
                                                       .width *
                                                   0.8,
                                               child: SfDateRangePicker(
+                                                // round the corners of the date range picker
+                                                todayHighlightColor:
+                                                    Colors.orange.shade800,
+                                                selectionColor:
+                                                    Colors.orange.shade300,
+                                                rangeSelectionColor:
+                                                    Colors.orange.shade100,
+                                                startRangeSelectionColor:
+                                                    Colors.orange.shade700,
+                                                endRangeSelectionColor:
+                                                    Colors.orange.shade700,
                                                 onSelectionChanged:
                                                     (DateRangePickerSelectionChangedArgs
                                                         args) {
@@ -484,8 +633,20 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                             ),
                                             actions: <Widget>[
                                               TextButton(
-                                                child: const Text('OK'),
+                                                child: Text(
+                                                  'OK',
+                                                  style: TextStyle(
+                                                      color: Colors
+                                                          .orange.shade800,
+                                                      fontSize: 15),
+                                                ),
                                                 onPressed: () {
+                                                  // clear the date range picker
+                                                  // and close the dialog
+                                                  // reset values
+                                                  setState(() {
+                                                    pickedDateRange = null;
+                                                  });
                                                   Navigator.of(context)
                                                       .pop(pickedDateRange);
                                                 },
@@ -510,27 +671,43 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
 
                                           setState(() {
                                             selectedDateRangeText =
-                                                '${DateFormat('yyyy-MM-dd').format(startDate)} - ${DateFormat('yyyy-MM-dd').format(endDate)}';
+                                                '${DateFormat('yyyy-MM-dd').format(startDate)} to ${DateFormat('yyyy-MM-dd').format(endDate)}';
                                           });
                                         }
                                       });
                                     },
-                                    child: const Text(
-                                      'Select Date Range',
-                                      style: TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                          'Select Date Range',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            fontSize: 20,
+                                            color: Colors.orange.shade700,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        Text(
+                                          '(default: 7 days)',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            color: Colors.orange.shade700,
+                                            fontWeight: FontWeight.bold,
+                                            fontStyle: FontStyle.italic,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  Text(
-                                    selectedDateRangeText,
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
+                                  // Text(
+                                  //   selectedDateRangeText,
+                                  //   textAlign: TextAlign.center,
+                                  //   style: const TextStyle(
+                                  //     color: Colors.black,
+                                  //     fontWeight: FontWeight.bold,
+                                  //   ),
+                                  // ),
                                 ],
                               ),
                             )
@@ -558,7 +735,16 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                         padding: const EdgeInsets.all(15.0),
                         child: Column(
                           children: [
-                            const SizedBox(height: 10),
+                            // insert horizontal bar for intuitive UI
+                            Container(
+                              height: 3,
+                              width: 50,
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade400,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            const SizedBox(height: 15),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -600,6 +786,8 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                                 as Map<String, dynamic>;
                                             final memberName =
                                                 data['name'] as String;
+                                            final memberPhotoUrl =
+                                                data['photoUrl'] as String;
                                             return Padding(
                                               padding:
                                                   const EdgeInsets.all(8.0),
@@ -609,7 +797,13 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                                       MainAxisAlignment
                                                           .spaceEvenly,
                                                   children: [
-                                                    const Icon(Icons.person),
+                                                    CircleAvatar(
+                                                      backgroundImage:
+                                                          NetworkImage(
+                                                        memberPhotoUrl,
+                                                      ),
+                                                      radius: 30,
+                                                    ),
                                                     Text(
                                                       memberName,
                                                       textAlign:
@@ -682,113 +876,67 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                 borderRadius: BorderRadius.circular(30),
               ),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 10),
-                  CalendarScroll(color: Colors.orange.shade700),
-                  Row(
-                    children: [
-                      const SizedBox(
-                        width: 30,
-                      ),
-                      const Text(
-                        "Time",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                          color: Color.fromARGB(143, 158, 158, 158),
-                        ),
-                      ),
-                      const SizedBox(
-                        width: 40,
-                      ),
-                      const Text(
-                        'Event',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                          color: Color.fromARGB(143, 158, 158, 158),
-                        ),
-                      ),
-                      const Spacer(),
-                      IconButton(
-                        onPressed: () {},
-                        icon: const Icon(
-                          Icons.sort,
-                          color: Color.fromARGB(143, 158, 158, 158),
-                        ),
-                      ),
-                      const SizedBox(width: 20),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 5,
-                  ),
-                  Expanded(
-                    child: Row(
-                      children: [
-                        const SizedBox(
-                          width: 30,
-                        ),
-                        // for time
-                        const Column(
-                          children: [
-                            Text(
-                              "11:35",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'Arial',
-                                fontSize: 17,
-                              ),
-                            ),
-                            SizedBox(
-                              height: 5,
-                            ),
-                            Text(
-                              "12:00",
-                              style: TextStyle(
-                                color: Color.fromARGB(143, 158, 158, 158),
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'Arial',
-                                fontSize: 17,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                        // for divider
-                        const VerticalDivider(
-                          color: Color.fromARGB(71, 158, 158, 158),
-                          thickness: 2.5,
-                        ),
-                        const SizedBox(width: 10),
-                        // for event
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Container(
-                              height: 120,
-                              width: MediaQuery.of(context).size.width * 0.68,
-                              decoration: BoxDecoration(
-                                  color: Colors.orange.shade700,
-                                  borderRadius: BorderRadius.circular(20)),
-                              child: const Padding(
-                                padding: EdgeInsets.all(15.0),
-                                child: Text(
-                                  'MA2001 Group Meeeting',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                      fontSize: 17),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                  // all dates here
+                  DateScroller(
+                      selectedDate, updateSelectedDate, _dateScrollerController,
+                      color: Colors.orange.shade700),
+                  // divider
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Divider(
+                      color: Colors.grey[200],
+                      thickness: 1,
                     ),
                   ),
+                  // Currently selected Date:
+                  DateTile(selectedDate, Colors.orange.shade700, Colors.white),
+                  // all events for the day:
+                  const SizedBox(height: 10),
+                  FutureBuilder<List<cal.Event>>(
+                      future: _handleGetEvents(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                            child:
+                                CircularProgressIndicator(), // Display a loading indicator
+                          );
+                        } else if (snapshot.hasError) {
+                          return Center(
+                            child: Text(
+                                'Error: ${snapshot.error}'), // Display an error message
+                          );
+                        } else if (snapshot.hasData) {
+                          final List<cal.Event> events = snapshot.data!;
+                          return events.isNotEmpty
+                              ? Expanded(
+                                  child: ListView.builder(
+                                    itemCount: events.length,
+                                    itemBuilder: (context, index) {
+                                      final event = events[index];
+                                      return EventTile(event,
+                                          color: Colors.orange.shade700);
+                                    },
+                                  ),
+                                )
+                              : Padding(
+                                  padding: const EdgeInsets.only(top: 25.0),
+                                  child: Center(
+                                      child: Text('You\'re clear for the day!',
+                                          style: TextStyle(
+                                              fontSize: 15,
+                                              color: Colors.green.shade600,
+                                              fontWeight: FontWeight.bold))),
+                                );
+                        } else {
+                          return const Center(
+                            child: Text(
+                                'No data available'), // Display a message when no data is available
+                          );
+                        }
+                      }),
                 ],
               ),
             ),

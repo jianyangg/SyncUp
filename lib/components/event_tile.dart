@@ -6,7 +6,8 @@ import 'package:flutter_html/flutter_html.dart';
 
 class EventTile extends StatelessWidget {
   final cal.Event event;
-  const EventTile(this.event, {super.key});
+  final Color color;
+  const EventTile(this.event, {super.key, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +20,7 @@ class EventTile extends StatelessWidget {
         //  width: SizeConfig.screenWidth * 0.78,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          color: const Color.fromARGB(255, 71, 50, 252),
+          color: color,
         ),
         child: Row(children: [
           Expanded(
