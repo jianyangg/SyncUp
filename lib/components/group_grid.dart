@@ -12,7 +12,7 @@ class GroupGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // create a firestore instnace to access the database
-    final _firestore = FirebaseFirestore.instance;
+    final firestore = FirebaseFirestore.instance;
 
     // using the userId, retrieve id of the groups associated with the user
     // and save it in a list
@@ -20,13 +20,13 @@ class GroupGrid extends StatelessWidget {
 
     // return a future builder to get the data from the database
     Future getGroupIds() async {
-      final snapshot = await _firestore.collection("users").doc(userId).get();
+      final snapshot = await firestore.collection("users").doc(userId).get();
       final data = snapshot.data();
       final groupIds = data?["groups"] as List<dynamic>;
       // retrieve the group names
       for (var groupId in groupIds) {
         final groupSnapshot =
-            await _firestore.collection("groups").doc(groupId).get();
+            await firestore.collection("groups").doc(groupId).get();
         final groupData = groupSnapshot.data();
         final groupName = groupData?["name"] as String;
         groupNames.add(groupName);
@@ -124,7 +124,7 @@ class GroupGrid extends StatelessWidget {
                                   // remove the group from the user's list of groups
                                   // if the user is the owner of the group,
                                   // delete the group
-                                  _firestore
+                                  firestore
                                       .collection("groups")
                                       .doc(groupIds[index])
                                       .get()
@@ -133,7 +133,7 @@ class GroupGrid extends StatelessWidget {
                                     final ownerId = data?["owner"] as String;
                                     if (ownerId == userId) {
                                       // delete the group from all users
-                                      _firestore
+                                      firestore
                                           .collection("users")
                                           .get()
                                           .then((value) {
@@ -143,7 +143,7 @@ class GroupGrid extends StatelessWidget {
                                               userData["groups"] as List;
                                           if (userGroups
                                               .contains(groupIds[index])) {
-                                            _firestore
+                                            firestore
                                                 .collection("users")
                                                 .doc(doc.id)
                                                 .update({
@@ -153,19 +153,19 @@ class GroupGrid extends StatelessWidget {
                                           }
                                         }
                                       });
-                                      _firestore
+                                      firestore
                                           .collection("groups")
                                           .doc(groupIds[index])
                                           .delete();
                                     } else {
-                                      _firestore
+                                      firestore
                                           .collection("groups")
                                           .doc(groupIds[index])
                                           .update({
                                         "members":
                                             FieldValue.arrayRemove([userId])
                                       });
-                                      _firestore
+                                      firestore
                                           .collection("users")
                                           .doc(userId)
                                           .update({

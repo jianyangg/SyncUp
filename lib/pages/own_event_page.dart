@@ -191,7 +191,7 @@ class _OwnEventPageState extends State<OwnEventPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blue.shade800,
+      backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: Theme.of(context).primaryColor,
@@ -291,7 +291,7 @@ class _OwnEventPageState extends State<OwnEventPage> {
               ),
               // Currently selected Date:
               DateTile(
-                  selectedDate, Color.fromARGB(255, 71, 50, 252), Colors.white),
+                  selectedDate, Theme.of(context).highlightColor, Colors.white),
               // all events for the day:
               const SizedBox(height: 10),
               FutureBuilder<List<cal.Event>>(
@@ -309,7 +309,7 @@ class _OwnEventPageState extends State<OwnEventPage> {
                       );
                     } else if (snapshot.hasData) {
                       final List<cal.Event> events = snapshot.data!;
-                      return events.length > 0
+                      return events.isNotEmpty
                           ? Expanded(
                               child: ListView.builder(
                                 itemCount: events.length,
@@ -319,9 +319,9 @@ class _OwnEventPageState extends State<OwnEventPage> {
                                 },
                               ),
                             )
-                          : Center(child: Text('You\'re clear for the day!'));
+                          : const Center(child: Text('You\'re clear for the day!'));
                     } else {
-                      return Center(
+                      return const Center(
                         child: Text(
                             'No data available'), // Display a message when no data is available
                       );
@@ -332,7 +332,7 @@ class _OwnEventPageState extends State<OwnEventPage> {
         ),
       ),
       bottomNavigationBar: DotNavigationBar(
-        backgroundColor: Colors.blue.shade800,
+        backgroundColor: Theme.of(context).primaryColor,
         enableFloatingNavBar: true,
         margin: const EdgeInsets.only(left: 10, right: 10),
         currentIndex: _SelectedTab.values.indexOf(_selectedTab),

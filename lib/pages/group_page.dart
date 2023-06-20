@@ -90,7 +90,7 @@ class _GroupPageState extends State<GroupPage> {
     QuerySnapshot snapshot = await _firestore
         .collection("groups")
         .where("name", isGreaterThanOrEqualTo: searchQuery)
-        .where("name", isLessThan: searchQuery + "z")
+        .where("name", isLessThan: "${searchQuery}z")
         .get();
 
     // Process the search results
@@ -251,7 +251,7 @@ class _GroupPageState extends State<GroupPage> {
                 // if no groups found
                 // show a message saying no groups found
                 Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => GroupSearchPage()));
+                    MaterialPageRoute(builder: (context) => const GroupSearchPage()));
               },
             ),
             const SizedBox(

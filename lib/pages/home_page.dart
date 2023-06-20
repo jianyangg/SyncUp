@@ -111,10 +111,10 @@ class _HomeState extends State<HomePage> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Padding(
-            padding: EdgeInsets.only(left: 10),
+            padding: const EdgeInsets.only(left: 10),
             child: Text(
               "Hello, $username",
-              style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
             )),
         backgroundColor: Colors.blue.shade800,
         shadowColor: Colors.transparent,
