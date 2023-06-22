@@ -151,7 +151,8 @@ class _GroupSearchPageState extends State<GroupSearchPage> {
                   groupWidgets.add(groupWidget);
                 }
                 return Padding(
-                  padding: const EdgeInsets.all(30.0),
+                  padding:
+                      const EdgeInsets.only(left: 30.0, top: 10, right: 30),
                   child: ListView(
                     children: groupWidgets,
                   ),

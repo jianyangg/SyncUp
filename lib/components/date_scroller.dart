@@ -6,10 +6,11 @@ class DateScroller extends StatelessWidget {
   final DateTime dateToDisplay;
   final DatePickerController _controller;
   final Function(DateTime) updateSelectedDate;
+  final Color color;
 
   const DateScroller(
       this.dateToDisplay, this.updateSelectedDate, this._controller,
-      {super.key});
+      {super.key, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +21,7 @@ class DateScroller extends StatelessWidget {
           height: 80,
           width: 64,
           initialSelectedDate: DateTime.now(),
-          selectionColor: Theme.of(context).primaryColor,
+          selectionColor: color,
           selectedTextColor: Colors.white,
           monthTextStyle: GoogleFonts.lato(
             textStyle: const TextStyle(

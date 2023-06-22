@@ -13,7 +13,6 @@ import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 
 /// Provides the `GoogleSignIn` class
 import 'package:google_sign_in/google_sign_in.dart';
-
 import '../components/date_scroller.dart';
 import '../components/date_tile.dart';
 import '../components/event_tile.dart';
@@ -148,6 +147,26 @@ class _OwnEventPageState extends State<OwnEventPage> {
     DateTime firstDate = initialDate.subtract(const Duration(days: 365));
     DateTime lastDate = initialDate.add(const Duration(days: 365));
     showDatePicker(
+      builder: (context, child) {
+        return Theme(
+          data: ThemeData(
+            dialogTheme: const DialogTheme(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(30)))),
+            colorScheme: ColorScheme.light(
+              primary: Colors.blue.shade800, // header background color
+              onPrimary: Colors.white, // header text color
+              onSurface: Colors.black, // body text color
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.blue.shade800, // button text color
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
       context: context,
       initialDate: initialDate,
       firstDate: firstDate,
@@ -199,10 +218,11 @@ class _OwnEventPageState extends State<OwnEventPage> {
       backgroundColor: Colors.blue.shade800,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: Colors.blue.shade800,
         shadowColor: Colors.transparent,
         title: Row(
           children: [
+            const SizedBox(width: 10),
             TextButton(
               onPressed: () {
                 updateSelectedDate(DateTime.now());
@@ -223,7 +243,7 @@ class _OwnEventPageState extends State<OwnEventPage> {
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
-                  fontSize: 15,
+                  fontSize: 18,
                 ),
               ),
             ),
@@ -234,41 +254,15 @@ class _OwnEventPageState extends State<OwnEventPage> {
             onPressed: _showDatePicker,
             icon: const Icon(Icons.calendar_month),
           ),
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.add),
-          ),
+          // User shoudl go to group to create event.
+          // we can add an additional feature to shortcut this using the add button in future versions
           // IconButton(
           //   onPressed: () {},
-          //   icon: const Icon(Icons.sync),
+          //   icon: const Icon(Icons.add),
           // ),
-
-          // Groups Button
-          TextButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).primaryColor,
-                foregroundColor: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(vertical: 0, horizontal: 10)),
-            child: Padding(
-              padding: const EdgeInsets.only(right: 10.0),
-              child: TextButton(
-                style: ButtonStyle(
-                  backgroundColor:
-                      MaterialStateProperty.all<Color>(Colors.blue.shade700),
-                ),
-                onPressed: () {},
-                child: const Text(
-                  "Groups",
-                  style: TextStyle(
-                      fontSize: 15,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-          ),
+          const SizedBox(
+            width: 15,
+          )
         ],
       ),
       extendBody: true,
@@ -285,7 +279,8 @@ class _OwnEventPageState extends State<OwnEventPage> {
             children: [
               // all dates here
               DateScroller(
-                  selectedDate, updateSelectedDate, _dateScrollerController),
+                  selectedDate, updateSelectedDate, _dateScrollerController,
+                  color: Colors.blue.shade700),
               // divider
               Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -295,8 +290,7 @@ class _OwnEventPageState extends State<OwnEventPage> {
                 ),
               ),
               // Currently selected Date:
-              DateTile(
-                  selectedDate, Color.fromARGB(255, 71, 50, 252), Colors.white),
+              DateTile(selectedDate, Colors.blue.shade700, Colors.white),
               // all events for the day:
               const SizedBox(height: 10),
               FutureBuilder<List<cal.Event>>(
@@ -320,12 +314,20 @@ class _OwnEventPageState extends State<OwnEventPage> {
                                 itemCount: events.length,
                                 itemBuilder: (context, index) {
                                   final event = events[index];
-                                  return EventTile(event);
+                                  return EventTile(event,
+                                      color: Colors.blue.shade700);
                                 },
                               ),
                             )
-                          : const Center(
-                              child: Text('You\'re clear for the day!'));
+                          : Padding(
+                              padding: const EdgeInsets.only(top: 25.0),
+                              child: Center(
+                                  child: Text('You\'re clear for the day!',
+                                      style: TextStyle(
+                                          fontSize: 15,
+                                          color: Colors.green.shade600,
+                                          fontWeight: FontWeight.bold))),
+                            );
                     } else {
                       return const Center(
                         child: Text(

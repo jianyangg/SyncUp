@@ -1,9 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dot_navigation_bar/dot_navigation_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:sync_up/pages/account_page.dart';
-import 'package:sync_up/pages/group_page.dart';
 import 'package:sync_up/pages/own_event_page.dart';
+import 'package:sync_up/pages/group_page.dart';
 
 import '../components/bottom_nav_bar.dart';
 
@@ -31,7 +32,6 @@ class _HomeState extends State<HomePage> {
           ),
         );
         break;
-      // TODO: fix the case 1 and 2 once Calendar and Database pages are done.
       case 1:
         Navigator.pushReplacement(
           context,
@@ -107,17 +107,20 @@ class _HomeState extends State<HomePage> {
   Widget build(BuildContext context) {
     String username = _auth.currentUser!.displayName.toString();
     return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor,
+      backgroundColor: Colors.blue.shade800,
       extendBody: true,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Padding(
-            padding: EdgeInsets.only(left: 10),
-            child: Text(
+        title: Row(
+          children: [
+            const SizedBox(width: 10),
+            Text(
               "Hello, $username",
-              style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-            )),
-        backgroundColor: Theme.of(context).primaryColor,
+              style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.blue.shade800,
         shadowColor: Colors.transparent,
         actions: [
           IconButton(
@@ -137,13 +140,15 @@ class _HomeState extends State<HomePage> {
               },
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.only(right: 10),
-            child: IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: () {},
-            ),
-          ),
+          // User shoudl go to group to create event.
+          // we can add an additional feature to shortcut this using the add button in future versions
+          // IconButton(
+          //   icon: const Icon(Icons.add),
+          //   onPressed: () {},
+          // ),
+          const SizedBox(
+            width: 15,
+          )
         ],
       ),
       body: Center(
