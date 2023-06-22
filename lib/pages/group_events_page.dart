@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:sync_up/components/common_slots_tile.dart';
+import 'package:sync_up/components/user_selection_widget.dart';
 import '../components/bottom_nav_bar.dart';
 import 'account_page.dart';
 import 'notification_page.dart';
@@ -42,8 +43,8 @@ class GroupEventsPage extends StatefulWidget {
 class _GroupEventsPageState extends State<GroupEventsPage> {
   GoogleSignInAccount? _currentUser;
   late DateTime selectedDate;
-  late DateTime startDate;
-  late DateTime endDate;
+  DateTime startDate = DateTime.now();
+  DateTime endDate = DateTime.now().add(const Duration(days: 7));
   var _selectedTab = _SelectedTab.group;
   void _handleIndexChanged(int i) {
     setState(() {
@@ -93,6 +94,13 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
         );
         break;
     }
+  }
+
+  List<String> _selectedUserIds = [];
+  void handleUserSelectionChanged(List<String> selectedUserIds) {
+    setState(() {
+      _selectedUserIds = selectedUserIds;
+    });
   }
 
   final int pickerDateRange = 5;
@@ -194,7 +202,7 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
   final DatePickerController _dateScrollerController = DatePickerController();
 
   final TextEditingController _eventNameController = TextEditingController();
-  String? _selectedPeriod = "Should not be chosen";
+  int? _selectedPeriod = -1;
   String selectedDateRangeText =
       '${DateFormat('yyyy-MM-dd').format(DateTime.now())} to ${DateFormat('yyyy-MM-dd').format(DateTime.now().add(const Duration(days: 7)))}';
 
@@ -331,7 +339,9 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                   onPressed: () {
                                     setState(() {
                                       _eventNameController.clear();
-                                      _selectedPeriod = "Should not be chosen";
+                                      _selectedPeriod = -1;
+                                      // clear selected users
+                                      _selectedUserIds.clear();
                                       selectedDateRangeText =
                                           '${DateFormat('yyyy-MM-dd').format(DateTime.now())} to ${DateFormat('yyyy-MM-dd').format(DateTime.now().add(const Duration(days: 7)))}';
                                     });
@@ -356,106 +366,193 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                   onPressed: () {
                                     // show availability of members for the event
                                     // once again using showModalBottomSheet
-                                    showModalBottomSheet(
-                                      // window to come in from the right instead of bottom
-
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(30)),
-                                      isScrollControlled: true,
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return SizedBox(
-                                          height: MediaQuery.of(context)
-                                                  .size
-                                                  .height *
-                                              14 /
-                                              15,
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(15.0),
-                                            child: Column(
-                                              children: [
-                                                Row(
-                                                  children: [
-                                                    TextButton(
-                                                      onPressed: () {
-                                                        Navigator.pop(context);
-                                                      },
-                                                      child: Text(
-                                                        "< Back",
-                                                        style: TextStyle(
-                                                            color: Colors.orange
-                                                                .shade800,
-                                                            fontSize: 20),
-                                                      ),
-                                                    ),
-                                                    const Spacer(),
-                                                    // another button to create group
-                                                    TextButton(
-                                                      // once create button is pressed, add to cloud firestore and update the list
-                                                      onPressed: () {
-                                                        setState(() {
-                                                          _eventNameController
-                                                              .clear();
-                                                          _selectedPeriod =
-                                                              "Should not be chosen";
-                                                          selectedDateRangeText =
-                                                              '';
-                                                        });
-                                                        Navigator
-                                                            .pushReplacement(
-                                                          context,
-                                                          PageRouteBuilder(
-                                                            pageBuilder: (context,
-                                                                    animation1,
-                                                                    animation2) =>
-                                                                GroupEventsPage(
-                                                              userId:
-                                                                  widget.userId,
-                                                              groupId: widget
-                                                                  .groupId,
-                                                              groupName: widget
-                                                                  .groupName,
-                                                            ),
-                                                            transitionDuration:
-                                                                Duration.zero,
-                                                            reverseTransitionDuration:
-                                                                Duration.zero,
-                                                          ),
-                                                        );
-                                                      },
-                                                      child: Text(
-                                                        "Create",
-                                                        style: TextStyle(
-                                                            color: Colors.orange
-                                                                .shade800,
-                                                            fontSize: 20,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .bold),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                const SizedBox(height: 20),
-                                                CommonSlotsTile(
-                                                  eventName:
-                                                      _eventNameController.text
-                                                          .trim(),
-                                                  selectedPeriod:
-                                                      _selectedPeriod!,
-                                                  selectedDateRangeText:
-                                                      selectedDateRangeText,
-                                                  startDate: startDate,
-                                                  endDate: endDate,
-                                                  groupId: widget.groupId,
-                                                )
-                                              ],
+                                    if (_eventNameController.text.trim() ==
+                                        '') {
+                                      // show dialog, say set a name for the event and do not showModalBottomSheet
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return AlertDialog(
+                                            title: const Text(
+                                              "Please set a name for the event",
+                                              style: TextStyle(
+                                                  color: Colors.black),
                                             ),
-                                          ),
-                                        );
-                                      },
-                                    );
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                },
+                                                child: const Text(
+                                                  "OK",
+                                                  style: TextStyle(
+                                                      color: Colors.black),
+                                                ),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    } else if (_selectedPeriod == -1) {
+                                      // show dialog, say pick a period of time and do not showModalBottomSheet
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return AlertDialog(
+                                            title: const Text(
+                                              "Please select an event duration",
+                                              style: TextStyle(
+                                                  color: Colors.black),
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                },
+                                                child: const Text(
+                                                  "OK",
+                                                  style: TextStyle(
+                                                      color: Colors.black),
+                                                ),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    } else if (_selectedUserIds.isEmpty) {
+                                      // show dialog, say select at least one member and do not showModalBottomSheet
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return AlertDialog(
+                                            title: const Text(
+                                              "Please select at least one member",
+                                              style: TextStyle(
+                                                  color: Colors.black),
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                },
+                                                child: const Text(
+                                                  "OK",
+                                                  style: TextStyle(
+                                                      color: Colors.black),
+                                                ),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    } else {
+                                      showModalBottomSheet(
+                                        // window to come in from the right instead of bottom
+
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(30)),
+                                        isScrollControlled: true,
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return SizedBox(
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .height *
+                                                14 /
+                                                15,
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(15.0),
+                                              child: Column(
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      TextButton(
+                                                        onPressed: () {
+                                                          Navigator.pop(
+                                                              context);
+                                                        },
+                                                        child: Text(
+                                                          "< Back",
+                                                          style: TextStyle(
+                                                              color: Colors
+                                                                  .orange
+                                                                  .shade800,
+                                                              fontSize: 20),
+                                                        ),
+                                                      ),
+                                                      const Spacer(),
+                                                      // another button to create group
+                                                      TextButton(
+                                                        // once create button is pressed, add to cloud firestore and update the list
+                                                        onPressed: () {
+                                                          setState(() {
+                                                            _eventNameController
+                                                                .clear();
+                                                            _selectedPeriod =
+                                                                -1;
+                                                            selectedDateRangeText =
+                                                                '';
+                                                          });
+                                                          Navigator
+                                                              .pushReplacement(
+                                                            context,
+                                                            PageRouteBuilder(
+                                                              pageBuilder: (context,
+                                                                      animation1,
+                                                                      animation2) =>
+                                                                  GroupEventsPage(
+                                                                userId: widget
+                                                                    .userId,
+                                                                groupId: widget
+                                                                    .groupId,
+                                                                groupName: widget
+                                                                    .groupName,
+                                                              ),
+                                                              transitionDuration:
+                                                                  Duration.zero,
+                                                              reverseTransitionDuration:
+                                                                  Duration.zero,
+                                                            ),
+                                                          );
+                                                        },
+                                                        child: Text(
+                                                          "Create",
+                                                          style: TextStyle(
+                                                              color: Colors
+                                                                  .orange
+                                                                  .shade800,
+                                                              fontSize: 20,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  const SizedBox(height: 20),
+                                                  CommonSlotsTile(
+                                                    eventName:
+                                                        _eventNameController
+                                                            .text
+                                                            .trim(),
+                                                    selectedPeriod:
+                                                        _selectedPeriod!,
+                                                    selectedDateRangeText:
+                                                        selectedDateRangeText,
+                                                    startDate: startDate,
+                                                    endDate: endDate,
+                                                    groupId: widget.groupId,
+                                                    userIds: _selectedUserIds,
+                                                  )
+                                                ],
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      );
+                                    }
                                   },
                                 )
                               ],
@@ -493,7 +590,7 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  DropdownButtonFormField<String>(
+                                  DropdownButtonFormField<int>(
                                     hint: const Text("Event Duration"),
                                     focusColor: Colors.orange.shade800,
                                     value: _selectedPeriod,
@@ -506,39 +603,39 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                       ),
                                       contentPadding: const EdgeInsets.all(15),
                                     ),
-                                    onChanged: (String? newValue) {
+                                    onChanged: (int? newValue) {
                                       setState(() {
                                         _selectedPeriod = newValue;
                                       });
                                     },
                                     items: const [
-                                      DropdownMenuItem<String>(
-                                        value: 'Should not be chosen',
+                                      DropdownMenuItem<int>(
+                                        value: -1,
                                         child: Text('Event Duration'),
                                       ),
-                                      DropdownMenuItem<String>(
-                                        value: '30 mins',
+                                      DropdownMenuItem<int>(
+                                        value: 30,
                                         child: Text('30 mins'),
                                       ),
-                                      DropdownMenuItem<String>(
-                                        value: '1 hour',
+                                      DropdownMenuItem<int>(
+                                        value: 60,
                                         child: Text('1 hour'),
                                       ),
-                                      DropdownMenuItem<String>(
-                                        value: '1.5 hours',
+                                      DropdownMenuItem<int>(
+                                        value: 90,
                                         child: Text('1.5 hours'),
                                       ),
                                       // generate similar dropdownmenuitems up to 3 hours
-                                      DropdownMenuItem<String>(
-                                        value: '2 hours',
+                                      DropdownMenuItem<int>(
+                                        value: 120,
                                         child: Text('2 hours'),
                                       ),
-                                      DropdownMenuItem<String>(
-                                        value: '2.5 hours',
+                                      DropdownMenuItem<int>(
+                                        value: 150,
                                         child: Text('2.5 hours'),
                                       ),
-                                      DropdownMenuItem<String>(
-                                        value: '3 hours',
+                                      DropdownMenuItem<int>(
+                                        value: 180,
                                         child: Text('3 hours'),
                                       ),
                                     ],
@@ -546,6 +643,27 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                 ],
                               ),
                             ),
+                            // allow user to select which members must be present for the event
+                            // must be intuitive and easy to use
+                            // use a listview with checkboxes
+                            // each listtile will have a checkbox and a text
+                            // text will be the name of the member
+                            // checkbox will be used to select the member
+                            // use a list of strings to store the names of the members
+                            // use a list of bools to store the state of the checkboxes
+                            UserSelectionWidget(
+                              onUserSelectionChanged:
+                                  handleUserSelectionChanged,
+                            ),
+                            // FloatingActionButton(
+                            //   onPressed: () {
+                            //     // Access the selected users list and perform desired actions
+                            //     final List<String> selectedUsers =
+                            //         _selectedUserIds;
+                            //     print('Selected Users: $selectedUsers');
+                            //   },
+                            //   child: Icon(Icons.check),
+                            // ),
                             Padding(
                               padding: const EdgeInsets.all(15.0),
                               child: Column(

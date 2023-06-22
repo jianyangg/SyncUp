@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class GetCommonTime {
   // Function to find the common free slots among users
-  static Future<List<List<String>>> findFreeSlots(List<String> userIds,
-      DateTime startDate, DateTime endDate, String period) async {
+  static Future<List<List<String>>> findFreeSlots(
+      List<String> userIds, DateTime startDate, DateTime endDate) async {
     List<Map<String, List<String>>> availabilityDataList = [];
 
     // Retrieve availability data for each user
@@ -21,7 +21,7 @@ class GetCommonTime {
     }
 
     // Find the common free slots among users
-    List<List<String>> commonFreeSlots = [];
+    List<List<String>> commonBusySlots = [];
 
     if (availabilityDataList.isNotEmpty) {
       // Merge availability data
@@ -37,7 +37,7 @@ class GetCommonTime {
       // Filter free slots within the date range
       List<DateTime> datesInRange = [];
       for (DateTime date = startDate;
-          date.isBefore(endDate);
+          date.isBefore(endDate) || date == endDate;
           date = date.add(Duration(days: 1))) {
         datesInRange.add(date);
       }
@@ -52,13 +52,13 @@ class GetCommonTime {
           }
         });
 
-        commonFreeSlots.add(freeSlots);
+        commonBusySlots.add(freeSlots);
       }
     }
 
     // Merge overlapping slots within each day
-    for (int i = 0; i < commonFreeSlots.length; i++) {
-      List<String> slots = commonFreeSlots[i];
+    for (int i = 0; i < commonBusySlots.length; i++) {
+      List<String> slots = commonBusySlots[i];
       slots.sort();
 
       List<String> mergedSlots = [];
@@ -72,7 +72,7 @@ class GetCommonTime {
           if (nextStart <= currentEnd) {
             // Merge the slots
             currentSlot =
-                currentSlot.split('-')[0] + '-' + nextSlot.split('-')[1];
+                '${currentSlot.split('-')[0]}-${nextSlot.split('-')[1]}';
           } else {
             // Add the current slot and update currentSlot to the next slot
             mergedSlots.add(currentSlot);
@@ -82,36 +82,13 @@ class GetCommonTime {
         mergedSlots.add(currentSlot); // Add the last slot
       }
 
-      commonFreeSlots[i] = mergedSlots;
+      commonBusySlots[i] = mergedSlots;
     }
-
-    return commonFreeSlots;
-  }
-
-  // Function to retrieve user IDs (example implementation)
-  static List<String> getUserIds() {
-    // Example implementation to retrieve user IDs
-    // Modify this method according to your specific logic
-    return [
-      'KkMnmPrOIJhvNTsLHShrK8KGUOi1',
-      'XcZygk9eyMS01aAbC89x88eKv452',
-      'ZIYN8Be81af2RNUhaPlrMV2ScyL2',
-    ];
-  }
-
-  // Example usage of the findFreeSlots() function
-  static void exampleUsage(DateTime startDate, DateTime endDate) async {
-    print(startDate);
-    print(endDate);
-    List<String> userIds =
-        getUserIds(); // Retrieve user IDs from within the class
-
-    List<List<String>> commonFreeSlots =
-        await findFreeSlots(userIds, startDate, endDate, '30');
 
     List<List<String>> workingHoursFreeSlots = [];
 
-    for (List<String> slots in commonFreeSlots) {
+    // formatting and adding working hours to the free slots
+    for (List<String> slots in commonBusySlots) {
       List<String> workingHoursSlots = [];
 
       if (slots.isNotEmpty) {
@@ -135,9 +112,9 @@ class GetCommonTime {
             String formattedPreviousEndMinute =
                 '${(previousEndMinute ~/ 60).toString().padLeft(2, '0')}:${(previousEndMinute % 60).toString().padLeft(2, '0')}';
             String formattedSlotStartHour =
-                '${slotStartHour.toString().padLeft(2, '0')}';
+                slotStartHour.toString().padLeft(2, '0');
             String formattedSlotStartMinute =
-                '${slotStartMinute.toString().padLeft(2, '0')}';
+                slotStartMinute.toString().padLeft(2, '0');
             workingHoursSlots.add(
                 '$formattedPreviousEndMinute-$formattedSlotStartHour:$formattedSlotStartMinute');
           }
@@ -153,8 +130,8 @@ class GetCommonTime {
           // Add the free slot after the last slot
           String formattedPreviousEndMinute =
               '${(previousEndMinute ~/ 60).toString().padLeft(2, '0')}:${(previousEndMinute % 60).toString().padLeft(2, '0')}';
-          String formattedEndHour = '${endHour.toString().padLeft(2, '0')}';
-          String formattedEndMinute = '${endMinute.toString().padLeft(2, '0')}';
+          String formattedEndHour = endHour.toString().padLeft(2, '0');
+          String formattedEndMinute = endMinute.toString().padLeft(2, '0');
           workingHoursSlots.add(
               '$formattedPreviousEndMinute-$formattedEndHour:$formattedEndMinute');
         }
@@ -162,11 +139,8 @@ class GetCommonTime {
 
       workingHoursFreeSlots.add(workingHoursSlots);
     }
-    print(workingHoursFreeSlots);
-  }
-}
 
-void main() {
-  GetCommonTime.exampleUsage(
-      DateTime.now(), DateTime.now().add(Duration(days: 7)));
+    print(workingHoursFreeSlots);
+    return workingHoursFreeSlots;
+  }
 }

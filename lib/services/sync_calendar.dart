@@ -53,7 +53,7 @@ class SyncCalendar {
       // Increment the date by 1 day
       selectedDate = selectedDate.add(const Duration(days: 1));
     }
-    print("eventsData: $eventsData");
+    print("ownEventsData: $eventsData");
     // now save the numbers to the database
     // Save the events data to Firestore
     final db = FirebaseFirestore.instance;

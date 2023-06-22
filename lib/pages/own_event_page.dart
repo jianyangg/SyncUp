@@ -7,11 +7,6 @@ import 'package:googleapis/calendar/v3.dart' as cal;
 import "package:googleapis_auth/auth_io.dart" as auth;
 import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
 import 'package:date_picker_timeline/date_picker_timeline.dart';
-import 'package:http/http.dart' as http;
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
-
-/// Provides the `GoogleSignIn` class
 import 'package:google_sign_in/google_sign_in.dart';
 import '../components/date_scroller.dart';
 import '../components/date_tile.dart';
@@ -31,7 +26,6 @@ class OwnEventPage extends StatefulWidget {
 enum _SelectedTab { home, calendar, group, account }
 
 class _OwnEventPageState extends State<OwnEventPage> {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   GoogleSignInAccount? _currentUser;
   late DateTime selectedDate;
 
