@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 class BottomNavBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int>? onTap;
-  const BottomNavBar(this.currentIndex, this.onTap, {super.key});
+  final Color color;
+  const BottomNavBar(this.currentIndex, this.onTap,
+      {super.key, required this.color});
 
   @override
   Widget build(BuildContext context) {
     return DotNavigationBar(
-      backgroundColor: Colors.blue.shade800,
+      backgroundColor: color,
       enableFloatingNavBar: true,
       margin: const EdgeInsets.only(left: 10, right: 10),
       currentIndex: currentIndex,

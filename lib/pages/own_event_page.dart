@@ -342,6 +342,7 @@ class _OwnEventPageState extends State<OwnEventPage> {
       bottomNavigationBar: BottomNavBar(
         _SelectedTab.values.indexOf(_selectedTab),
         _handleIndexChanged,
+        color: Colors.blue.shade800,
       ),
     );
   }
