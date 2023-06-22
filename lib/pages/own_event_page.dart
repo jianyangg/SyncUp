@@ -1,4 +1,7 @@
 import "package:flutter/material.dart";
+import 'package:google_fonts/google_fonts.dart';
+import 'package:googleapis/doubleclicksearch/v2.dart';
+import 'package:intl/intl.dart';
 import 'package:sync_up/components/bottom_nav_bar.dart';
 import 'package:sync_up/pages/group_page.dart';
 import 'package:sync_up/pages/home_page.dart';
@@ -7,7 +10,6 @@ import 'package:googleapis/calendar/v3.dart' as cal;
 import "package:googleapis_auth/auth_io.dart" as auth;
 import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
 import 'package:date_picker_timeline/date_picker_timeline.dart';
-import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 
@@ -16,6 +18,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import '../components/date_scroller.dart';
 import '../components/date_tile.dart';
 import '../components/event_tile.dart';
+import '../components/time_slot.dart';
 
 final GoogleSignIn _googleSignIn = GoogleSignIn(
   scopes: [cal.CalendarApi.calendarScope],
@@ -34,7 +37,7 @@ class _OwnEventPageState extends State<OwnEventPage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   GoogleSignInAccount? _currentUser;
   late DateTime selectedDate;
-
+  List<List<DateTime>> avails = [];
   @override
   void initState() {
     super.initState();
@@ -52,6 +55,40 @@ class _OwnEventPageState extends State<OwnEventPage> {
     _googleSignIn.signInSilently();
   }
 
+  bool isBefore(DateTime a, DateTime b) {
+    int compareStartHours = a.hour.compareTo(b.hour);
+    if (compareStartHours < 0) {
+      return true;
+    } else if (compareStartHours > 0) {
+      return false;
+    }
+
+    // If start hours are the same, compare start times by minutes
+    int compareStartMinutes = a.minute.compareTo(b.minute);
+    if (compareStartMinutes < 0) {
+      return true;
+    }
+
+    return false;
+  }
+
+  bool isAfter(DateTime a, DateTime b) {
+    int compareStartHours = a.hour.compareTo(b.hour);
+    if (compareStartHours > 0) {
+      return true;
+    } else if (compareStartHours < 0) {
+      return false;
+    }
+
+    // If start hours are the same, compare start times by minutes
+    int compareStartMinutes = a.minute.compareTo(b.minute);
+    if (compareStartMinutes > 0) {
+      return true;
+    }
+
+    return false;
+  }
+
   Future<List<cal.Event>> _handleGetEvents() async {
     // Retrieve an [auth.AuthClient] from the current [GoogleSignIn] instance.
     final auth.AuthClient? client = await _googleSignIn.authenticatedClient();
@@ -60,26 +97,54 @@ class _OwnEventPageState extends State<OwnEventPage> {
     // Prepare a gcal authenticated client. ORIGINAL. KEEP THIS CODE
     final cal.CalendarApi gcalApi = cal.CalendarApi(client!);
 
-    // calEvents should contain the events on the selected date.
-    final cal.Events calEvents = await gcalApi.events.list(
+    // dayEvents should contain the events on the selected date.
+    final cal.Events dayEvents = await gcalApi.events.list(
       "primary",
       timeMin: selectedDate,
-      timeMax:
-          selectedDate.add(const Duration(hours: 23, minutes: 59, seconds: 59)),
+      timeMax: selectedDate
+          .add(const Duration(hours: 23, minutes: 59, seconds: 59))
+          .toUtc(),
     );
-    final List<cal.Event> appointments = <cal.Event>[];
+    List<cal.Event> dayAppts = [];
 
-    // add all events to appointments which is a Future<List<Event>>
-    if (calEvents.items != null) {
-      for (int i = 0; i < calEvents.items!.length; i++) {
-        final cal.Event event = calEvents.items![i];
-        if (event.start == null) {
-          continue;
+    if (dayEvents.items != null) {
+      dayAppts = dayEvents.items!.where((event) => event.end != null).toList();
+
+      dayAppts.sort((a, b) {
+        final DateTime startA = a.start!.dateTime ?? a.start!.date!;
+        final DateTime startB = b.start!.dateTime ?? b.start!.date!;
+        final DateTime endA = a.end!.dateTime ?? a.end!.date!;
+        final DateTime endB = b.end!.dateTime ?? b.end!.date!;
+
+        // Compare start times by hours
+        int compareStartHours = startA.hour.compareTo(startB.hour);
+        if (compareStartHours != 0) {
+          return compareStartHours;
         }
-        appointments.add(event);
-      }
+
+        // If start hours are the same, compare start times by minutes
+        int compareStartMinutes = startA.minute.compareTo(startB.minute);
+        if (compareStartMinutes != 0) {
+          return compareStartMinutes;
+        }
+
+        // If start times are equal, compare end times by hours
+        int compareEndHours = endA.hour.compareTo(endB.hour);
+        if (compareEndHours != 0) {
+          return compareEndHours;
+        }
+
+        // If end hours are the same, compare end times by minutes
+        int compareEndMinutes = endA.minute.compareTo(endB.minute);
+        if (compareEndMinutes != 0) {
+          return compareEndMinutes;
+        }
+
+        // If both start and end times are equal, compare by event title
+        return a.summary!.compareTo(b.summary!);
+      });
     }
-    return appointments;
+    return dayAppts;
   }
 
   var _selectedTab = _SelectedTab.calendar;
@@ -322,12 +387,15 @@ class _OwnEventPageState extends State<OwnEventPage> {
                           : Padding(
                               padding: const EdgeInsets.only(top: 25.0),
                               child: Center(
-                                  child: Text('You\'re clear for the day!',
-                                      style: TextStyle(
-                                          fontSize: 15,
-                                          color: Colors.green.shade600,
-                                          fontWeight: FontWeight.bold))),
-                            );
+                                  child: Text(
+                                'No events to show.',
+                                style: GoogleFonts.lato(
+                                  textStyle: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black),
+                                ),
+                              )));
                     } else {
                       return const Center(
                         child: Text(

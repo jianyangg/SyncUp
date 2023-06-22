@@ -1,12 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:dot_navigation_bar/dot_navigation_bar.dart';
 import 'package:sync_up/pages/own_event_page.dart';
 import 'package:sync_up/pages/group_page.dart';
 import 'package:sync_up/pages/home_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:sync_up/pages/main_page.dart';
-
 import '../components/bottom_nav_bar.dart';
 
 // this will be the logout page.
@@ -110,23 +108,26 @@ class _AccountPageState extends State<AccountPage> {
         title: Row(
           children: [
             const SizedBox(width: 10),
-            FutureBuilder<String>(
-              future: getUserName(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData && snapshot.data != null) {
-                  userName = snapshot.data!;
-                  return Text(
-                    "Hello, ${snapshot.data}",
-                    style: const TextStyle(
-                        fontSize: 25, fontWeight: FontWeight.bold),
-                  );
-                } else {
-                  return const Text(
-                    "Hello, User",
-                    style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                  );
-                }
-              },
+            Expanded(
+              child: FutureBuilder<String>(
+                future: getUserName(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData && snapshot.data != null) {
+                    userName = snapshot.data!;
+                    return Text(
+                      "Hello, ${snapshot.data}",
+                      style: const TextStyle(
+                          fontSize: 25, fontWeight: FontWeight.bold),
+                    );
+                  } else {
+                    return const Text(
+                      "Hello, User",
+                      style:
+                          TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                    );
+                  }
+                },
+              ),
             ),
           ],
         ),
