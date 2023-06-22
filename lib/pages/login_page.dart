@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sync_up/components/my_textfield.dart';
 import 'package:sync_up/components/signIn_signUp_button.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
@@ -15,6 +16,15 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginState extends State<LoginPage> {
+  Future<bool> isUserSignedIn() async {
+    GoogleSignIn googleSignIn = GoogleSignIn();
+
+    // Check if the user is currently signed in
+    bool isSignedIn = await googleSignIn.isSignedIn();
+
+    return isSignedIn;
+  }
+
   // add sign user in method
   void signUserIn() async {
     // show loading
@@ -38,12 +48,6 @@ class _LoginState extends State<LoginPage> {
 
       // show error message
       showErrorMessage(e.code);
-
-      // if (e.code == 'user-not-found') {
-      //   wrongEmailNotif();
-      // } else if (e.code == 'wrong-password') {
-      //   wrongPasswordNotif();
-      // }
     }
   }
 
@@ -247,18 +251,13 @@ class _LoginState extends State<LoginPage> {
                   padding: const EdgeInsets.fromLTRB(35, 0, 0, 0),
                   Buttons.Google,
                   elevation: 1,
-                  onPressed: () => GoogleAuthService().signInWithGoogle(),
+                  onPressed: () async {
+                    // upon log in, we want to save the user's calendar to firestore
+                    // this method will be done here once login is complete
+                    GoogleAuthService().signInWithGoogle();
+                  },
                   text: "Sign in with Google",
                 ),
-                // const SizedBox(
-                //   height: 7,
-                // ),
-                // SignInButton(
-                //   padding: const EdgeInsets.fromLTRB(35, 0, 0, 0),
-                //   Buttons.AppleDark,
-                //   onPressed: () {},
-                //   text: "Sign in with Apple",
-                // ),
                 const SizedBox(
                   height: 7,
                 ),

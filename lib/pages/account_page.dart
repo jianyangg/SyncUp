@@ -6,6 +6,38 @@ import 'package:sync_up/pages/home_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:sync_up/pages/main_page.dart';
 import '../components/bottom_nav_bar.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dot_navigation_bar/dot_navigation_bar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:sync_up/pages/account_page.dart';
+import 'package:sync_up/pages/own_event_page.dart';
+import 'package:sync_up/pages/group_page.dart';
+
+import '../components/bottom_nav_bar.dart';
+import "package:flutter/material.dart";
+import 'package:sync_up/components/bottom_nav_bar.dart';
+import 'package:sync_up/pages/group_page.dart';
+import 'package:sync_up/pages/home_page.dart';
+import 'package:sync_up/pages/account_page.dart';
+import 'package:googleapis/calendar/v3.dart' as cal;
+import "package:googleapis_auth/auth_io.dart" as auth;
+import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
+import 'package:date_picker_timeline/date_picker_timeline.dart';
+import 'package:http/http.dart' as http;
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:sync_up/services/sync_calendar.dart';
+
+/// Provides the `GoogleSignIn` class
+import 'package:google_sign_in/google_sign_in.dart';
+import '../components/date_scroller.dart';
+import '../components/date_tile.dart';
+import '../components/event_tile.dart';
+
+final GoogleSignIn _googleSignIn = GoogleSignIn(
+  scopes: [cal.CalendarApi.calendarScope],
+);
 
 // this will be the logout page.
 class AccountPage extends StatefulWidget {
@@ -44,6 +76,26 @@ Future<String> getUserPhotoUrl() async {
 class _AccountPageState extends State<AccountPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   var _selectedTab = _SelectedTab.account;
+
+  GoogleSignInAccount? _currentUser;
+  late DateTime dateTodayFormatted;
+
+  @override
+  void initState() {
+    super.initState();
+
+    DateTime now = DateTime.now();
+    dateTodayFormatted = DateTime(now.year, now.month, now.day);
+    _googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
+      setState(() {
+        _currentUser = account;
+      });
+      // if (_currentUser != null) {
+      //   SyncCalendar.syncCalendarByDay(dateTodayFormatted, _googleSignIn);
+      // }
+    });
+    _googleSignIn.signInSilently();
+  }
 
   void _handleIndexChanged(int i) {
     setState(() {
@@ -205,13 +257,22 @@ class _AccountPageState extends State<AccountPage> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          TextButton(
-                            onPressed: () {},
+                          TextButton.icon(
+                            icon: const Icon(
+                              Icons.calendar_month,
+                              color: Colors.white,
+                            ),
+                            onPressed: () {
+                              if (_currentUser != null) {
+                                SyncCalendar.syncCalendarByDay(
+                                    dateTodayFormatted, _googleSignIn);
+                              }
+                            },
                             style: ButtonStyle(
                               backgroundColor: MaterialStateProperty.all<Color>(
                                   Colors.orange.shade400),
                             ),
-                            child: const Text(
+                            label: const Text(
                               'Sync with Google',
                               style: TextStyle(
                                   color: Colors.white,
@@ -246,6 +307,7 @@ class _AccountPageState extends State<AccountPage> {
       bottomNavigationBar: BottomNavBar(
         _SelectedTab.values.indexOf(_selectedTab),
         _handleIndexChanged,
+        color: Colors.blue.shade800,
       ),
     );
   }

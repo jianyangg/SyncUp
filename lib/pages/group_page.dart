@@ -281,6 +281,7 @@ class _GroupPageState extends State<GroupPage> {
         bottomNavigationBar: BottomNavBar(
           _SelectedTab.values.indexOf(_selectedTab),
           _handleIndexChanged,
+          color: Colors.blue.shade800,
         ),
       ),
     );

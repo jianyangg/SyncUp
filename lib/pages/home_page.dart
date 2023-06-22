@@ -4,8 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:sync_up/pages/account_page.dart';
 import 'package:sync_up/pages/own_event_page.dart';
 import 'package:sync_up/pages/group_page.dart';
-
 import '../components/bottom_nav_bar.dart';
+import 'package:googleapis/calendar/v3.dart' as cal;
+import 'package:sync_up/services/sync_calendar.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+
+final GoogleSignIn _googleSignIn = GoogleSignIn(
+  scopes: [cal.CalendarApi.calendarScope],
+);
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -75,6 +81,7 @@ class _HomeState extends State<HomePage> {
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   Future<bool> checkAllRequests() async {
     // check all groups owned by the user
     // if there is any request, return true
@@ -101,6 +108,26 @@ class _HomeState extends State<HomePage> {
 
   // distance between each Connect! button
   final double _buttonDistance = 15.0;
+
+  GoogleSignInAccount? _currentUser;
+  late DateTime dateTodayFormatted;
+
+  @override
+  void initState() {
+    super.initState();
+
+    DateTime now = DateTime.now();
+    dateTodayFormatted = DateTime(now.year, now.month, now.day);
+    _googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
+      setState(() {
+        _currentUser = account;
+      });
+      if (_currentUser != null) {
+        SyncCalendar.syncCalendarByDay(dateTodayFormatted, _googleSignIn);
+      }
+    });
+    _googleSignIn.signInSilently();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -438,6 +465,7 @@ class _HomeState extends State<HomePage> {
       bottomNavigationBar: BottomNavBar(
         _SelectedTab.values.indexOf(_selectedTab),
         _handleIndexChanged,
+        color: Colors.blue.shade800,
       ),
     );
   }

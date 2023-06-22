@@ -2,40 +2,45 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/calendar/v3.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:googleapis/calendar/v3.dart' as cal;
+import "package:googleapis_auth/auth_io.dart" as auth;
+import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class GoogleAuthService {
   signInWithGoogle() async {
     try {
-      // begin interactive sign in process
+      // Begin interactive sign-in process
       final GoogleSignInAccount? gUser = await GoogleSignIn(
         scopes: [CalendarApi.calendarScope],
       ).signIn();
-      // obtain auth details from request
+
+      // Obtain auth details from request
       final GoogleSignInAuthentication gAuth = await gUser!.authentication;
-      // create a new credential for user
+
+      // Create a new credential for the user
       final credential = GoogleAuthProvider.credential(
         accessToken: gAuth.accessToken,
         idToken: gAuth.idToken,
       );
 
-      // add firebase auth to cloud_firestore
+      // Add Firebase Auth to Cloud Firestore
       final db = FirebaseFirestore.instance;
       final res = await FirebaseAuth.instance.signInWithCredential(credential);
       final user = res.user;
       final userRef = db.collection('users').doc(user!.uid);
       final userDoc = await userRef.get();
+
       if (!userDoc.exists) {
         await userRef.set({
           'email': user.email,
           'name': user.displayName,
           'photoUrl': user.photoURL,
           'createdAt': DateTime.now(),
-          // create empty groups array
-          'groups': [],
+          'groups': [], // Create empty groups array
         });
         return res;
       }
-      // return await FirebaseAuth.instance.signInWithCredential(credential);
     } catch (e) {
       print(e);
     }

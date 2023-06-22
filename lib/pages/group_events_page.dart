@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:sync_up/components/common_slots_tile.dart';
 import '../components/bottom_nav_bar.dart';
 import 'account_page.dart';
 import 'notification_page.dart';
@@ -41,6 +42,8 @@ class GroupEventsPage extends StatefulWidget {
 class _GroupEventsPageState extends State<GroupEventsPage> {
   GoogleSignInAccount? _currentUser;
   late DateTime selectedDate;
+  late DateTime startDate;
+  late DateTime endDate;
   var _selectedTab = _SelectedTab.group;
   void _handleIndexChanged(int i) {
     setState(() {
@@ -92,6 +95,7 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
     }
   }
 
+  final int pickerDateRange = 5;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   // have a future boolean method to check requests to join group
   Future<bool> checkRequests() async {
@@ -325,6 +329,12 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                               children: [
                                 TextButton(
                                   onPressed: () {
+                                    setState(() {
+                                      _eventNameController.clear();
+                                      _selectedPeriod = "Should not be chosen";
+                                      selectedDateRangeText =
+                                          '${DateFormat('yyyy-MM-dd').format(DateTime.now())} to ${DateFormat('yyyy-MM-dd').format(DateTime.now().add(const Duration(days: 7)))}';
+                                    });
                                     Navigator.pop(context);
                                   },
                                   child: Text(
@@ -384,15 +394,14 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                                     TextButton(
                                                       // once create button is pressed, add to cloud firestore and update the list
                                                       onPressed: () {
-                                                        // reset event name
-                                                        _eventNameController
-                                                            .clear();
-                                                        // reset selected period
-                                                        _selectedPeriod =
-                                                            "Should not be chosen";
-                                                        // reset selected date range
-                                                        selectedDateRangeText =
-                                                            '';
+                                                        setState(() {
+                                                          _eventNameController
+                                                              .clear();
+                                                          _selectedPeriod =
+                                                              "Should not be chosen";
+                                                          selectedDateRangeText =
+                                                              '';
+                                                        });
                                                         Navigator
                                                             .pushReplacement(
                                                           context,
@@ -429,43 +438,18 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                                   ],
                                                 ),
                                                 const SizedBox(height: 20),
-                                                Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      "Event Name: ${_eventNameController.text}",
-                                                      textAlign:
-                                                          TextAlign.start,
-                                                      style: const TextStyle(
-                                                          fontSize: 20,
-                                                          fontWeight:
-                                                              FontWeight.bold),
-                                                    ),
-                                                    const SizedBox(
-                                                      height: 10,
-                                                    ),
-                                                    Text(
-                                                        "Duration: ${_selectedPeriod!}",
-                                                        textAlign:
-                                                            TextAlign.start,
-                                                        style: const TextStyle(
-                                                            fontSize: 20,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .bold)),
-                                                    const SizedBox(height: 10),
-                                                    Text(
-                                                      "Date Range: $selectedDateRangeText",
-                                                      textAlign:
-                                                          TextAlign.start,
-                                                      style: const TextStyle(
-                                                          fontSize: 20,
-                                                          fontWeight:
-                                                              FontWeight.bold),
-                                                    ),
-                                                  ],
-                                                ),
+                                                CommonSlotsTile(
+                                                  eventName:
+                                                      _eventNameController.text
+                                                          .trim(),
+                                                  selectedPeriod:
+                                                      _selectedPeriod!,
+                                                  selectedDateRangeText:
+                                                      selectedDateRangeText,
+                                                  startDate: startDate,
+                                                  endDate: endDate,
+                                                  groupId: widget.groupId,
+                                                )
                                               ],
                                             ),
                                           ),
@@ -599,6 +583,7 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                                   0.8,
                                               child: SfDateRangePicker(
                                                 // round the corners of the date range picker
+                                                view: DateRangePickerView.month,
                                                 todayHighlightColor:
                                                     Colors.orange.shade800,
                                                 selectionColor:
@@ -626,8 +611,8 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                                 initialSelectedRange:
                                                     PickerDateRange(
                                                   DateTime.now(),
-                                                  DateTime.now().add(
-                                                      const Duration(days: 7)),
+                                                  DateTime.now().add(Duration(
+                                                      days: pickerDateRange)),
                                                 ),
                                               ),
                                             ),
@@ -641,12 +626,6 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                                       fontSize: 15),
                                                 ),
                                                 onPressed: () {
-                                                  // clear the date range picker
-                                                  // and close the dialog
-                                                  // reset values
-                                                  setState(() {
-                                                    pickedDateRange = null;
-                                                  });
                                                   Navigator.of(context)
                                                       .pop(pickedDateRange);
                                                 },
@@ -662,13 +641,13 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                           });
                                         }
                                         if (pickedDateRange != null) {
-                                          final startDate =
+                                          startDate =
                                               pickedDateRange!.startDate ??
                                                   DateTime.now();
-                                          final endDate =
-                                              pickedDateRange!.endDate ??
-                                                  DateTime.now();
-
+                                          endDate = pickedDateRange!.endDate ??
+                                              DateTime.now();
+                                          selectedDateRangeText =
+                                              '${DateFormat('yyyy-MM-dd').format(startDate)} to ${DateFormat('yyyy-MM-dd').format(endDate)}';
                                           setState(() {
                                             selectedDateRangeText =
                                                 '${DateFormat('yyyy-MM-dd').format(startDate)} to ${DateFormat('yyyy-MM-dd').format(endDate)}';
@@ -688,7 +667,7 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                           ),
                                         ),
                                         Text(
-                                          '(default: 7 days)',
+                                          '(default: $pickerDateRange days)',
                                           textAlign: TextAlign.center,
                                           style: TextStyle(
                                             fontSize: 15,
@@ -945,6 +924,7 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
         bottomNavigationBar: BottomNavBar(
           _SelectedTab.values.indexOf(_selectedTab),
           _handleIndexChanged,
+          color: Colors.orange.shade800,
         ),
       ),
     );
