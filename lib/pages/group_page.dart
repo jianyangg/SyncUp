@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import "package:flutter/material.dart";
-import 'package:dot_navigation_bar/dot_navigation_bar.dart';
 import 'package:sync_up/components/group_grid.dart';
 import 'package:sync_up/pages/home_page.dart';
 import 'package:sync_up/pages/account_page.dart';
@@ -8,6 +7,8 @@ import 'package:sync_up/pages/own_event_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:sync_up/pages/group_search_page.dart';
 import 'package:sync_up/pages/user_search_page.dart';
+
+import '../components/bottom_nav_bar.dart';
 
 class GroupPage extends StatefulWidget {
   const GroupPage({super.key});
@@ -277,40 +278,9 @@ class _GroupPageState extends State<GroupPage> {
             ),
           ),
         ),
-        bottomNavigationBar: DotNavigationBar(
-          backgroundColor: Colors.blue.shade800,
-          enableFloatingNavBar: true,
-          margin: const EdgeInsets.only(left: 10, right: 10),
-          currentIndex: _SelectedTab.values.indexOf(_selectedTab),
-          dotIndicatorColor: Colors.white,
-          unselectedItemColor: Colors.grey[350],
-          // enableFloatingNavBar: false,
-          onTap: _handleIndexChanged,
-          items: [
-            /// Home
-            DotNavigationBarItem(
-              icon: const Icon(Icons.home),
-              selectedColor: Colors.white,
-            ),
-
-            /// Likes
-            DotNavigationBarItem(
-              icon: const Icon(Icons.calendar_month),
-              selectedColor: Colors.white,
-            ),
-
-            /// Search
-            DotNavigationBarItem(
-              icon: const Icon(Icons.group),
-              selectedColor: Colors.white,
-            ),
-
-            /// Profile
-            DotNavigationBarItem(
-              icon: const Icon(Icons.person),
-              selectedColor: Colors.white,
-            ),
-          ],
+        bottomNavigationBar: BottomNavBar(
+          _SelectedTab.values.indexOf(_selectedTab),
+          _handleIndexChanged,
         ),
       ),
     );

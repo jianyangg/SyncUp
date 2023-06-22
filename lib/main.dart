@@ -24,6 +24,6 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
             primaryColor: Colors.blue.shade800,
             primaryColorLight: Colors.blue.shade700,
-            highlightColor: Colors.orange.shade800));
+            highlightColor: Colors.red));
   }
 }

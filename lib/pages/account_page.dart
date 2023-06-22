@@ -7,6 +7,9 @@ import 'package:sync_up/pages/home_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:sync_up/pages/main_page.dart';
 
+import '../components/bottom_nav_bar.dart';
+
+// this will be the logout page.
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
 
@@ -239,39 +242,9 @@ class _AccountPageState extends State<AccountPage> {
         ),
       ),
       extendBody: true,
-      bottomNavigationBar: DotNavigationBar(
-        backgroundColor: Colors.blue.shade800,
-        enableFloatingNavBar: true,
-        margin: const EdgeInsets.only(left: 10, right: 10),
-        currentIndex: _SelectedTab.values.indexOf(_selectedTab),
-        dotIndicatorColor: Colors.white,
-        unselectedItemColor: Colors.grey[350],
-        onTap: _handleIndexChanged,
-        items: [
-          /// Home
-          DotNavigationBarItem(
-            icon: const Icon(Icons.home),
-            selectedColor: Colors.white,
-          ),
-
-          /// Likes
-          DotNavigationBarItem(
-            icon: const Icon(Icons.calendar_month),
-            selectedColor: Colors.white,
-          ),
-
-          /// Search
-          DotNavigationBarItem(
-            icon: const Icon(Icons.group),
-            selectedColor: Colors.white,
-          ),
-
-          /// Profile
-          DotNavigationBarItem(
-            icon: const Icon(Icons.person),
-            selectedColor: Colors.white,
-          ),
-        ],
+      bottomNavigationBar: BottomNavBar(
+        _SelectedTab.values.indexOf(_selectedTab),
+        _handleIndexChanged,
       ),
     );
   }

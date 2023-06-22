@@ -1,5 +1,5 @@
 import "package:flutter/material.dart";
-import 'package:dot_navigation_bar/dot_navigation_bar.dart';
+import 'package:sync_up/components/bottom_nav_bar.dart';
 import 'package:sync_up/pages/group_page.dart';
 import 'package:sync_up/pages/home_page.dart';
 import 'package:sync_up/pages/account_page.dart';
@@ -7,6 +7,11 @@ import 'package:googleapis/calendar/v3.dart' as cal;
 import "package:googleapis_auth/auth_io.dart" as auth;
 import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
 import 'package:date_picker_timeline/date_picker_timeline.dart';
+import 'package:http/http.dart' as http;
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+
+/// Provides the `GoogleSignIn` class
 import 'package:google_sign_in/google_sign_in.dart';
 import '../components/date_scroller.dart';
 import '../components/date_tile.dart';
@@ -26,6 +31,7 @@ class OwnEventPage extends StatefulWidget {
 enum _SelectedTab { home, calendar, group, account }
 
 class _OwnEventPageState extends State<OwnEventPage> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   GoogleSignInAccount? _currentUser;
   late DateTime selectedDate;
 
@@ -51,8 +57,9 @@ class _OwnEventPageState extends State<OwnEventPage> {
     final auth.AuthClient? client = await _googleSignIn.authenticatedClient();
     assert(client != null, 'Authenticated client missing!');
 
-    // Prepare a gcal authenticated client.
+    // Prepare a gcal authenticated client. ORIGINAL. KEEP THIS CODE
     final cal.CalendarApi gcalApi = cal.CalendarApi(client!);
+
     // calEvents should contain the events on the selected date.
     final cal.Events calEvents = await gcalApi.events.list(
       "primary",
@@ -332,40 +339,9 @@ class _OwnEventPageState extends State<OwnEventPage> {
           ),
         ),
       ),
-      bottomNavigationBar: DotNavigationBar(
-        backgroundColor: Colors.blue.shade800,
-        enableFloatingNavBar: true,
-        margin: const EdgeInsets.only(left: 10, right: 10),
-        currentIndex: _SelectedTab.values.indexOf(_selectedTab),
-        dotIndicatorColor: Colors.white,
-        unselectedItemColor: Colors.grey[350],
-        // enableFloatingNavBar: false,
-        onTap: _handleIndexChanged,
-        items: [
-          /// Home
-          DotNavigationBarItem(
-            icon: const Icon(Icons.home),
-            selectedColor: Colors.white,
-          ),
-
-          /// Likes
-          DotNavigationBarItem(
-            icon: const Icon(Icons.calendar_month),
-            selectedColor: Colors.white,
-          ),
-
-          /// Search
-          DotNavigationBarItem(
-            icon: const Icon(Icons.group),
-            selectedColor: Colors.white,
-          ),
-
-          /// Profile
-          DotNavigationBarItem(
-            icon: const Icon(Icons.person),
-            selectedColor: Colors.white,
-          ),
-        ],
+      bottomNavigationBar: BottomNavBar(
+        _SelectedTab.values.indexOf(_selectedTab),
+        _handleIndexChanged,
       ),
     );
   }

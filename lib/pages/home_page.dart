@@ -1,10 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dot_navigation_bar/dot_navigation_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:sync_up/pages/account_page.dart';
-import 'package:sync_up/pages/own_event_page.dart';
 import 'package:sync_up/pages/group_page.dart';
+import 'package:sync_up/pages/own_event_page.dart';
+
+import '../components/bottom_nav_bar.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -105,7 +106,7 @@ class _HomeState extends State<HomePage> {
   Widget build(BuildContext context) {
     String username = _auth.currentUser!.displayName.toString();
     return Scaffold(
-      backgroundColor: Colors.blue.shade800,
+      backgroundColor: Theme.of(context).primaryColor,
       extendBody: true,
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -119,6 +120,9 @@ class _HomeState extends State<HomePage> {
           ],
         ),
         backgroundColor: Colors.blue.shade800,
+              style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+            )),
+        backgroundColor: Theme.of(context).primaryColor,
         shadowColor: Colors.transparent,
         actions: [
           IconButton(
@@ -434,40 +438,9 @@ class _HomeState extends State<HomePage> {
           ),
         ),
       ),
-      bottomNavigationBar: DotNavigationBar(
-        backgroundColor: Colors.blue.shade800,
-        enableFloatingNavBar: true,
-        margin: const EdgeInsets.only(left: 10, right: 10),
-        currentIndex: _SelectedTab.values.indexOf(_selectedTab),
-        dotIndicatorColor: Colors.white,
-        unselectedItemColor: Colors.grey[350],
-        // enableFloatingNavBar: false,
-        onTap: _handleIndexChanged,
-        items: [
-          /// Home
-          DotNavigationBarItem(
-            icon: const Icon(Icons.home),
-            selectedColor: Colors.white,
-          ),
-
-          /// Likes
-          DotNavigationBarItem(
-            icon: const Icon(Icons.calendar_month),
-            selectedColor: Colors.white,
-          ),
-
-          /// Search
-          DotNavigationBarItem(
-            icon: const Icon(Icons.group),
-            selectedColor: Colors.white,
-          ),
-
-          /// Profile
-          DotNavigationBarItem(
-            icon: const Icon(Icons.person),
-            selectedColor: Colors.white,
-          ),
-        ],
+      bottomNavigationBar: BottomNavBar(
+        _SelectedTab.values.indexOf(_selectedTab),
+        _handleIndexChanged,
       ),
     );
   }
