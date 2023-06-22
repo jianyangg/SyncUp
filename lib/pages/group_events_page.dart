@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import '../components/bottom_nav_bar.dart';
 import 'account_page.dart';
 import 'notification_page.dart';
 import 'own_event_page.dart';

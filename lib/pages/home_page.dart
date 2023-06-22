@@ -1,9 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dot_navigation_bar/dot_navigation_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:sync_up/pages/account_page.dart';
-import 'package:sync_up/pages/group_page.dart';
 import 'package:sync_up/pages/own_event_page.dart';
+import 'package:sync_up/pages/group_page.dart';
 
 import '../components/bottom_nav_bar.dart';
 
@@ -106,7 +107,7 @@ class _HomeState extends State<HomePage> {
   Widget build(BuildContext context) {
     String username = _auth.currentUser!.displayName.toString();
     return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor,
+      backgroundColor: Colors.blue.shade800,
       extendBody: true,
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -120,9 +121,6 @@ class _HomeState extends State<HomePage> {
           ],
         ),
         backgroundColor: Colors.blue.shade800,
-              style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-            )),
-        backgroundColor: Theme.of(context).primaryColor,
         shadowColor: Colors.transparent,
         actions: [
           IconButton(
