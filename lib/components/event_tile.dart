@@ -1,7 +1,6 @@
 import 'package:googleapis/calendar/v3.dart' as cal;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:googleapis/realtimebidding/v1.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_html/flutter_html.dart';
 
@@ -20,7 +19,7 @@ class EventTile extends StatelessWidget {
         //  width: SizeConfig.screenWidth * 0.78,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          color: Color.fromARGB(255, 71, 50, 252),
+          color: const Color.fromARGB(255, 71, 50, 252),
         ),
         child: Row(children: [
           Expanded(

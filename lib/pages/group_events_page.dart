@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dot_navigation_bar/dot_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:sync_up/components/calendar_scroll.dart';
+import '../components/bottom_nav_bar.dart';
 import 'account_page.dart';
 import 'notification_page.dart';
 import 'own_event_page.dart';
@@ -405,40 +405,9 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
             ),
           ),
         ),
-        bottomNavigationBar: DotNavigationBar(
-          backgroundColor: Colors.orange.shade800,
-          enableFloatingNavBar: true,
-          margin: const EdgeInsets.only(left: 10, right: 10),
-          currentIndex: _SelectedTab.values.indexOf(_selectedTab),
-          dotIndicatorColor: Colors.white,
-          unselectedItemColor: Colors.grey[350],
-          // enableFloatingNavBar: false,
-          onTap: _handleIndexChanged,
-          items: [
-            /// Home
-            DotNavigationBarItem(
-              icon: const Icon(Icons.home),
-              selectedColor: Colors.white,
-            ),
-
-            /// Likes
-            DotNavigationBarItem(
-              icon: const Icon(Icons.calendar_month),
-              selectedColor: Colors.white,
-            ),
-
-            /// Search
-            DotNavigationBarItem(
-              icon: const Icon(Icons.group),
-              selectedColor: Colors.white,
-            ),
-
-            /// Profile
-            DotNavigationBarItem(
-              icon: const Icon(Icons.person),
-              selectedColor: Colors.white,
-            ),
-          ],
+        bottomNavigationBar: BottomNavBar(
+          _SelectedTab.values.indexOf(_selectedTab),
+          _handleIndexChanged,
         ),
       ),
     );
