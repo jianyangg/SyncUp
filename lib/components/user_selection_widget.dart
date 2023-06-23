@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class UserSelectionWidget extends StatefulWidget {
   final Function(List<String>) onUserSelectionChanged;
@@ -12,7 +13,7 @@ class UserSelectionWidget extends StatefulWidget {
 
 class _UserSelectionWidgetState extends State<UserSelectionWidget> {
   List<String> selectedUsers = [];
-  bool selectAll = false;
+  bool selectedAll = false;
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +25,7 @@ class _UserSelectionWidgetState extends State<UserSelectionWidget> {
         }
 
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator();
+          return CircularProgressIndicator();
         }
 
         final users = snapshot.data!.docs;
@@ -36,32 +37,59 @@ class _UserSelectionWidgetState extends State<UserSelectionWidget> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    "Choose users that must be present:",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                      decoration: TextDecoration.underline,
+                  Container(
+                    padding: EdgeInsets.all(15),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8.0),
+                      color: Colors.orange[100],
                     ),
+                    child: Text("Choose users that must be present:",
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.lato(
+                          textStyle: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        )),
                   ),
-                  TextButton(
-                    onPressed: () {
-                      setState(() {
-                        if (selectAll) {
-                          selectedUsers.clear();
-                        } else {
-                          selectedUsers = users.map((user) => user.id).toList();
-                        }
-                        selectAll = !selectAll;
-                      });
-                      widget.onUserSelectionChanged(selectedUsers);
-                    },
-                    child: Text(
-                      selectAll ? 'Deselect All' : 'Select All',
-                      style: TextStyle(
-                        color: Colors.orange.shade800,
+                  Expanded(
+                    child: Container(
+                      constraints: BoxConstraints(maxWidth: 150),
+                      child: TextButton(
+                        onPressed: () {
+                          setState(() {
+                            if (selectedAll) {
+                              selectedUsers.clear();
+                            } else {
+                              selectedUsers =
+                                  users.map((user) => user.id).toList();
+                            }
+                            selectedAll = !selectedAll;
+                          });
+                          widget.onUserSelectionChanged(selectedUsers);
+                        },
+                        style: ButtonStyle(
+                          padding: MaterialStateProperty.all<EdgeInsets>(
+                              EdgeInsets.zero),
+                          textStyle: MaterialStateProperty.all<TextStyle>(
+                            TextStyle(
+                              color: Colors.orange.shade800,
+                              decoration: TextDecoration.underline,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          foregroundColor: MaterialStateProperty.all<Color>(
+                              Colors.orange.shade800),
+                          overlayColor: MaterialStateProperty.all<Color>(
+                              Colors.transparent),
+                          visualDensity: VisualDensity.compact,
+                        ),
+                        child: FittedBox(
+                          child: Text(
+                            selectedAll ? 'Deselect All' : 'Select All',
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -87,7 +115,7 @@ class _UserSelectionWidgetState extends State<UserSelectionWidget> {
                           } else {
                             selectedUsers.remove(userId);
                           }
-                          selectAll = false;
+                          selectedAll = false;
                         });
                         widget.onUserSelectionChanged(selectedUsers);
                       },

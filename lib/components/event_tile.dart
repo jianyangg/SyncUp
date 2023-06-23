@@ -20,7 +20,9 @@ class EventTile extends StatelessWidget {
         //  width: SizeConfig.screenWidth * 0.78,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          color: color,
+          color: event.extendedProperties?.private?['CREATOR'] == "SYNCUP"
+              ? Colors.orange.shade800
+              : color,
         ),
         child: Row(children: [
           Expanded(
@@ -85,37 +87,23 @@ class EventTile extends StatelessWidget {
             width: 0.5,
             color: Colors.grey[200]!.withOpacity(0.7),
           ),
-
-          //TODO: using this code could be for indicating when an event is an individually created event,
-          // or a group event (color code or change the text according to the group name)
-          // It's text that appears on the right side of the event, separated by some divider
-          // RotatedBox(
-          //   quarterTurns: 3,
-          //   child: Text(
-          //     task!.isCompleted == 1 ? "COMPLETED" : "TODO",
-          //     style: GoogleFonts.lato(
-          //       textStyle: TextStyle(
-          //           fontSize: 10,
-          //           fontWeight: FontWeight.bold,
-          //           color: Colors.white),
-          //     ),
-          //   ),
-          // ),
+          Visibility(
+            visible: event.extendedProperties?.private?['CREATOR'] == "SYNCUP",
+            child: RotatedBox(
+              quarterTurns: 3,
+              child: Text(
+                event.extendedProperties?.private?['GROUP_NAME'] ?? "",
+                style: GoogleFonts.lato(
+                  textStyle: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
+                ),
+              ),
+            ),
+          ),
         ]),
       ),
     );
   }
-
-  // _getBGClr(int no) {
-  //   switch (no) {
-  //     case 0:
-  //       return bluishClr;
-  //     case 1:
-  //       return pinkClr;
-  //     case 2:
-  //       return yellowClr;
-  //     default:
-  //       return bluishClr;
-  //   }
-  // }
 }

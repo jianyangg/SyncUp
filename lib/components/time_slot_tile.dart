@@ -2,15 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
-class TimeSlot extends StatelessWidget {
+class TimeSlotTile extends StatelessWidget {
   final DateTime startDateTime;
-  final DateTime startEndTime;
+  final DateTime endDateTime;
   final int numAvailable;
   final int numTotal;
   Function() handler;
-  TimeSlot(this.startDateTime, this.startEndTime, this.numAvailable,
-      this.numTotal, this.handler,
-      {super.key});
+  TimeSlotTile({
+    required this.startDateTime,
+    required this.endDateTime,
+    required this.numAvailable,
+    required this.numTotal,
+    required this.handler,
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +68,7 @@ class TimeSlot extends StatelessWidget {
                       ),
                       SizedBox(height: 5),
                       Text(
-                        "${DateFormat('HH:mm').format(startDateTime)} - ${DateFormat('HH:mm').format(startEndTime)}",
+                        "${DateFormat('HH:mm').format(startDateTime)} - ${DateFormat('HH:mm').format(endDateTime)}",
                         style: GoogleFonts.lato(
                           textStyle: TextStyle(fontSize: 13),
                         ),

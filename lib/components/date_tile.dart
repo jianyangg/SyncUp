@@ -6,14 +6,23 @@ class DateTile extends StatelessWidget {
   final DateTime dateToDisplay;
   final Color bgColor;
   final Color textColor;
-  const DateTile(this.dateToDisplay, this.bgColor, this.textColor, {super.key});
+  final double fontSize;
+  final EdgeInsetsGeometry margin;
 
+  const DateTile({
+    required this.dateToDisplay,
+    required this.bgColor,
+    required this.textColor,
+    this.fontSize = 16,
+    this.margin = const EdgeInsets.only(left: 20, right: 220, bottom: 10),
+    Key? key,
+  }) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Container(
         padding: const EdgeInsets.symmetric(vertical: 10),
         width: MediaQuery.of(context).size.width,
-        margin: const EdgeInsets.only(left: 20, right: 220, bottom: 10),
+        margin: margin,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           color: bgColor, // color prop
@@ -22,7 +31,7 @@ class DateTile extends StatelessWidget {
         child: Text(
           DateFormat('EEE, dd MMM yyyy').format(dateToDisplay), // date prop
           style: GoogleFonts.lato(
-            fontSize: 16,
+            fontSize: fontSize,
             textStyle: TextStyle(fontWeight: FontWeight.bold, color: textColor),
           ),
         ));

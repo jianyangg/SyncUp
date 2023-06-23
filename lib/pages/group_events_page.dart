@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:sync_up/components/common_slots_tile.dart';
 import 'package:sync_up/components/user_selection_widget.dart';
+import 'package:sync_up/components/users/profile_tile.dart';
 import '../components/bottom_nav_bar.dart';
 import 'account_page.dart';
 import 'notification_page.dart';
@@ -319,7 +321,7 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
             ),
             IconButton(
               onPressed: () {
-                // allow user to create events for the grou
+                // allow user to create events for the group
                 // design is based on our Figma sketch
                 showModalBottomSheet(
                   isScrollControlled: true,
@@ -483,52 +485,6 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                                         ),
                                                       ),
                                                       const Spacer(),
-                                                      // another button to create group
-                                                      TextButton(
-                                                        // once create button is pressed, add to cloud firestore and update the list
-                                                        onPressed: () {
-                                                          setState(() {
-                                                            _eventNameController
-                                                                .clear();
-                                                            _selectedPeriod =
-                                                                -1;
-                                                            selectedDateRangeText =
-                                                                '';
-                                                          });
-                                                          Navigator
-                                                              .pushReplacement(
-                                                            context,
-                                                            PageRouteBuilder(
-                                                              pageBuilder: (context,
-                                                                      animation1,
-                                                                      animation2) =>
-                                                                  GroupEventsPage(
-                                                                userId: widget
-                                                                    .userId,
-                                                                groupId: widget
-                                                                    .groupId,
-                                                                groupName: widget
-                                                                    .groupName,
-                                                              ),
-                                                              transitionDuration:
-                                                                  Duration.zero,
-                                                              reverseTransitionDuration:
-                                                                  Duration.zero,
-                                                            ),
-                                                          );
-                                                        },
-                                                        child: Text(
-                                                          "Create",
-                                                          style: TextStyle(
-                                                              color: Colors
-                                                                  .orange
-                                                                  .shade800,
-                                                              fontSize: 20,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                      ),
                                                     ],
                                                   ),
                                                   const SizedBox(height: 20),
@@ -543,7 +499,9 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                                         selectedDateRangeText,
                                                     startDate: startDate,
                                                     endDate: endDate,
+                                                    userId: widget.userId,
                                                     groupId: widget.groupId,
+                                                    groupName: widget.groupName,
                                                     userIds: _selectedUserIds,
                                                   )
                                                 ],
@@ -885,36 +843,9 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                                 data['name'] as String;
                                             final memberPhotoUrl =
                                                 data['photoUrl'] as String;
-                                            return Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: Center(
-                                                child: Column(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceEvenly,
-                                                  children: [
-                                                    CircleAvatar(
-                                                      backgroundImage:
-                                                          NetworkImage(
-                                                        memberPhotoUrl,
-                                                      ),
-                                                      radius: 30,
-                                                    ),
-                                                    Text(
-                                                      memberName,
-                                                      textAlign:
-                                                          TextAlign.center,
-                                                      style: const TextStyle(
-                                                        fontSize: 18,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            );
+                                            return ProfileTile(
+                                                memberPhotoUrl: memberPhotoUrl,
+                                                memberName: memberName);
                                           } else if (snapshot.hasError) {
                                             return Text(
                                                 'Error: ${snapshot.error}');
@@ -988,7 +919,10 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                     ),
                   ),
                   // Currently selected Date:
-                  DateTile(selectedDate, Colors.orange.shade700, Colors.white),
+                  DateTile(
+                      dateToDisplay: selectedDate,
+                      bgColor: Colors.orange.shade700,
+                      textColor: Colors.white),
                   // all events for the day:
                   const SizedBox(height: 10),
                   FutureBuilder<List<cal.Event>>(
@@ -1021,12 +955,15 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                               : Padding(
                                   padding: const EdgeInsets.only(top: 25.0),
                                   child: Center(
-                                      child: Text('You\'re clear for the day!',
-                                          style: TextStyle(
-                                              fontSize: 15,
-                                              color: Colors.green.shade600,
-                                              fontWeight: FontWeight.bold))),
-                                );
+                                      child: Text(
+                                    'No events to show.',
+                                    style: GoogleFonts.lato(
+                                      textStyle: const TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black),
+                                    ),
+                                  )));
                         } else {
                           return const Center(
                             child: Text(

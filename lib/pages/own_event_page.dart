@@ -14,7 +14,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import '../components/date_scroller.dart';
 import '../components/date_tile.dart';
 import '../components/event_tile.dart';
-import '../components/time_slot.dart';
+import '../components/time_slot_tile.dart';
 
 final GoogleSignIn _googleSignIn = GoogleSignIn(
   scopes: [cal.CalendarApi.calendarScope],
@@ -32,7 +32,6 @@ enum _SelectedTab { home, calendar, group, account }
 class _OwnEventPageState extends State<OwnEventPage> {
   GoogleSignInAccount? _currentUser;
   late DateTime selectedDate;
-  List<List<DateTime>> avails = [];
   @override
   void initState() {
     super.initState();
@@ -350,7 +349,10 @@ class _OwnEventPageState extends State<OwnEventPage> {
                 ),
               ),
               // Currently selected Date:
-              DateTile(selectedDate, Colors.blue.shade700, Colors.white),
+              DateTile(
+                  dateToDisplay: selectedDate,
+                  bgColor: Colors.blue.shade700,
+                  textColor: Colors.white),
               // all events for the day:
               const SizedBox(height: 10),
               FutureBuilder<List<cal.Event>>(
