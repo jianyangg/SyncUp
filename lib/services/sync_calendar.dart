@@ -7,7 +7,7 @@ import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sig
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SyncCalendar {
-  static int daysToSync = 7;
+  static int daysToSync = 14;
   static Future<void> syncCalendarByDay(
       DateTime selectedDate, GoogleSignIn googleSignIn) async {
     // Get user's calendar events

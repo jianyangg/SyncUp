@@ -1,16 +1,29 @@
 import 'package:googleapis/calendar/v3.dart' as cal;
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_html/flutter_html.dart';
 
 class EventTile extends StatelessWidget {
   final cal.Event event;
   final Color color;
-  const EventTile(this.event, {super.key, required this.color});
+  final bool isGroupEvent;
+  final String groupName;
+  const EventTile(this.event,
+      {super.key,
+      required this.color,
+      required this.isGroupEvent,
+      required this.groupName});
+
+  // Then for own_events_page, we should all of the current user's events, but colour code according to the group.
 
   @override
   Widget build(BuildContext context) {
+    // TODO: Replace this with the
+    if (isGroupEvent &&
+        event.extendedProperties?.private?['GROUP_NAME'] != groupName) {
+      return Container();
+    }
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       width: MediaQuery.of(context).size.width,
@@ -21,7 +34,7 @@ class EventTile extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           color: event.extendedProperties?.private?['CREATOR'] == "SYNCUP"
-              ? Colors.orange.shade800
+              ? Colors.orange.shade700
               : color,
         ),
         child: Row(children: [
@@ -31,12 +44,11 @@ class EventTile extends StatelessWidget {
               children: [
                 Text(
                   event.summary ?? "N/A",
-                  style: GoogleFonts.lato(
-                    textStyle: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white),
-                  ),
+                  style: const TextStyle(
+                      fontFamily: "Lato",
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
                 ),
                 const SizedBox(
                   height: 12,
@@ -55,9 +67,10 @@ class EventTile extends StatelessWidget {
                               event.end?.dateTime != null)
                           ? '${DateFormat('HH:mm').format(event.start!.dateTime!.toLocal())} to ${DateFormat('HH:mm').format(event.end!.dateTime!.toLocal())}'
                           : 'All Day',
-                      style: GoogleFonts.lato(
-                        textStyle:
-                            TextStyle(fontSize: 13, color: Colors.grey[100]),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey[100],
+                        fontFamily: "Lato",
                       ),
                     ),
                   ],
@@ -65,7 +78,7 @@ class EventTile extends StatelessWidget {
                 const SizedBox(height: 12),
                 DefaultTextStyle(
                   style: TextStyle(
-                    fontFamily: GoogleFonts.lato().fontFamily,
+                    fontFamily: "Lato",
                     color: Colors.grey[100],
                   ),
                   child: Html(
@@ -93,12 +106,11 @@ class EventTile extends StatelessWidget {
               quarterTurns: 3,
               child: Text(
                 event.extendedProperties?.private?['GROUP_NAME'] ?? "",
-                style: GoogleFonts.lato(
-                  textStyle: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white),
-                ),
+                style: const TextStyle(
+                    fontFamily: "Lato",
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
               ),
             ),
           ),

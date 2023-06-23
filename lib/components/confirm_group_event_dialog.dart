@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class ConfirmGroupEventDialog extends StatelessWidget {
   final String title;
@@ -9,7 +8,7 @@ class ConfirmGroupEventDialog extends StatelessWidget {
   final VoidCallback onCancel;
   final VoidCallback onConfirm;
 
-  ConfirmGroupEventDialog({
+  const ConfirmGroupEventDialog({super.key, 
     required this.title,
     required this.dateString,
     required this.timeString,
@@ -22,96 +21,134 @@ class ConfirmGroupEventDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return Dialog(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8.0),
+        borderRadius: BorderRadius.circular(20.0),
       ),
       backgroundColor: Colors.white,
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Icon(Icons.text_fields),
-                SizedBox(width: 8),
-                Text(
-                  title,
-                  style: GoogleFonts.lato(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                ),
-              ],
+            // Row(
+            //   children: [
+            //     const Icon(Icons.text_fields),
+            //     const SizedBox(width: 8),
+            //     Text(
+            //       title,
+            //       style: TextStyle(
+            //         fontSize: 20,
+            //         fontWeight: FontWeight.bold,
+            //         color: Colors.black,
+            //       ),
+            //     ),
+            //   ],
+            // ),
+            // const SizedBox(height: 20),
+            // Row(
+            //   children: [
+            //     const Icon(Icons.date_range),
+            //     const SizedBox(width: 8),
+            //     Text(
+            //       "Date: $dateString",
+            //       style: TextStyle(
+            //         fontSize: 16,
+            //         color: Colors.black,
+            //         fontWeight: FontWeight.bold,
+            //       ),
+            //     ),
+            //   ],
+            // ),
+            // const SizedBox(height: 8),
+            // Row(
+            //   children: [
+            //     const Icon(Icons.access_time),
+            //     const SizedBox(width: 8),
+            //     Text(
+            //       "Time: $timeString",
+            //       style: TextStyle(
+            //         fontSize: 16,
+            //         color: Colors.black,
+            //         fontWeight: FontWeight.bold,
+            //       ),
+            //     ),
+            //   ],
+            // ),
+            Text(
+              title,
+              style: const TextStyle(
+                fontFamily: "Lato",
+                fontSize: 25,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            SizedBox(height: 20),
-            Row(
-              children: [
-                Icon(Icons.date_range),
-                SizedBox(width: 8),
-                Text(
-                  "Date: ${dateString}",
-                  style: GoogleFonts.lato(
-                    fontSize: 16,
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
+            const SizedBox(height: 5),
+            // <Day>, <Date>
+            // from <startTime>PM to <endTime>PM
+            Text(
+              dateString,
+              style: const TextStyle(
+                fontFamily: "Lato",
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(Icons.access_time),
-                SizedBox(width: 8),
-                Text(
-                  "Time: ${timeString}",
-                  style: GoogleFonts.lato(
-                    fontSize: 16,
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
+            const SizedBox(height: 2),
+            Text(
+              timeString,
+              style: const TextStyle(
+                fontFamily: "Lato",
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Text(
               messageBottom,
-              style: GoogleFonts.lato(
+              style: const TextStyle(
+                fontFamily: "Lato",
                 fontSize: 16,
                 color: Colors.black,
               ),
             ),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
-                  child: Text(
+                  // on press, color should be orange
+                  style: ButtonStyle(
+                    overlayColor:
+                        MaterialStateProperty.all<Color>(Colors.transparent),
+                  ),
+
+                  onPressed: onCancel,
+                  child: const Text(
                     'Cancel',
-                    style: GoogleFonts.lato(
+                    style: TextStyle(
+                      fontFamily: "Lato",
                       fontSize: 18,
                       color: Colors.black,
-                      fontWeight: FontWeight.bold,
+                      // fontWeight: FontWeight.bold,
                     ),
                   ),
-                  onPressed: onCancel,
                 ),
-                SizedBox(width: 8),
+                // const SizedBox(width: 3),
                 ElevatedButton(
+                  onPressed: onConfirm,
+                  style: ElevatedButton.styleFrom(
+                    // backgroundColor: Colors.orange[50],
+                    backgroundColor: Colors.white,
+                    elevation: 0,
+                  ),
                   child: Text(
                     'Confirm',
-                    style: GoogleFonts.lato(
+                    style: TextStyle(
+                      fontFamily: "Lato",
                       fontSize: 18,
                       color: Colors.orange.shade800,
                       fontWeight: FontWeight.bold,
                     ),
-                  ),
-                  onPressed: onConfirm,
-                  style: ElevatedButton.styleFrom(
-                    primary: Colors.orange[50],
-                    elevation: 0,
                   ),
                 ),
               ],

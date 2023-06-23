@@ -1,16 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl/intl.dart';
 import 'package:sync_up/components/confirm_group_event_dialog.dart';
-import 'package:sync_up/components/date_tile.dart';
-import 'package:sync_up/components/event_tile.dart';
 import 'package:sync_up/components/time_slot_tile.dart';
 import 'package:sync_up/services/get_common_time.dart';
 import 'package:googleapis/calendar/v3.dart' as cal;
 import "package:googleapis_auth/auth_io.dart" as auth;
+import 'package:sync_up/services/sync_calendar.dart';
 
 import '../pages/group_events_page.dart';
 
@@ -28,6 +26,7 @@ class CommonSlotsTile extends StatefulWidget {
   final DateTime startDate;
   final DateTime endDate;
   final List<String> userIds;
+  final int memberCount;
 
   const CommonSlotsTile(
       {super.key,
@@ -39,7 +38,8 @@ class CommonSlotsTile extends StatefulWidget {
       required this.userId,
       required this.groupId,
       required this.groupName,
-      required this.userIds});
+      required this.userIds,
+      required this.memberCount});
 
   @override
   State<CommonSlotsTile> createState() => _CommonSlotsTileState();
@@ -50,11 +50,12 @@ class _CommonSlotsTileState extends State<CommonSlotsTile> {
 
   GoogleSignInAccount? _currentUser;
   late DateTime selectedDate;
+  DateTime now = DateTime.now();
   @override
   void initState() {
     super.initState();
 
-    DateTime now = DateTime.now();
+    now = DateTime.now();
     selectedDate = DateTime(now.year, now.month, now.day);
     _googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
       setState(() {
@@ -139,6 +140,20 @@ class _CommonSlotsTileState extends State<CommonSlotsTile> {
 
       formattedSlots.add(formattedList);
     }
+    // Modify the first row (representing the current day) to only show timings after the current time
+    List<String> firstRow = formattedSlots[0];
+    List<String> modifiedFirstRow = [];
+    for (String time in firstRow) {
+      List<String> timeSplit = time.split(':');
+      int hour = int.parse(timeSplit[0]);
+      int minute = int.parse(timeSplit[1]);
+      if (hour > now.hour) {
+        modifiedFirstRow.add(time);
+      } else if (hour == now.hour && minute > now.minute) {
+        modifiedFirstRow.add(time);
+      }
+    }
+    formattedSlots[0] = modifiedFirstRow;
     // print(formattedSlots);
     return formattedSlots;
   }
@@ -214,250 +229,247 @@ class _CommonSlotsTileState extends State<CommonSlotsTile> {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: MediaQuery.of(context).size.width,
-            margin: const EdgeInsets.only(bottom: 12),
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                color: Colors.orange[300],
-              ),
-              child: Row(children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.text_fields),
-                          SizedBox(width: 8),
-                          Text(
-                            "Event Title: ${widget.eventName}",
-                            style: GoogleFonts.lato(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Icon(Icons.date_range),
-                          SizedBox(width: 8),
-                          Text(
-                            "Dates: ${widget.selectedDateRangeText}",
-                            style: GoogleFonts.lato(
-                              fontSize: 14,
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Icon(Icons.access_time),
-                          SizedBox(width: 8),
-                          Text(
-                            "Duration: ${widget.selectedPeriod} minutes",
-                            style: GoogleFonts.lato(
-                              fontSize: 14,
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+      child: SizedBox(
+        height: MediaQuery.of(context).size.height,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              height: 75,
+              width: MediaQuery.of(context).size.width,
+              margin: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.eventName,
+                    style: const TextStyle(
+                      fontFamily: "Lato",
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-              ]),
+                  const SizedBox(height: 5),
+                  // <Day>, <Date>
+                  // from <startTime>PM to <endTime>PM
+                  Text(
+                    widget.selectedDateRangeText,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${widget.selectedPeriod.toString()} minutes',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const Divider(
-            thickness: 2,
-          ),
-          const SizedBox(height: 5),
-          Expanded(
-            child: FutureBuilder<List<List<String>>>(
-              future: getSlotsSuggestions(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const CircularProgressIndicator();
-                } else if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                } else {
-                  List<List<String>> formattedSlots = snapshot.data!;
-                  return ListView.builder(
-                    shrinkWrap: true,
-                    // physics: NeverScrollableScrollPhysics(),
-                    itemCount: formattedSlots.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      List<String> slots = formattedSlots[index];
-                      int maxLength = formattedSlots
-                          .reduce((a, b) => a.length > b.length ? a : b)
-                          .length;
+            const SizedBox(height: 5),
+            Expanded(
+              child: FutureBuilder<List<List<String>>>(
+                future: getSlotsSuggestions(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else {
+                    List<List<String>> formattedSlots = snapshot.data!;
+                    return ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: formattedSlots.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        List<String> slots = formattedSlots[index];
+                        int maxLength = formattedSlots
+                            .reduce((a, b) => a.length > b.length ? a : b)
+                            .length;
 
-                      double proportion = slots.length / maxLength;
-                      Color? expBgColor;
+                        double proportion = slots.length / maxLength;
+                        Color? expBgColor;
+                        final ColorTween colorTween = ColorTween(
+                          begin: Colors.orange.shade200, // Faint Orange
+                          end: Colors.orange.shade700, // Dark Orange
+                        );
 
-                      if (proportion < 0.5) {
-                        expBgColor = Color.lerp(Colors.red[100],
-                            Colors.yellow[100], proportion * 2)!;
-                      } else {
-                        expBgColor = Color.lerp(Colors.yellow[100],
-                            Colors.green[100], (proportion - 0.5) * 2)!;
-                      }
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          ExpansionTile(
-                              collapsedShape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              backgroundColor: expBgColor,
-                              collapsedBackgroundColor: expBgColor,
-                              trailing: slots.length == 0
-                                  ? const Icon(
-                                      Icons.expand_more,
-                                      color: Colors.transparent,
-                                    )
-                                  : null,
-                              title: Align(
-                                alignment: Alignment.center,
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      "${slots.length}",
-                                      style: GoogleFonts.lato(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
+                        expBgColor = colorTween.lerp(proportion)!;
+                        // if (proportion < 0.5) {
+                        //   expBgColor = Color.lerp(
+                        //       Color.fromARGB(shade, 219, 68, 55),
+                        //       Color.fromARGB(shade, 244, 180, 0),
+                        //       proportion * 2)!;
+                        // } else {
+                        //   expBgColor = Color.lerp(
+                        //       Color.fromARGB(shade, 244, 180, 0),
+                        //       Color.fromARGB(shade, 15, 157, 88),
+                        //       (proportion - 0.5) * 2)!;
+                        // }
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            ExpansionTile(
+                                collapsedShape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                                backgroundColor: expBgColor,
+                                collapsedBackgroundColor: expBgColor,
+                                textColor: Colors.white,
+                                iconColor: Colors.white,
+                                trailing: slots.isEmpty
+                                    ? const Icon(
+                                        Icons.expand_more,
+                                        color: Colors.transparent,
+                                      )
+                                    : null,
+                                title: Align(
+                                  alignment: Alignment.center,
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        "${slots.length}",
+                                        style: const TextStyle(
+                                          fontFamily: "Lato",
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
-                                    ),
-                                    Expanded(
-                                      child: Text(
-                                          DateFormat('EEE, dd MMM yyyy').format(
-                                              widget.startDate.add(Duration(
-                                                  days: index))), // date prop
-                                          textAlign: TextAlign.center,
-                                          style: GoogleFonts.lato(
-                                            fontSize: 17,
-                                            textStyle: const TextStyle(
+                                      Expanded(
+                                        child: Text(
+                                            DateFormat('EEE, dd MMM yyyy').format(
+                                                widget.startDate.add(Duration(
+                                                    days: index))), // date prop
+                                            textAlign: TextAlign.center,
+                                            style: const TextStyle(
+                                              fontSize: 17,
                                               fontWeight: FontWeight.bold,
-                                            ),
-                                          )),
-                                    ),
-                                  ],
+                                            )),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              children: [
-                                ListView.builder(
-                                  shrinkWrap: true,
-                                  scrollDirection: Axis.vertical,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  itemCount: slots.length,
-                                  itemBuilder:
-                                      (BuildContext context, int innerIndex) {
-                                    DateTime currentDate = widget.startDate
-                                        .add(Duration(days: index));
-                                    DateTime startDateTime = getStartEndTime(
-                                        slots[innerIndex],
-                                        widget.selectedPeriod,
-                                        currentDate)[0];
-                                    DateTime endDateTime = getStartEndTime(
-                                        slots[innerIndex],
-                                        widget.selectedPeriod,
-                                        currentDate)[1];
-                                    return TimeSlotTile(
-                                        startDateTime: startDateTime,
-                                        endDateTime: endDateTime,
-                                        numAvailable: 5,
-                                        numTotal: 5,
-                                        handler: () => {
-                                              showDialog(
-                                                context: context,
-                                                builder:
-                                                    (BuildContext context) {
-                                                  return ConfirmGroupEventDialog(
-                                                    title:
-                                                        'Event: ${widget.eventName}',
-                                                    dateString: DateFormat(
-                                                            'EEE, dd MMM yyyy')
-                                                        .format(startDateTime),
-                                                    timeString:
-                                                        "${DateFormat('HH:mm').format(startDateTime)} - ${DateFormat('HH:mm').format(endDateTime)}",
-                                                    messageBottom:
-                                                        "Create the event and send invitation emails to all group members?",
-                                                    onCancel: () {
-                                                      Navigator.pop(
-                                                          context); // Close the dialog
-                                                    },
-                                                    onConfirm: () async {
-                                                      // Execute your function or API call here
-                                                      // ...
-                                                      List<String> uids =
-                                                          await getUserEmails(
-                                                              widget.userIds);
-                                                      cal.Event event =
-                                                          cal.Event(
-                                                        summary:
-                                                            widget.eventName,
-                                                        description:
-                                                            "Group: ${widget.groupName} - Created by SyncUp ;)",
-                                                        start: cal.EventDateTime(
-                                                            dateTime:
-                                                                startDateTime),
-                                                        end: cal.EventDateTime(
-                                                            dateTime:
-                                                                endDateTime),
-                                                        attendees: uids
-                                                            .map((email) => cal
-                                                                .EventAttendee(
-                                                                    email:
-                                                                        email))
-                                                            .toList(),
-                                                      );
-                                                      event.extendedProperties =
-                                                          cal.EventExtendedProperties();
-                                                      event.extendedProperties!
-                                                          .private = {
-                                                        "CREATOR": "SYNCUP",
-                                                        "GROUP_NAME":
-                                                            widget.groupName,
-                                                      };
+                                children: [
+                                  ListView.builder(
+                                    shrinkWrap: true,
+                                    scrollDirection: Axis.vertical,
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    itemCount: slots.length,
+                                    itemBuilder:
+                                        (BuildContext context, int innerIndex) {
+                                      DateTime currentDate = widget.startDate
+                                          .add(Duration(days: index));
+                                      DateTime startDateTime = getStartEndTime(
+                                          slots[innerIndex],
+                                          widget.selectedPeriod,
+                                          currentDate)[0];
+                                      DateTime endDateTime = getStartEndTime(
+                                          slots[innerIndex],
+                                          widget.selectedPeriod,
+                                          currentDate)[1];
+                                      return TimeSlotTile(
+                                          startDateTime: startDateTime,
+                                          endDateTime: endDateTime,
+                                          numAvailable: widget.userIds.length,
+                                          numTotal: widget.memberCount,
+                                          handler: () => {
+                                                showDialog(
+                                                  context: context,
+                                                  builder:
+                                                      (BuildContext context) {
+                                                    return ConfirmGroupEventDialog(
+                                                      title:
+                                                          // 'Event: ${widget.eventName}',
+                                                          widget.eventName,
+                                                      dateString: DateFormat(
+                                                              'EEE, dd MMM yyyy')
+                                                          .format(
+                                                              startDateTime),
+                                                      timeString:
+                                                          "${DateFormat('HH:mm').format(startDateTime)} - ${DateFormat('HH:mm').format(endDateTime)}",
+                                                      messageBottom:
+                                                          "Create the event and send invitation emails to all group members?",
+                                                      onCancel: () {
+                                                        // clear
+                                                        Navigator.pop(
+                                                            context); // Close the dialog
+                                                      },
+                                                      onConfirm: () async {
+                                                        // Execute your function or API call here
+                                                        // ...
+                                                        List<String> uids =
+                                                            await getUserEmails(
+                                                                widget.userIds);
+                                                        cal.Event event =
+                                                            cal.Event(
+                                                          summary:
+                                                              widget.eventName,
+                                                          description:
+                                                              "Group: ${widget.groupName} - Created by SyncUp ;)",
+                                                          start: cal.EventDateTime(
+                                                              dateTime:
+                                                                  startDateTime),
+                                                          end: cal.EventDateTime(
+                                                              dateTime:
+                                                                  endDateTime),
+                                                          attendees: uids
+                                                              .map((email) => cal
+                                                                  .EventAttendee(
+                                                                      email:
+                                                                          email))
+                                                              .toList(),
+                                                        );
+                                                        event.extendedProperties =
+                                                            cal.EventExtendedProperties();
+                                                        event
+                                                            .extendedProperties!
+                                                            .private = {
+                                                          "CREATOR": "SYNCUP",
+                                                          "GROUP_NAME":
+                                                              widget.groupName,
+                                                        };
 
-                                                      Navigator.pop(context);
+                                                        // call sync calendar to update availability
+                                                        SyncCalendar
+                                                            .syncCalendarByDay(
+                                                                DateTime(
+                                                                    now.year,
+                                                                    now.month,
+                                                                    now.day),
+                                                                _googleSignIn);
 
-                                                      createEventAndBackToGroupPage(
-                                                          event);
-                                                    },
-                                                  );
-                                                },
-                                              )
-                                            });
-                                  },
-                                ),
-                              ]),
-                        ],
-                      );
-                    },
-                  );
-                }
-              },
+                                                        Navigator.pop(context);
+
+                                                        createEventAndBackToGroupPage(
+                                                            event);
+                                                      },
+                                                    );
+                                                  },
+                                                )
+                                              });
+                                    },
+                                  ),
+                                ]),
+                            const SizedBox(height: 5),
+                          ],
+                        );
+                      },
+                    );
+                  }
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

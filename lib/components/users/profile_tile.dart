@@ -4,7 +4,7 @@ class ProfileTile extends StatelessWidget {
   final String memberPhotoUrl;
   final String memberName;
 
-  const ProfileTile({
+  const ProfileTile({super.key, 
     required this.memberPhotoUrl,
     required this.memberName,
   });
@@ -21,7 +21,7 @@ class ProfileTile extends StatelessWidget {
             backgroundImage: NetworkImage(memberPhotoUrl),
             radius: 30,
           ),
-          SizedBox(height: 6), // Add spacing between the avatar and the text
+          const SizedBox(height: 6), // Add spacing between the avatar and the text
           Expanded(
             child: Text(
               memberName,

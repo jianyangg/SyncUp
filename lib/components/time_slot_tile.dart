@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 class TimeSlotTile extends StatelessWidget {
@@ -22,11 +21,26 @@ class TimeSlotTile extends StatelessWidget {
     double proportion = numAvailable / numTotal;
     Color? color;
 
-    if (proportion < 0.5) {
-      color = Color.lerp(Colors.red, Colors.yellow, proportion * 2)!;
-    } else {
-      color = Color.lerp(Colors.yellow, Colors.green, (proportion - 0.5) * 2)!;
-    }
+    // if (proportion < 0.5) {
+    //   color = Color.lerp(Colors.red, Colors.yellow, proportion * 2)!;
+    // } else {
+    //   color = Color.lerp(Colors.yellow, Colors.green, (proportion - 0.5) * 2)!;
+    // }
+    // int shade = 230;
+
+    // if (proportion < 0.5) {
+    //   color = Color.lerp(Color.fromARGB(shade, 219, 68, 55),
+    //       Color.fromARGB(shade, 244, 180, 0), proportion * 2)!;
+    // } else {
+    //   color = Color.lerp(Color.fromARGB(shade, 244, 180, 0),
+    //       Color.fromARGB(shade, 15, 157, 88), (proportion - 0.5) * 2)!;
+    // }
+    final ColorTween colorTween = ColorTween(
+      begin: Colors.orange.shade200, // Faint Orange
+      end: Colors.orange.shade700, // Dark Orange
+    );
+
+    color = colorTween.lerp(proportion)!;
     return GestureDetector(
       onTap: handler,
       child: Container(
@@ -48,30 +62,27 @@ class TimeSlotTile extends StatelessWidget {
                 children: [
                   Text(
                     startDateTime.day.toString(),
-                    style: GoogleFonts.lato(
-                      textStyle: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black),
-                    ),
+                    style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black),
                   ),
-                  SizedBox(width: 20),
+                  const SizedBox(width: 20),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         DateFormat('MMMM').format(startDateTime),
-                        style: GoogleFonts.lato(
-                          textStyle: TextStyle(
-                              fontSize: 15, fontWeight: FontWeight.bold),
-                        ),
+                        style: const TextStyle(
+                            fontFamily: "Lato",
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold),
                       ),
-                      SizedBox(height: 5),
+                      const SizedBox(height: 5),
                       Text(
                         "${DateFormat('HH:mm').format(startDateTime)} - ${DateFormat('HH:mm').format(endDateTime)}",
-                        style: GoogleFonts.lato(
-                          textStyle: TextStyle(fontSize: 13),
-                        ),
+                        style:
+                            const TextStyle(fontSize: 13, fontFamily: "Lato"),
                       ),
                     ],
                   ),
@@ -79,12 +90,12 @@ class TimeSlotTile extends StatelessWidget {
                       child: Align(
                           alignment: Alignment.centerRight,
                           child: Container(
-                              padding: EdgeInsets.all(15),
+                              padding: const EdgeInsets.all(15),
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(12),
                                   color: color),
                               child: Text('$numAvailable/$numTotal',
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       color: Colors.black54)))))
                 ],

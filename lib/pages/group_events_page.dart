@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:sync_up/components/common_slots_tile.dart';
 import 'package:sync_up/components/user_selection_widget.dart';
 import 'package:sync_up/components/users/profile_tile.dart';
@@ -20,9 +19,9 @@ import 'package:googleapis/calendar/v3.dart' as cal;
 import "package:googleapis_auth/auth_io.dart" as auth;
 import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
 import 'package:date_picker_timeline/date_picker_timeline.dart';
-
-// TODO: The add event page is only complete on the front end side! We need to add the event to the database and the calendar
-// once we have figured out the calendar API.
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
 final GoogleSignIn _googleSignIn = GoogleSignIn(
   scopes: [cal.CalendarApi.calendarScope],
@@ -44,6 +43,11 @@ class GroupEventsPage extends StatefulWidget {
 
 class _GroupEventsPageState extends State<GroupEventsPage> {
   GoogleSignInAccount? _currentUser;
+  File? _imageFile;
+  String? _imageUrl;
+  final _picker = ImagePicker();
+  final _storage = firebase_storage.FirebaseStorage.instance;
+
   late DateTime selectedDate;
   DateTime startDate = DateTime.now();
   DateTime endDate = DateTime.now().add(const Duration(days: 7));
@@ -98,6 +102,7 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
     }
   }
 
+  int memberCount = 5;
   List<String> _selectedUserIds = [];
   void handleUserSelectionChanged(List<String> selectedUserIds) {
     setState(() {
@@ -155,7 +160,7 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
           data: ThemeData(
             dialogTheme: const DialogTheme(
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(30)))),
+                    borderRadius: BorderRadius.all(Radius.circular(20)))),
             colorScheme: ColorScheme.light(
               primary: Colors.orange.shade800, // header background color
               onPrimary: Colors.white, // header text color
@@ -237,10 +242,68 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
     });
   }
 
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedImage = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedImage != null) {
+      final imageFile = File(pickedImage.path);
+      final fileName =
+          'groupImages/${widget.groupId}_groupPhoto'; // Adjust the file path to match your desired location in Firebase Storage
+
+      final storageRef =
+          firebase_storage.FirebaseStorage.instance.ref(fileName);
+
+      // Delete the previous group photo if it exists
+      try {
+        await storageRef.delete();
+      } catch (e) {
+        print('Error deleting previous group photo: $e');
+      }
+
+      // Upload the new group photo to Firebase Storage
+      await storageRef.putFile(imageFile);
+
+      // Fetch the download URL of the newly uploaded image
+      final downloadURL = await storageRef.getDownloadURL();
+
+      setState(() {
+        _imageFile = imageFile;
+        _imageUrl = downloadURL; // Update the URL of the image
+      });
+    }
+  }
+
+  Future<String> doesGrpPhotoExist() async {
+    final fileName =
+        'groupImages/${widget.groupId}_groupPhoto'; // Adjust the file path to match your desired location in Firebase Storage
+
+    final storageRef = firebase_storage.FirebaseStorage.instance.ref(fileName);
+
+    // if photo exists, return the downloadURL
+    try {
+      final metadata = await storageRef.getMetadata();
+      final doesExist = metadata.size != null;
+
+      if (doesExist) {
+        // Fetch the group photo from Firebase Storage
+        final downloadURL = await storageRef.getDownloadURL();
+
+        // Use the downloadURL as needed (e.g., display the image)
+        print('Download URL: $downloadURL');
+        return downloadURL;
+      }
+    } catch (e) {
+      print('Error checking if the file exists: $e');
+    }
+    return 'NA';
+  }
+
   @override
   Widget build(BuildContext context) {
     // show userId and groupId
     // using text widget for now
+    Future<String> grpPhotoExists = doesGrpPhotoExist();
 
     return MaterialApp(
       // supposedly allows for swipe back gesture
@@ -261,31 +324,66 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
           backgroundColor: Colors.grey.shade100,
           shadowColor: Colors.transparent,
           title: Container(
-            padding: const EdgeInsets.all(8),
+            height: 55,
+            padding: const EdgeInsets.symmetric(horizontal: 5),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(13),
               color: Colors.orange.shade800,
             ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.photo,
-                    color: Colors.white,
-                    size: 30,
-                  ),
-                  const SizedBox(width: 5),
-                  Text(
-                    widget.groupName,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 22,
+            child: Row(
+              children: [
+                // const Icon(
+                //   Icons.photo,
+                //   color: Colors.white,
+                //   size: 30,
+                // ),
+                // clickable button to change group photo
+                // but with a placeholder icon if there's no photo
+                FutureBuilder<String>(
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        // While the future is still loading, you can show a loading indicator
+                        return const CircularProgressIndicator();
+                      } else if (snapshot.hasError) {
+                        // If an error occurred while fetching the value, you can handle it here
+                        return Text('Error: ${snapshot.error}');
+                      } else {
+                        // The future has completed successfully, and you have obtained the boolean value
+                        final String grpPhotoStatus = snapshot.data!;
+                        // if grpphoto exists,
+                        // display the photo from firebase storage
+                        // else display a placeholder icon
+                        return IconButton(
+                          icon: grpPhotoStatus != "NA"
+                              ? CircleAvatar(
+                                  backgroundImage: NetworkImage(grpPhotoStatus),
+                                  radius: 20,
+                                )
+                              : const Icon(
+                                  Icons.photo,
+                                  color: Colors.white,
+                                  size: 30,
+                                ),
+                          onPressed: _pickImage,
+                        );
+                      }
+                    },
+                    future: grpPhotoExists),
+                const SizedBox(width: 5),
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Text(
+                      widget.groupName,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 22,
+                      ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
           actions: [
@@ -503,6 +601,7 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                                     groupId: widget.groupId,
                                                     groupName: widget.groupName,
                                                     userIds: _selectedUserIds,
+                                                    memberCount: memberCount,
                                                   )
                                                 ],
                                               ),
@@ -612,16 +711,8 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                             UserSelectionWidget(
                               onUserSelectionChanged:
                                   handleUserSelectionChanged,
+                              groupId: widget.groupId,
                             ),
-                            // FloatingActionButton(
-                            //   onPressed: () {
-                            //     // Access the selected users list and perform desired actions
-                            //     final List<String> selectedUsers =
-                            //         _selectedUserIds;
-                            //     print('Selected Users: $selectedUsers');
-                            //   },
-                            //   child: Icon(Icons.check),
-                            // ),
                             Padding(
                               padding: const EdgeInsets.all(15.0),
                               child: Column(
@@ -732,6 +823,9 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                       });
                                     },
                                     child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
                                       children: [
                                         Text(
                                           'Select Date Range',
@@ -755,14 +849,6 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                       ],
                                     ),
                                   ),
-                                  // Text(
-                                  //   selectedDateRangeText,
-                                  //   textAlign: TextAlign.center,
-                                  //   style: const TextStyle(
-                                  //     color: Colors.black,
-                                  //     fontWeight: FontWeight.bold,
-                                  //   ),
-                                  // ),
                                 ],
                               ),
                             )
@@ -828,6 +914,8 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                     final members =
                                         data['members'] as List<dynamic>;
                                     List<Widget> memberWidgets = [];
+                                    // save member count
+                                    memberCount = members.length;
                                     for (var member in members) {
                                       final memberWidget =
                                           FutureBuilder<DocumentSnapshot>(
@@ -947,23 +1035,27 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                     itemCount: events.length,
                                     itemBuilder: (context, index) {
                                       final event = events[index];
-                                      return EventTile(event,
-                                          color: Colors.orange.shade700);
+                                      return EventTile(
+                                        event,
+                                        color: Colors.orange.shade700,
+                                        isGroupEvent: true,
+                                        groupName: widget.groupName,
+                                      );
                                     },
                                   ),
                                 )
-                              : Padding(
-                                  padding: const EdgeInsets.only(top: 25.0),
+                              : const Padding(
+                                  padding: EdgeInsets.only(top: 25.0),
                                   child: Center(
-                                      child: Text(
-                                    'No events to show.',
-                                    style: GoogleFonts.lato(
-                                      textStyle: const TextStyle(
+                                    child: Text(
+                                      'No events to show.',
+                                      style: TextStyle(
+                                          fontFamily: "Lato",
                                           fontSize: 15,
                                           fontWeight: FontWeight.bold,
-                                          color: Colors.black),
+                                          color: Color.fromARGB(106, 0, 0, 0)),
                                     ),
-                                  )));
+                                  ));
                         } else {
                           return const Center(
                             child: Text(
@@ -979,7 +1071,7 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
         bottomNavigationBar: BottomNavBar(
           _SelectedTab.values.indexOf(_selectedTab),
           _handleIndexChanged,
-          color: Colors.orange.shade800,
+          color: Colors.orange.shade700,
         ),
       ),
     );

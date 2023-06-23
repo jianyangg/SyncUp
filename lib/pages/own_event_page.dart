@@ -1,7 +1,4 @@
 import "package:flutter/material.dart";
-import 'package:google_fonts/google_fonts.dart';
-import 'package:googleapis/doubleclicksearch/v2.dart';
-import 'package:intl/intl.dart';
 import 'package:sync_up/components/bottom_nav_bar.dart';
 import 'package:sync_up/pages/group_page.dart';
 import 'package:sync_up/pages/home_page.dart';
@@ -14,7 +11,6 @@ import 'package:google_sign_in/google_sign_in.dart';
 import '../components/date_scroller.dart';
 import '../components/date_tile.dart';
 import '../components/event_tile.dart';
-import '../components/time_slot_tile.dart';
 
 final GoogleSignIn _googleSignIn = GoogleSignIn(
   scopes: [cal.CalendarApi.calendarScope],
@@ -376,23 +372,27 @@ class _OwnEventPageState extends State<OwnEventPage> {
                                 itemCount: events.length,
                                 itemBuilder: (context, index) {
                                   final event = events[index];
-                                  return EventTile(event,
-                                      color: Colors.blue.shade700);
+                                  return EventTile(
+                                    event,
+                                    color: Colors.blue.shade700,
+                                    isGroupEvent: false,
+                                    groupName: '',
+                                  );
                                 },
                               ),
                             )
-                          : Padding(
-                              padding: const EdgeInsets.only(top: 25.0),
+                          : const Padding(
+                              padding: EdgeInsets.only(top: 25.0),
                               child: Center(
-                                  child: Text(
-                                'No events to show.',
-                                style: GoogleFonts.lato(
-                                  textStyle: const TextStyle(
+                                child: Text(
+                                  'No events to show.',
+                                  style: TextStyle(
+                                      fontFamily: "Lato",
                                       fontSize: 15,
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.black),
+                                      color: Color.fromARGB(106, 0, 0, 0)),
                                 ),
-                              )));
+                              ));
                     } else {
                       return const Center(
                         child: Text(
@@ -407,7 +407,7 @@ class _OwnEventPageState extends State<OwnEventPage> {
       bottomNavigationBar: BottomNavBar(
         _SelectedTab.values.indexOf(_selectedTab),
         _handleIndexChanged,
-        color: Colors.blue.shade800,
+        color: Colors.blue.shade700,
       ),
     );
   }

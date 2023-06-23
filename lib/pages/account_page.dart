@@ -239,8 +239,7 @@ class _AccountPageState extends State<AccountPage> {
                             ),
                             onPressed: () {
                               if (_currentUser != null) {
-                                SyncCalendar.syncCalendarByDay(
-                                    dateTodayFormatted, _googleSignIn);
+                                syncCalendarHelper();
                               }
                             },
                             style: ButtonStyle(
@@ -251,20 +250,7 @@ class _AccountPageState extends State<AccountPage> {
                               'Sync with Google',
                               style: TextStyle(
                                   color: Colors.white,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          TextButton(
-                            style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all<Color>(
-                                  Colors.blueAccent.shade100),
-                            ),
-                            onPressed: () {},
-                            child: const Text(
-                              'Sync with Apple',
-                              style: TextStyle(
-                                  color: Colors.white,
+                                  fontSize: 15,
                                   fontWeight: FontWeight.bold),
                             ),
                           ),
@@ -282,9 +268,13 @@ class _AccountPageState extends State<AccountPage> {
       bottomNavigationBar: BottomNavBar(
         _SelectedTab.values.indexOf(_selectedTab),
         _handleIndexChanged,
-        color: Colors.blue.shade800,
+        color: Colors.blue.shade700,
       ),
     );
+  }
+
+  void syncCalendarHelper() {
+    SyncCalendar.syncCalendarByDay(dateTodayFormatted, _googleSignIn);
   }
 
   void _signOut() async {

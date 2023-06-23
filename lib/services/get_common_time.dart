@@ -38,7 +38,7 @@ class GetCommonTime {
       List<DateTime> datesInRange = [];
       for (DateTime date = startDate;
           date.isBefore(endDate) || date == endDate;
-          date = date.add(Duration(days: 1))) {
+          date = date.add(const Duration(days: 1))) {
         datesInRange.add(date);
       }
 

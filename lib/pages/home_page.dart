@@ -465,7 +465,7 @@ class _HomeState extends State<HomePage> {
       bottomNavigationBar: BottomNavBar(
         _SelectedTab.values.indexOf(_selectedTab),
         _handleIndexChanged,
-        color: Colors.blue.shade800,
+        color: Colors.blue.shade700,
       ),
     );
   }

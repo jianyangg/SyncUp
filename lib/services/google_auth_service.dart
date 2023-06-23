@@ -2,10 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/calendar/v3.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:googleapis/calendar/v3.dart' as cal;
-import "package:googleapis_auth/auth_io.dart" as auth;
-import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 
 class GoogleAuthService {
   signInWithGoogle() async {

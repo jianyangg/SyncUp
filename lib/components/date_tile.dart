@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class DateTile extends StatelessWidget {
   final DateTime dateToDisplay;
@@ -20,20 +19,27 @@ class DateTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        width: MediaQuery.of(context).size.width,
-        margin: margin,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          color: bgColor, // color prop
+      padding: const EdgeInsets.only(bottom: 5),
+      width: MediaQuery.of(context).size.width,
+      // margin: margin,
+      // margin: EdgeInsets.symmetric()
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        // color: bgColor, // color prop
+        color: Colors.white,
+      ),
+      // alignment: Alignment.center
+      alignment: Alignment.center,
+      child: Text(
+        DateFormat('EEE, dd MMM yyyy').format(dateToDisplay), // date prop
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: fontSize,
+          fontFamily: "Lato",
+          // color: textColor,
+          color: const Color.fromARGB(212, 0, 0, 0),
         ),
-        alignment: Alignment.center,
-        child: Text(
-          DateFormat('EEE, dd MMM yyyy').format(dateToDisplay), // date prop
-          style: GoogleFonts.lato(
-            fontSize: fontSize,
-            textStyle: TextStyle(fontWeight: FontWeight.bold, color: textColor),
-          ),
-        ));
+      ),
+    );
   }
 }

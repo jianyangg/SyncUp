@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:date_picker_timeline/date_picker_timeline.dart';
 
 class DateScroller extends StatelessWidget {
@@ -23,26 +22,23 @@ class DateScroller extends StatelessWidget {
           initialSelectedDate: DateTime.now(),
           selectionColor: color,
           selectedTextColor: Colors.white,
-          monthTextStyle: GoogleFonts.lato(
-            textStyle: const TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey,
-            ),
+          monthTextStyle: const TextStyle(
+            fontFamily: "Lato",
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey,
           ),
-          dateTextStyle: GoogleFonts.lato(
-            textStyle: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey,
-            ),
+          dateTextStyle: const TextStyle(
+            fontFamily: "Lato",
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey,
           ),
-          dayTextStyle: GoogleFonts.lato(
-            textStyle: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey,
-            ),
+          dayTextStyle: const TextStyle(
+            fontFamily: "Lato",
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey,
           ),
           daysCount: 1000,
           onDateChange: (date) {
