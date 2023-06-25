@@ -22,7 +22,7 @@ Apollo 11
 
 ## Project Poster:
 
-![Untitled](https://drive.google.com/file/d/1IfiynGv7h9ZT_MBjYFdxjYWMG7Ie3s7y/view?usp=drive_link)
+![Imgur](https://i.imgur.com/PXl30FR.png)
 
 ## Design plans and reasoning:
 
