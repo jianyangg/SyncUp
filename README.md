@@ -87,20 +87,21 @@ A simple test of this algorithm is as follows:
 
 **Objective: Schedule a meeting on 27th June, Tuesday between timothyleow12 and timothyleow14.**
 
-<img src="https://i.imgur.com/53b6aZW.png" width="400" />
-
-<img src="https://i.imgur.com/zXAspVs.png" width="400" />
+| ![Imgur](https://i.imgur.com/53b6aZW.png) | ![Imgur](https://i.imgur.com/zXAspVs.png) |
+| :--------------------------------------: | :--------------------------------------: |
+|        timothyleow14's Availability       |        timothyleow12's Availability       |
 
 - As we can see from the above, timothyleow14 has blocked out his time from 1430-1700, while timothyleow12 has blocked out his time from 0900-1330.
 - The only common free timing they have is from 1330-1430 (assuming that their desired meeting hours are 0900-1700).
 
 In the group with both of them, an event scheduling is initiated from timothyleow12@gmail.com:
 
-<img src="https://i.imgur.com/ufz3z5M.png" width="400" />
-
-<img src="https://i.imgur.com/dy1MHoT.png" width="400" />
+| ![Imgur](https://i.imgur.com/ufz3z5M.png) | ![Imgur](https://i.imgur.com/dy1MHoT.png) |
+| :--------------------------------------: | :--------------------------------------: |
+|        Group Event Scheduling Page        |       Suggested Time Slot: 27th June      |
 
 As expected, the app only suggests the time slot on 27th June for 1330-1430. This shows that our app correctly performs the algorithm to only suggest common free timings of the users within the group.
+
 
 # Motivation and Aim (from project proposal)
 
