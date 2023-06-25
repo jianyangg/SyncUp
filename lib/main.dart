@@ -24,6 +24,12 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
             primaryColor: Colors.blue.shade800,
             primaryColorLight: Colors.blue.shade700,
-            highlightColor: Colors.red));
+            highlightColor: Colors.red,
+            snackBarTheme: SnackBarThemeData(
+                backgroundColor: Colors.blue.shade800,
+                contentTextStyle: const TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'Lato',
+                ))));
   }
 }

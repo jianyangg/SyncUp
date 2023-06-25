@@ -11,6 +11,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import '../components/date_scroller.dart';
 import '../components/date_tile.dart';
 import '../components/event_tile.dart';
+import '../services/sync_calendar.dart';
 
 final GoogleSignIn _googleSignIn = GoogleSignIn(
   scopes: [cal.CalendarApi.calendarScope],
@@ -28,6 +29,7 @@ enum _SelectedTab { home, calendar, group, account }
 class _OwnEventPageState extends State<OwnEventPage> {
   GoogleSignInAccount? _currentUser;
   late DateTime selectedDate;
+
   @override
   void initState() {
     super.initState();
@@ -81,6 +83,7 @@ class _OwnEventPageState extends State<OwnEventPage> {
 
   Future<List<cal.Event>> _handleGetEvents() async {
     // Retrieve an [auth.AuthClient] from the current [GoogleSignIn] instance.
+
     final auth.AuthClient? client = await _googleSignIn.authenticatedClient();
     assert(client != null, 'Authenticated client missing!');
 
@@ -256,6 +259,11 @@ class _OwnEventPageState extends State<OwnEventPage> {
 
   void executeAfterBuild() {
     updateSelectedDate(DateTime.now());
+    SyncCalendar.syncCalendarByDay(
+      DateTime(selectedDate.year, selectedDate.month, selectedDate.day),
+      _googleSignIn,
+      context,
+    );
   }
 
   @override
@@ -351,6 +359,7 @@ class _OwnEventPageState extends State<OwnEventPage> {
               // all events for the day:
               const SizedBox(height: 10),
               FutureBuilder<List<cal.Event>>(
+                  initialData: [],
                   future: _handleGetEvents(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
@@ -374,7 +383,6 @@ class _OwnEventPageState extends State<OwnEventPage> {
                                   return EventTile(
                                     event,
                                     color: Colors.blue.shade700,
-                                    isGroupEvent: false,
                                     groupName: '',
                                   );
                                 },
