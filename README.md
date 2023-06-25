@@ -47,31 +47,31 @@ Apollo 11
 
 ---
 
-![Imgur](https://i.imgur.com/vbjYKLQ.png)
+<img src="https://i.imgur.com/vbjYKLQ.png" width="400" height="300" />
 
 - For Milestone 2, we have only worked with Google Calendar API, so it is best advised to Sign In With Google, otherwise the features would not work as expected.
 
-![Imgur](https://i.imgur.com/ZYSgZ3C.jpg)
+<img src="https://i.imgur.com/ZYSgZ3C.jpg" width="400" height="300" />
 
 - Allow access to calendar data when requested by google api.
 
-![Untitled](https://i.imgur.com/SCxT10z.png)
+<img src="https://i.imgur.com/SCxT10z.png" width="400" height="300" />
 
 - From the HomePage, use the navigation bar to navigate between pages.
 
-![Imgur](https://i.imgur.com/sYYz54C.png)
+<img src="https://i.imgur.com/sYYz54C.png" width="400" height="300" />
 
 - The Personal Calendar page pulls events from google calendar and formats them accordingly based on the event data - events created using SyncUp will be in bright orange whereas personal events will be in blue.
 
-![Imgur](https://i.imgur.com/HLcdzhb.png)
+<img src="https://i.imgur.com/HLcdzhb.png" width="400" height="300" />
 
 - From the Groups page, users can create or add themselves to groups.
 
-![Imgur](https://i.imgur.com/AsWmII7.png)
+<img src="https://i.imgur.com/AsWmII7.png" width="400" height="300" />
 
 - Within groups, users can schedule for events. Only Group Events will be displayed in the group calendar page. A more comprehensive demonstration for event creation can be found in our video.
 
-![Imgur](https://i.imgur.com/oNsiHa6.png)
+<img src="https://i.imgur.com/oNsiHa6.png" width="400" height="300" />
 
 - For now, in the account page, users can sign out, or request for a calendar synchronisation with google. As mentioned earlier, our MVP has only implemented integrations with google calendar API, so the syncing will only work if you are signed in with a google account, and have allowed SyncUp permissions to access and modify your calendar data.
 
@@ -87,18 +87,18 @@ A simple test of this algorithm is as follows:
 
 **Objective: Schedule a meeting on 27th June, Tuesday between timothyleow12 and timothyleow14.**
 
-![Imgur](https://i.imgur.com/53b6aZW.png)
+<img src="https://i.imgur.com/53b6aZW.png" width="400" height="300" />
 
-![Imgur](https://i.imgur.com/zXAspVs.png)
+<img src="https://i.imgur.com/zXAspVs.png" width="400" height="300" />
 
 - As we can see from the above, timothyleow14 has blocked out his time from 1430-1700, while timothyleow12 has blocked out his time from 0900-1330.
 - The only common free timing they have is from 1330-1430 (Assuming that their desired meeting hours is 0900-1700).
 
 In the group with 2 of them, an event scheduling is initiated from timothyleow12@gmail.com:
 
-![Imgur](https://i.imgur.com/ufz3z5M.png)
+<img src="https://i.imgur.com/ufz3z5M.png" width="400" height="300" />
 
-![Imgur](https://i.imgur.com/dy1MHoT.png)
+<img src="https://i.imgur.com/dy1MHoT.png" width="400" height="300" />
 
 As expected, the app only suggests the time-slot on 27th June for 1330-1430. This shows that our app performs the algorithm correctly to only suggest common free timings of the users within the group.
 
