@@ -123,7 +123,8 @@ class _HomeState extends State<HomePage> {
         _currentUser = account;
       });
       if (_currentUser != null) {
-        SyncCalendar.syncCalendarByDay(dateTodayFormatted, _googleSignIn);
+        SyncCalendar.syncCalendarByDay(
+            dateTodayFormatted, _googleSignIn, context);
       }
     });
     _googleSignIn.signInSilently();
