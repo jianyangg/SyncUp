@@ -6,7 +6,7 @@
 
 ### **Team Name:**
 
-SyncUp 
+`SyncUp`
 
 ### **Proposed Level of Achievement:**
 
@@ -100,10 +100,35 @@ In the group with both of them, an event scheduling is initiated from timothyleo
 | :--------------------------------------: | :--------------------------------------: |
 |        Group Event Scheduling Page        |       Suggested Time Slot: 27th June      |
 
-As expected, the app only suggests the time slot on 27th June for 1330-1430. This shows that our app correctly performs the algorithm to only suggest common free timings of the users within the group.
+As expected, the app only suggests the time slot on 27th June for 1330-1430. This shows that `SyncUp` correctly performs the algorithm to only suggest common free timings of the users within the group.
 
+## Installation Instructions
 
-# Motivation and Aim (from project proposal)
+To install SyncUp, please follow these steps:
+
+1. Download the SyncUp APK file from the following link: [SyncUp APK](https://docs.google.com/spreadsheets/d/1hUErlQk9Z9O3w8OTrkZnbDOMF9CEwYTc1YUPhqLF26E/edit?usp=drive_link).
+
+2. Transfer the APK file to your Android device using any preferred method, such as email, USB cable, or cloud storage.
+
+3. On your Android device, go to **Settings**.
+
+4. Navigate to **Security** or **Privacy** (the exact location may vary depending on your device).
+
+5. Enable the **Unknown Sources** option. This allows the installation of apps from sources other than the Google Play Store.
+
+6. Use a file manager app to locate the transferred SyncUp APK file on your device.
+
+7. Tap on the APK file to start the installation process.
+
+8. Review the permissions required by the app and tap **Install** to proceed with the installation.
+
+9. Wait for the installation to complete.
+
+10. Once the installation is finished, you can open SyncUp from your app drawer and start using it to manage your schedules and collaborate with others effectively.
+
+Note: It's important to exercise caution when installing APK files from external sources. Ensure that you trust the source and that the APK file hasn't been tampered with for security reasons.
+
+# Motivation and Aim (Milestone 1 and before)
 
 ---
 
