@@ -26,7 +26,7 @@ Apollo 11
 
 ## Design plans and reasoning:
 
-![Imgur](https://i.imgur.com/QI6j8Vb.png))
+![Imgur](https://i.imgur.com/QI6j8Vb.png)
 
 *****Fig 1: We decided to make the UI as clean as possible, with only 4 main pages after logging into the app:***** 
 
