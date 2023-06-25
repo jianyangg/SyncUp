@@ -87,12 +87,11 @@ class _OwnEventPageState extends State<OwnEventPage> {
     // Prepare a gcal authenticated client. ORIGINAL. KEEP THIS CODE
     final cal.CalendarApi gcalApi = cal.CalendarApi(client!);
 
-    // dayEvents should contain the events on the selected date.
     final cal.Events dayEvents = await gcalApi.events.list(
       "primary",
       timeMin: selectedDate,
-      timeMax: selectedDate
-          .add(const Duration(hours: 23, minutes: 59, seconds: 59))
+      timeMax: DateTime(selectedDate.year, selectedDate.month, selectedDate.day,
+              23, 59, 59)
           .toUtc(),
     );
     List<cal.Event> dayAppts = [];

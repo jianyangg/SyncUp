@@ -290,6 +290,8 @@ class _CommonSlotsTileState extends State<CommonSlotsTile> {
                             .reduce((a, b) => a.length > b.length ? a : b)
                             .length;
 
+                        print(slots.length);
+                        print(maxLength);
                         double proportion = slots.length / maxLength;
                         Color? expBgColor;
                         final ColorTween colorTween = ColorTween(
@@ -298,17 +300,6 @@ class _CommonSlotsTileState extends State<CommonSlotsTile> {
                         );
 
                         expBgColor = colorTween.lerp(proportion)!;
-                        // if (proportion < 0.5) {
-                        //   expBgColor = Color.lerp(
-                        //       Color.fromARGB(shade, 219, 68, 55),
-                        //       Color.fromARGB(shade, 244, 180, 0),
-                        //       proportion * 2)!;
-                        // } else {
-                        //   expBgColor = Color.lerp(
-                        //       Color.fromARGB(shade, 244, 180, 0),
-                        //       Color.fromARGB(shade, 15, 157, 88),
-                        //       (proportion - 0.5) * 2)!;
-                        // }
 
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
