@@ -26,7 +26,7 @@ Apollo 11
 
 ## Design plans and reasoning:
 
-![Untitled](README%20b3b1cd45bde546b1949daffc7e3180eb/Untitled.png)
+![Imgur](https://i.imgur.com/QI6j8Vb.png))
 
 *****Fig 1: We decided to make the UI as clean as possible, with only 4 main pages after logging into the app:***** 
 
@@ -35,7 +35,7 @@ Apollo 11
 3. **Groups page** (For managing groups, viewing Group Event Calendars, and scheduling group events
 4. **Account page** (For general settings)
 
-![Untitled](README%20b3b1cd45bde546b1949daffc7e3180eb/Untitled%201.png)
+![Imgur](https://i.imgur.com/XpEIaMR.png)
 
 *Fig 2: The above diagram is a zoom-in on the initial design prototype for the general flow of group event creation in `SyncUp`:*
 
@@ -47,31 +47,31 @@ Apollo 11
 
 ---
 
-![Untitled](README%20b3b1cd45bde546b1949daffc7e3180eb/Untitled%202.png)
+![Imgur](https://i.imgur.com/vbjYKLQ.png)
 
 - For Milestone 2, we have only worked with Google Calendar API, so it is best advised to Sign In With Google, otherwise the features would not work as expected.
 
-![Untitled](README%20b3b1cd45bde546b1949daffc7e3180eb/Untitled%201.jpeg)
+![Imgur](https://i.imgur.com/ZYSgZ3C.jpg)
 
 - Allow access to calendar data when requested by google api.
 
-![Untitled](README%20b3b1cd45bde546b1949daffc7e3180eb/Untitled%203.png)
+![Untitled](https://i.imgur.com/SCxT10z.png)
 
 - From the HomePage, use the navigation bar to navigate between pages.
 
-![Untitled](README%20b3b1cd45bde546b1949daffc7e3180eb/Untitled%204.png)
+![Imgur](https://i.imgur.com/sYYz54C.png)
 
 - The Personal Calendar page pulls events from google calendar and formats them accordingly based on the event data - events created using SyncUp will be in bright orange whereas personal events will be in blue.
 
-![Untitled](README%20b3b1cd45bde546b1949daffc7e3180eb/Untitled%205.png)
+![Imgur](https://i.imgur.com/HLcdzhb.png)
 
 - From the Groups page, users can create or add themselves to groups.
 
-![Untitled](README%20b3b1cd45bde546b1949daffc7e3180eb/Untitled%206.png)
+![Imgur](https://i.imgur.com/AsWmII7.png)
 
 - Within groups, users can schedule for events. Only Group Events will be displayed in the group calendar page. A more comprehensive demonstration for event creation can be found in our video.
 
-![Untitled](README%20b3b1cd45bde546b1949daffc7e3180eb/Untitled%207.png)
+![Imgur](https://i.imgur.com/oNsiHa6.png)
 
 - For now, in the account page, users can sign out, or request for a calendar synchronisation with google. As mentioned earlier, our MVP has only implemented integrations with google calendar API, so the syncing will only work if you are signed in with a google account, and have allowed SyncUp permissions to access and modify your calendar data.
 
@@ -87,18 +87,18 @@ A simple test of this algorithm is as follows:
 
 **Objective: Schedule a meeting on 27th June, Tuesday between timothyleow12 and timothyleow14.**
 
-![Untitled](README%20b3b1cd45bde546b1949daffc7e3180eb/Untitled%208.png)
+![Imgur](https://i.imgur.com/53b6aZW.png)
 
-![Untitled](README%20b3b1cd45bde546b1949daffc7e3180eb/Untitled%209.png)
+![Imgur](https://i.imgur.com/zXAspVs.png)
 
 - As we can see from the above, timothyleow14 has blocked out his time from 1430-1700, while timothyleow12 has blocked out his time from 0900-1330.
 - The only common free timing they have is from 1330-1430 (Assuming that their desired meeting hours is 0900-1700).
 
 In the group with 2 of them, an event scheduling is initiated from timothyleow12@gmail.com:
 
-![Untitled](README%20b3b1cd45bde546b1949daffc7e3180eb/Untitled%2010.png)
+![Imgur](https://i.imgur.com/ufz3z5M.png)
 
-![Untitled](README%20b3b1cd45bde546b1949daffc7e3180eb/Untitled%2011.png)
+![Imgur](https://i.imgur.com/dy1MHoT.png)
 
 As expected, the app only suggests the time-slot on 27th June for 1330-1430. This shows that our app performs the algorithm correctly to only suggest common free timings of the users within the group.
 
