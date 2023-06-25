@@ -47,60 +47,60 @@ Apollo 11
 
 ---
 
-<img src="https://i.imgur.com/vbjYKLQ.png" width="400" height="300" />
+<img src="https://i.imgur.com/vbjYKLQ.png" width="400" />
 
 - For Milestone 2, we have only worked with Google Calendar API, so it is best advised to Sign In With Google, otherwise the features would not work as expected.
 
-<img src="https://i.imgur.com/ZYSgZ3C.jpg" width="400" height="300" />
+<img src="https://i.imgur.com/ZYSgZ3C.jpg" width="400" />
 
-- Allow access to calendar data when requested by google api.
+- Allow access to calendar data when requested by Google API.
 
-<img src="https://i.imgur.com/SCxT10z.png" width="400" height="300" />
+<img src="https://i.imgur.com/SCxT10z.png" width="400" />
 
 - From the HomePage, use the navigation bar to navigate between pages.
 
-<img src="https://i.imgur.com/sYYz54C.png" width="400" height="300" />
+<img src="https://i.imgur.com/sYYz54C.png" width="400" />
 
-- The Personal Calendar page pulls events from google calendar and formats them accordingly based on the event data - events created using SyncUp will be in bright orange whereas personal events will be in blue.
+- The Personal Calendar page pulls events from Google Calendar and formats them accordingly based on the event data - events created using SyncUp will be in bright orange whereas personal events will be in blue.
 
-<img src="https://i.imgur.com/HLcdzhb.png" width="400" height="300" />
+<img src="https://i.imgur.com/HLcdzhb.png" width="400" />
 
 - From the Groups page, users can create or add themselves to groups.
 
-<img src="https://i.imgur.com/AsWmII7.png" width="400" height="300" />
+<img src="https://i.imgur.com/AsWmII7.png" width="400" />
 
-- Within groups, users can schedule for events. Only Group Events will be displayed in the group calendar page. A more comprehensive demonstration for event creation can be found in our video.
+- Within groups, users can schedule events. Only Group Events will be displayed on the group calendar page. A more comprehensive demonstration of event creation can be found in our video.
 
-<img src="https://i.imgur.com/oNsiHa6.png" width="400" height="300" />
+<img src="https://i.imgur.com/oNsiHa6.png" width="400" />
 
-- For now, in the account page, users can sign out, or request for a calendar synchronisation with google. As mentioned earlier, our MVP has only implemented integrations with google calendar API, so the syncing will only work if you are signed in with a google account, and have allowed SyncUp permissions to access and modify your calendar data.
+- In the account page, users can sign out or request calendar synchronization with Google. Please note that our MVP has only implemented integrations with Google Calendar API, so syncing will only work if you are signed in with a Google account and have granted SyncUp permissions to access and modify your calendar data.
 
-*Note: for a more comprehensive demonstration, refer to our [video.](https://drive.google.com/file/d/10Npgv57ZQIYjrvMyE_42bKH9e9bbuplT/view?usp=drive_link)*
+*Note: For a more comprehensive demonstration, refer to our [video.](https://drive.google.com/file/d/10Npgv57ZQIYjrvMyE_42bKH9e9bbuplT/view?usp=drive_link)*
 
 ## Testing:
 
 ---
 
-The main feature for testing is the “Free-Slot-Finding” algorithm that we have implemented.
+The main feature for testing is the "Free-Slot-Finding" algorithm that we have implemented.
 
 A simple test of this algorithm is as follows:
 
 **Objective: Schedule a meeting on 27th June, Tuesday between timothyleow12 and timothyleow14.**
 
-<img src="https://i.imgur.com/53b6aZW.png" width="400" height="300" />
+<img src="https://i.imgur.com/53b6aZW.png" width="400" />
 
-<img src="https://i.imgur.com/zXAspVs.png" width="400" height="300" />
+<img src="https://i.imgur.com/zXAspVs.png" width="400" />
 
 - As we can see from the above, timothyleow14 has blocked out his time from 1430-1700, while timothyleow12 has blocked out his time from 0900-1330.
-- The only common free timing they have is from 1330-1430 (Assuming that their desired meeting hours is 0900-1700).
+- The only common free timing they have is from 1330-1430 (assuming that their desired meeting hours are 0900-1700).
 
-In the group with 2 of them, an event scheduling is initiated from timothyleow12@gmail.com:
+In the group with both of them, an event scheduling is initiated from timothyleow12@gmail.com:
 
-<img src="https://i.imgur.com/ufz3z5M.png" width="400" height="300" />
+<img src="https://i.imgur.com/ufz3z5M.png" width="400" />
 
-<img src="https://i.imgur.com/dy1MHoT.png" width="400" height="300" />
+<img src="https://i.imgur.com/dy1MHoT.png" width="400" />
 
-As expected, the app only suggests the time-slot on 27th June for 1330-1430. This shows that our app performs the algorithm correctly to only suggest common free timings of the users within the group.
+As expected, the app only suggests the time slot on 27th June for 1330-1430. This shows that our app correctly performs the algorithm to only suggest common free timings of the users within the group.
 
 # Motivation and Aim (from project proposal)
 
@@ -120,7 +120,7 @@ Our project aims to transform the way scheduling is done, making it a breeze for
 
 **User Stories**
 
-1. Students will be able to form specialised groups with their friends, colleagues for project members.
-2. Within a group, through seamless calendar integration, our platform will generate a joint virtual calendar based on the group members’ common availability. This will enable students to easily identify mutual availability with other individuals of interest and schedule meet-ups accordingly. The platform will also handle the polling of available time slots to make the process even smoother.
-3. Students will be able to effortlessly network with others from different faculties and form groups on our platform. Our system allows groups to indicate their intention of recruiting members of certain interests, making it easy for like-minded individuals to connect with each other.
+1. Students will be able to form specialized groups with their friends, colleagues, or project members.
+2. Within a group, through seamless calendar integration, our platform will generate a joint virtual calendar based on the group members' common availability. This will enable students to easily identify mutual availability with other individuals of interest and schedule meet-ups accordingly. The platform will also handle the polling of available time slots to make the process even smoother.
+3. Students will be able to effortlessly network with others from different faculties and form groups on our platform. Our system allows groups to indicate their intention to recruit members of certain interests, making it easy for like-minded individuals to connect with each other.
 4. Depending on the purpose of the group, there will be additional features such as shared to-do lists and file-sharing/real-time collaboration.
