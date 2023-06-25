@@ -14,7 +14,6 @@ final GoogleSignIn _googleSignIn = GoogleSignIn(
   scopes: [cal.CalendarApi.calendarScope],
 );
 
-// this will be the logout page.
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
 
@@ -65,9 +64,6 @@ class _AccountPageState extends State<AccountPage> {
       setState(() {
         _currentUser = account;
       });
-      // if (_currentUser != null) {
-      //   SyncCalendar.syncCalendarByDay(dateTodayFormatted, _googleSignIn);
-      // }
     });
     _googleSignIn.signInSilently();
   }
@@ -238,9 +234,8 @@ class _AccountPageState extends State<AccountPage> {
                               color: Colors.white,
                             ),
                             onPressed: () {
-                              if (_currentUser != null) {
-                                syncCalendarHelper();
-                              }
+                              SyncCalendar.syncCalendarByDay(
+                                  dateTodayFormatted, _googleSignIn, context);
                             },
                             style: ButtonStyle(
                               backgroundColor: MaterialStateProperty.all<Color>(
@@ -271,10 +266,6 @@ class _AccountPageState extends State<AccountPage> {
         color: Colors.blue.shade700,
       ),
     );
-  }
-
-  void syncCalendarHelper() {
-    SyncCalendar.syncCalendarByDay(dateTodayFormatted, _googleSignIn);
   }
 
   void _signOut() async {

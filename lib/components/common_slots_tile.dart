@@ -219,6 +219,7 @@ class _CommonSlotsTileState extends State<CommonSlotsTile> {
           userId: widget.userId,
           groupId: widget.groupId,
           groupName: widget.groupName,
+          // freshEventDate: event.start!.dateTime!,
         ),
         transitionDuration: Duration.zero,
         reverseTransitionDuration: Duration.zero,
@@ -432,20 +433,11 @@ class _CommonSlotsTileState extends State<CommonSlotsTile> {
                                                             cal.EventExtendedProperties();
                                                         event
                                                             .extendedProperties!
-                                                            .private = {
+                                                            .shared = {
                                                           "CREATOR": "SYNCUP",
                                                           "GROUP_NAME":
                                                               widget.groupName,
                                                         };
-
-                                                        // call sync calendar to update availability
-                                                        SyncCalendar
-                                                            .syncCalendarByDay(
-                                                                DateTime(
-                                                                    now.year,
-                                                                    now.month,
-                                                                    now.day),
-                                                                _googleSignIn);
 
                                                         Navigator.pop(context);
 

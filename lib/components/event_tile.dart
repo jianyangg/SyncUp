@@ -6,24 +6,14 @@ import 'package:flutter_html/flutter_html.dart';
 class EventTile extends StatelessWidget {
   final cal.Event event;
   final Color color;
-  final bool isGroupEvent;
   final String groupName;
   const EventTile(this.event,
-      {super.key,
-      required this.color,
-      required this.isGroupEvent,
-      required this.groupName});
+      {super.key, required this.color, required this.groupName});
 
   // Then for own_events_page, we should all of the current user's events, but colour code according to the group.
 
   @override
   Widget build(BuildContext context) {
-    // TODO: Replace this with the
-    if (isGroupEvent &&
-        event.extendedProperties?.private?['GROUP_NAME'] != groupName) {
-      return Container();
-    }
-
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       width: MediaQuery.of(context).size.width,
@@ -33,7 +23,7 @@ class EventTile extends StatelessWidget {
         //  width: SizeConfig.screenWidth * 0.78,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          color: event.extendedProperties?.private?['CREATOR'] == "SYNCUP"
+          color: event.extendedProperties?.shared?['CREATOR'] == "SYNCUP"
               ? Colors.orange.shade700
               : color,
         ),
@@ -101,11 +91,11 @@ class EventTile extends StatelessWidget {
             color: Colors.grey[200]!.withOpacity(0.7),
           ),
           Visibility(
-            visible: event.extendedProperties?.private?['CREATOR'] == "SYNCUP",
+            visible: event.extendedProperties?.shared?['CREATOR'] == "SYNCUP",
             child: RotatedBox(
               quarterTurns: 3,
               child: Text(
-                event.extendedProperties?.private?['GROUP_NAME'] ?? "",
+                event.extendedProperties?.shared?['GROUP_NAME'] ?? "",
                 style: const TextStyle(
                     fontFamily: "Lato",
                     fontSize: 10,

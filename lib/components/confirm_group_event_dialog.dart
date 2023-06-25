@@ -8,7 +8,8 @@ class ConfirmGroupEventDialog extends StatelessWidget {
   final VoidCallback onCancel;
   final VoidCallback onConfirm;
 
-  const ConfirmGroupEventDialog({super.key, 
+  const ConfirmGroupEventDialog({
+    super.key,
     required this.title,
     required this.dateString,
     required this.timeString,
