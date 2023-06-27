@@ -6,7 +6,7 @@
 
 ### **Team Name:**
 
-SyncUp 
+`SyncUp`
 
 ### **Proposed Level of Achievement:**
 
@@ -22,11 +22,11 @@ Apollo 11
 
 ## Project Poster:
 
-![Untitled](https://file.notion.so/f/s/a5591604-cc8e-4042-9fb4-e88ca1e499a4/Untitled.jpeg?id=79de7974-ba76-4b28-98c9-4e93012de648&table=block&spaceId=d494b39b-4d03-4dc1-829f-4bfffa14311f&expirationTimestamp=1687793669331&signature=QHOLkDLUXXaA5PNoDlvw-nHBIxxqHCGjbQI8fRwBWew&downloadName=Untitled.jpeg)
+![Imgur](https://i.imgur.com/PXl30FR.png)
 
 ## Design plans and reasoning:
 
-![Untitled](README%20b3b1cd45bde546b1949daffc7e3180eb/Untitled.png)
+![Imgur](https://i.imgur.com/QI6j8Vb.png)
 
 *****Fig 1: We decided to make the UI as clean as possible, with only 4 main pages after logging into the app:***** 
 
@@ -35,7 +35,7 @@ Apollo 11
 3. **Groups page** (For managing groups, viewing Group Event Calendars, and scheduling group events
 4. **Account page** (For general settings)
 
-![Untitled](README%20b3b1cd45bde546b1949daffc7e3180eb/Untitled%201.png)
+![Imgur](https://i.imgur.com/XpEIaMR.png)
 
 *Fig 2: The above diagram is a zoom-in on the initial design prototype for the general flow of group event creation in `SyncUp`:*
 
@@ -43,66 +43,91 @@ Apollo 11
 2. The app performs the “Free-Slot-Finding” algorithm, by comparing it against the availabilities of the group members (which are automatically retrieved and synced with the members’ google calendars). It then lists out all the possible slots, along with the attendance rates listed at the side.
 3. After a meeting is scheduled, invitation emails are sent out, and our app should indicate to the user whether or not they have accepted an invitation to a group event (which is scheduled on a ‘free’ time-slot of theirs.
 
+## Installation Instructions
+
+To install SyncUp, please follow these steps:
+
+1. Download the SyncUp APK file from the following link: [SyncUp APK](https://docs.google.com/spreadsheets/d/1hUErlQk9Z9O3w8OTrkZnbDOMF9CEwYTc1YUPhqLF26E/edit?usp=drive_link).
+
+2. Transfer the APK file to your Android device using any preferred method, such as email, USB cable, or cloud storage.
+
+3. On your Android device, go to **Settings**.
+
+4. Navigate to **Security** or **Privacy** (the exact location may vary depending on your device).
+
+5. Enable the **Unknown Sources** option. This allows the installation of apps from sources other than the Google Play Store.
+
+6. Use a file manager app to locate the transferred SyncUp APK file on your device.
+
+7. Tap on the APK file to start the installation process.
+
+8. Review the permissions required by the app and tap **Install** to proceed with the installation.
+
+9. Wait for the installation to complete.
+
+10. Once the installation is finished, you can open SyncUp from your app drawer and start using it to manage your schedules and collaborate with others effectively. Follow along with our walkthrough/video below!
+
 ## Main Features / Quick Walkthrough:
 
 ---
 
-![Untitled](README%20b3b1cd45bde546b1949daffc7e3180eb/Untitled%202.png)
+<img src="https://i.imgur.com/vbjYKLQ.png" width="400" />
 
 - For Milestone 2, we have only worked with Google Calendar API, so it is best advised to Sign In With Google, otherwise the features would not work as expected.
 
-![Untitled](README%20b3b1cd45bde546b1949daffc7e3180eb/Untitled%201.jpeg)
+<img src="https://i.imgur.com/ZYSgZ3C.jpg" width="400" />
 
-- Allow access to calendar data when requested by google api.
+- Allow access to calendar data when requested by Google API.
 
-![Untitled](README%20b3b1cd45bde546b1949daffc7e3180eb/Untitled%203.png)
+<img src="https://i.imgur.com/SCxT10z.png" width="400" />
 
 - From the HomePage, use the navigation bar to navigate between pages.
 
-![Untitled](README%20b3b1cd45bde546b1949daffc7e3180eb/Untitled%204.png)
+<img src="https://i.imgur.com/sYYz54C.png" width="400" />
 
-- The Personal Calendar page pulls events from google calendar and formats them accordingly based on the event data - events created using SyncUp will be in bright orange whereas personal events will be in blue.
+- The Personal Calendar page pulls events from Google Calendar and formats them accordingly based on the event data - events created using SyncUp will be in bright orange whereas personal events will be in blue.
 
-![Untitled](README%20b3b1cd45bde546b1949daffc7e3180eb/Untitled%205.png)
+<img src="https://i.imgur.com/HLcdzhb.png" width="400" />
 
 - From the Groups page, users can create or add themselves to groups.
 
-![Untitled](README%20b3b1cd45bde546b1949daffc7e3180eb/Untitled%206.png)
+<img src="https://i.imgur.com/AsWmII7.png" width="400" />
 
-- Within groups, users can schedule for events. Only Group Events will be displayed in the group calendar page. A more comprehensive demonstration for event creation can be found in our video.
+- Within groups, users can schedule events. Only Group Events will be displayed on the group calendar page. A more comprehensive demonstration of event creation can be found in our video.
 
-![Untitled](README%20b3b1cd45bde546b1949daffc7e3180eb/Untitled%207.png)
+<img src="https://i.imgur.com/oNsiHa6.png" width="400" />
 
-- For now, in the account page, users can sign out, or request for a calendar synchronisation with google. As mentioned earlier, our MVP has only implemented integrations with google calendar API, so the syncing will only work if you are signed in with a google account, and have allowed SyncUp permissions to access and modify your calendar data.
+- In the account page, users can sign out or request calendar synchronization with Google. Please note that our MVP has only implemented integrations with Google Calendar API, so syncing will only work if you are signed in with a Google account and have granted SyncUp permissions to access and modify your calendar data.
 
-*Note: for a more comprehensive demonstration, refer to our [video.](https://drive.google.com/file/d/10Npgv57ZQIYjrvMyE_42bKH9e9bbuplT/view?usp=drive_link)*
+*Note: For a more comprehensive demonstration, refer to our [video.](https://drive.google.com/file/d/10Npgv57ZQIYjrvMyE_42bKH9e9bbuplT/view?usp=drive_link)*
 
 ## Testing:
 
 ---
 
-The main feature for testing is the “Free-Slot-Finding” algorithm that we have implemented.
+The main feature for testing is the "Free-Slot-Finding" algorithm that we have implemented.
 
 A simple test of this algorithm is as follows:
 
 **Objective: Schedule a meeting on 27th June, Tuesday between timothyleow12 and timothyleow14.**
 
-![Untitled](README%20b3b1cd45bde546b1949daffc7e3180eb/Untitled%208.png)
-
-![Untitled](README%20b3b1cd45bde546b1949daffc7e3180eb/Untitled%209.png)
+| ![Imgur](https://i.imgur.com/53b6aZW.png) | ![Imgur](https://i.imgur.com/zXAspVs.png) |
+| :--------------------------------------: | :--------------------------------------: |
+|        timothyleow14's Availability       |        timothyleow12's Availability       |
 
 - As we can see from the above, timothyleow14 has blocked out his time from 1430-1700, while timothyleow12 has blocked out his time from 0900-1330.
-- The only common free timing they have is from 1330-1430 (Assuming that their desired meeting hours is 0900-1700).
+- The only common free timing they have is from 1330-1430 (assuming that their desired meeting hours are 0900-1700).
 
-In the group with 2 of them, an event scheduling is initiated from timothyleow12@gmail.com:
+In the group with both of them, an event scheduling is initiated from timothyleow12@gmail.com:
 
-![Untitled](README%20b3b1cd45bde546b1949daffc7e3180eb/Untitled%2010.png)
+| ![Imgur](https://i.imgur.com/ufz3z5M.png) | ![Imgur](https://i.imgur.com/dy1MHoT.png) |
+| :--------------------------------------: | :--------------------------------------: |
+|        Group Event Scheduling Page        |       Suggested Time Slot: 27th June      |
 
-![Untitled](README%20b3b1cd45bde546b1949daffc7e3180eb/Untitled%2011.png)
+As expected, the app only suggests the time slot on 27th June for 1330-1430. This shows that `SyncUp` correctly performs the algorithm to only suggest common free timings of the users within the group.
 
-As expected, the app only suggests the time-slot on 27th June for 1330-1430. This shows that our app performs the algorithm correctly to only suggest common free timings of the users within the group.
 
-# Motivation and Aim (from project proposal)
+# Motivation and Aim (Milestone 1 and before)
 
 ---
 
@@ -120,7 +145,7 @@ Our project aims to transform the way scheduling is done, making it a breeze for
 
 **User Stories**
 
-1. Students will be able to form specialised groups with their friends, colleagues for project members.
-2. Within a group, through seamless calendar integration, our platform will generate a joint virtual calendar based on the group members’ common availability. This will enable students to easily identify mutual availability with other individuals of interest and schedule meet-ups accordingly. The platform will also handle the polling of available time slots to make the process even smoother.
-3. Students will be able to effortlessly network with others from different faculties and form groups on our platform. Our system allows groups to indicate their intention of recruiting members of certain interests, making it easy for like-minded individuals to connect with each other.
+1. Students will be able to form specialized groups with their friends, colleagues, or project members.
+2. Within a group, through seamless calendar integration, our platform will generate a joint virtual calendar based on the group members' common availability. This will enable students to easily identify mutual availability with other individuals of interest and schedule meet-ups accordingly. The platform will also handle the polling of available time slots to make the process even smoother.
+3. Students will be able to effortlessly network with others from different faculties and form groups on our platform. Our system allows groups to indicate their intention to recruit members of certain interests, making it easy for like-minded individuals to connect with each other.
 4. Depending on the purpose of the group, there will be additional features such as shared to-do lists and file-sharing/real-time collaboration.
