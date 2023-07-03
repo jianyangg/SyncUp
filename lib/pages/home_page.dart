@@ -1,7 +1,11 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:sync_up/pages/account_page.dart';
+import 'package:sync_up/pages/faculty_materials.dart';
 import 'package:sync_up/pages/own_event_page.dart';
 import 'package:sync_up/pages/group_page.dart';
 import '../components/bottom_nav_bar.dart';
@@ -21,6 +25,11 @@ class HomePage extends StatefulWidget {
 
 class _HomeState extends State<HomePage> {
   var _selectedTab = _SelectedTab.home;
+  late Future<List<String>> _folders;
+  // late Future<List<String>> _groupIds;
+  // late Future<List<String>> _groupNames;
+  late Future<Map<String, String>> _groupIdToNameMap;
+  // late Future<List<String>> _groupNames;
 
   void _handleIndexChanged(int i) {
     setState(() {
@@ -116,17 +125,37 @@ class _HomeState extends State<HomePage> {
   void initState() {
     super.initState();
 
+    _folders = FirebaseStorage.instance
+        .ref()
+        .child('/academicDatabase/')
+        .listAll()
+        .then(
+            (result) => result.prefixes.map((prefix) => prefix.name).toList());
+
+    _groupIdToNameMap = _firestore.collection('/groups/').get().then((value) {
+      // List<String> groupIds = [];
+      Map<String, String> groupIdToNameMap = {};
+      for (final QueryDocumentSnapshot<Map<String, dynamic>> group
+          in value.docs) {
+        // groupIds.add(group.id);
+        groupIdToNameMap[group.id] = group['name'];
+      }
+      return groupIdToNameMap;
+    });
+
     DateTime now = DateTime.now();
     dateTodayFormatted = DateTime(now.year, now.month, now.day);
-    _googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
-      setState(() {
-        _currentUser = account;
-      });
-      if (_currentUser != null) {
-        SyncCalendar.syncCalendarByDay(
-            dateTodayFormatted, _googleSignIn, context);
-      }
-    });
+    _googleSignIn.onCurrentUserChanged.listen(
+      (GoogleSignInAccount? account) {
+        setState(() {
+          _currentUser = account;
+        });
+        if (_currentUser != null) {
+          SyncCalendar.syncCalendarByDay(
+              dateTodayFormatted, _googleSignIn, context);
+        }
+      },
+    );
     _googleSignIn.signInSilently();
   }
 
@@ -205,65 +234,59 @@ class _HomeState extends State<HomePage> {
                   Text('Cheatsheets, upcoming assignments and more!',
                       style: TextStyle(color: Colors.grey[600], fontSize: 13)),
                   const SizedBox(height: 8),
-                  SizedBox(
-                    height: 100,
-                    width: MediaQuery.of(context).size.width,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            color: hexToColor('56D6D5'),
+                  FutureBuilder<List<String>>(
+                    future: _folders,
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        return SizedBox(
+                          height: 100,
+                          width: MediaQuery.of(context).size.width,
+                          child: ListView(
+                            scrollDirection: Axis.horizontal,
+                            children: snapshot.data!.map((folder) {
+                              Color randomColor = Colors.primaries[
+                                  Random().nextInt(Colors.primaries.length)];
+                              return Row(
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              FacultyMaterials(
+                                                  folderName: folder),
+                                        ),
+                                      );
+                                    },
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(10),
+                                        color: randomColor,
+                                      ),
+                                      width: 140,
+                                      child: Center(
+                                        child: Text(
+                                          folder,
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: _buttonDistance),
+                                ],
+                              );
+                            }).toList(),
                           ),
-                          width: 140,
-                          child: const Center(
-                            child: Text(
-                              "Computing",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          width: _buttonDistance,
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: hexToColor('FFC278'),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          width: 140,
-                          child: const Center(
-                            child: Text(
-                              "Business",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          width: _buttonDistance,
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            color: Colors.yellow,
-                          ),
-                          width: 140,
-                          child: const Center(
-                            child: Text(
-                              "Mathematics",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                        );
+                      } else if (snapshot.hasError) {
+                        return Text(snapshot.error.toString());
+                      } else {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                    },
                   ),
                   const SizedBox(height: 20),
                   // Connect!
@@ -284,107 +307,56 @@ class _HomeState extends State<HomePage> {
                   const SizedBox(
                     height: 8,
                   ),
-                  // Horizontal Scrollable containers using list view
-                  SizedBox(
-                    height: 120,
-                    width: MediaQuery.of(context).size.width,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            color: Colors.amber,
-                          ),
-                          width: 90,
-                          alignment: Alignment.center,
-                          child: const Text(
-                            "Robotic Rookies",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white),
-                          ),
-                        ),
-                        SizedBox(
-                          width: _buttonDistance,
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            color: Colors.lightGreen,
-                          ),
-                          width: 90,
-                          child: const Center(
-                            child: Text(
-                              "NOC\nNorway",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold),
+                  FutureBuilder<Map<String, String>>(
+                    future: _groupIdToNameMap,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (snapshot.hasError) {
+                        return Text(snapshot.error.toString());
+                      } else {
+                        Map<String, String>? data = snapshot.data;
+                        if (data != null) {
+                          return SizedBox(
+                            height: 120,
+                            width: MediaQuery.of(context).size.width,
+                            child: ListView(
+                              scrollDirection: Axis.horizontal,
+                              children: data.entries.map((entry) {
+                                String groupName = entry.value;
+                                Color randomColor = Colors.primaries[
+                                    Random().nextInt(Colors.primaries.length)];
+                                return Row(
+                                  children: [
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(10),
+                                        color: randomColor,
+                                      ),
+                                      width: 90,
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        groupName,
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(width: _buttonDistance),
+                                  ],
+                                );
+                              }).toList(),
                             ),
-                          ),
-                        ),
-                        SizedBox(
-                          width: _buttonDistance,
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            color: Colors.purple,
-                          ),
-                          width: 90,
-                          child: const Center(
-                            child: Text(
-                              "Gym\nKFC\nBuddies",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          width: _buttonDistance,
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            color: Colors.deepOrange,
-                          ),
-                          width: 90,
-                          child: const Center(
-                            child: Text(
-                              "Gym\nKFC\nBuddies",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          width: _buttonDistance,
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            color: Colors.blue,
-                          ),
-                          width: 90,
-                          child: const Center(
-                            child: Text(
-                              "Gym\nKFC\nBuddies",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                          );
+                        } else {
+                          return const Text('No data available.');
+                        }
+                      }
+                    },
                   ),
+
                   const SizedBox(height: 20),
                   const Text(
                     "Provide Feedback",
