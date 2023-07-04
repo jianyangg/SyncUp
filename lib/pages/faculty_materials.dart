@@ -49,63 +49,61 @@ class _FacultyMaterialsState extends State<FacultyMaterials> {
         ),
       ),
       extendBody: true,
-      body: Expanded(
-        child: FutureBuilder<List<String>>(
-          future: _moduleFolders,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            } else if (snapshot.hasError) {
-              return Text('Error: ${snapshot.error}');
-            } else {
-              return ListView.builder(
-                itemCount: snapshot.data!.length,
-                itemBuilder: (context, index) {
-                  Color randomColor = Colors
-                      .primaries[Random().nextInt(Colors.primaries.length)];
-                  return Column(
-                    children: [
-                      const SizedBox(height: 10),
-                      Container(
-                        height: 60,
-                        width: MediaQuery.of(context).size.width * 0.95,
-                        decoration: BoxDecoration(
-                          color: randomColor,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Center(
-                          child: ListTile(
-                            title: Text(
-                              snapshot.data![index],
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 17,
-                                fontWeight: FontWeight.bold,
-                              ),
+      body: FutureBuilder<List<String>>(
+        future: _moduleFolders,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          } else if (snapshot.hasError) {
+            return Text('Error: ${snapshot.error}');
+          } else {
+            return ListView.builder(
+              itemCount: snapshot.data!.length,
+              itemBuilder: (context, index) {
+                Color randomColor =
+                    Colors.primaries[Random().nextInt(Colors.primaries.length)];
+                return Column(
+                  children: [
+                    const SizedBox(height: 10),
+                    Container(
+                      height: 60,
+                      width: MediaQuery.of(context).size.width * 0.95,
+                      decoration: BoxDecoration(
+                        color: randomColor,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Center(
+                        child: ListTile(
+                          title: Text(
+                            snapshot.data![index],
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 17,
+                              fontWeight: FontWeight.bold,
                             ),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ModulePage(
-                                      folderName: widget.folderName,
-                                      moduleName: snapshot.data![index]),
-                                ),
-                              );
-                            },
                           ),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ModulePage(
+                                    folderName: widget.folderName,
+                                    moduleName: snapshot.data![index]),
+                              ),
+                            );
+                          },
                         ),
                       ),
-                    ],
-                  );
-                },
-              );
-            }
-          },
-        ),
+                    ),
+                  ],
+                );
+              },
+            );
+          }
+        },
       ),
     );
   }

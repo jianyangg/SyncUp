@@ -56,50 +56,46 @@ class TimeSlotTile extends StatelessWidget {
             color: Colors.white,
           ),
           child: Row(children: [
-            Expanded(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    startDateTime.day.toString(),
-                    style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black),
-                  ),
-                  const SizedBox(width: 20),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        DateFormat('MMMM').format(startDateTime),
-                        style: const TextStyle(
-                            fontFamily: "Lato",
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 5),
-                      Text(
-                        "${DateFormat('HH:mm').format(startDateTime)} - ${DateFormat('HH:mm').format(endDateTime)}",
-                        style:
-                            const TextStyle(fontSize: 13, fontFamily: "Lato"),
-                      ),
-                    ],
-                  ),
-                  Expanded(
-                      child: Align(
-                          alignment: Alignment.centerRight,
-                          child: Container(
-                              padding: const EdgeInsets.all(15),
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12),
-                                  color: color),
-                              child: Text('$numAvailable/$numTotal',
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black54)))))
-                ],
-              ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  startDateTime.day.toString(),
+                  style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black),
+                ),
+                const SizedBox(width: 20),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      DateFormat('MMMM').format(startDateTime),
+                      style: const TextStyle(
+                          fontFamily: "Lato",
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      "${DateFormat('HH:mm').format(startDateTime)} - ${DateFormat('HH:mm').format(endDateTime)}",
+                      style: const TextStyle(fontSize: 13, fontFamily: "Lato"),
+                    ),
+                  ],
+                ),
+                Align(
+                    alignment: Alignment.centerRight,
+                    child: Container(
+                        padding: const EdgeInsets.all(15),
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            color: color),
+                        child: Text('$numAvailable/$numTotal',
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black54))))
+              ],
             ),
           ]),
         ),
