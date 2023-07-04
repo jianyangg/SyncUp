@@ -80,6 +80,7 @@ class _GroupPageState extends State<GroupPage> {
   }
 
   final _controller = TextEditingController();
+  final _descriptionController = TextEditingController();
   final _firestore = FirebaseFirestore.instance;
   // need a firebase instance to get current user's uid
   final _auth = FirebaseAuth.instance;
@@ -178,6 +179,10 @@ class _GroupPageState extends State<GroupPage> {
                                                 UserSearchPage(
                                                   groupName:
                                                       _controller.text.trim(),
+                                                  groupDescription:
+                                                      _descriptionController
+                                                          .text
+                                                          .trim(),
                                                 )));
                                   },
                                   child: Text(
@@ -208,6 +213,34 @@ class _GroupPageState extends State<GroupPage> {
                                   hintText: "Group Name",
                                   suffixIcon: IconButton(
                                       onPressed: _controller.clear,
+                                      icon: Icon(
+                                        Icons.clear,
+                                        color: Colors.blue.shade800,
+                                        size: 20,
+                                      )),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  contentPadding: const EdgeInsets.all(15),
+                                ),
+                              ),
+                            ),
+                            // another field for group description
+                            Padding(
+                              padding: const EdgeInsets.all(15.0),
+                              child: TextField(
+                                cursorColor: Colors.blue.shade800,
+                                autofocus: true,
+                                controller: _descriptionController,
+                                decoration: InputDecoration(
+                                  focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                      borderSide: BorderSide(
+                                          color: Colors.blue.shade800,
+                                          width: 2)),
+                                  hintText: "Group Description",
+                                  suffixIcon: IconButton(
+                                      onPressed: _descriptionController.clear,
                                       icon: Icon(
                                         Icons.clear,
                                         color: Colors.blue.shade800,

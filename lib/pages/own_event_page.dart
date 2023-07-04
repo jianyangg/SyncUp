@@ -359,7 +359,7 @@ class _OwnEventPageState extends State<OwnEventPage> {
               // all events for the day:
               const SizedBox(height: 10),
               FutureBuilder<List<cal.Event>>(
-                  initialData: [],
+                  initialData: const [],
                   future: _handleGetEvents(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {

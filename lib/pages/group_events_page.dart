@@ -211,6 +211,7 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
   final DatePickerController _dateScrollerController = DatePickerController();
 
   final TextEditingController _eventNameController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
   int? _selectedPeriod = -1;
   String selectedDateRangeText =
       '${DateFormat('yyyy-MM-dd').format(DateTime.now())} to ${DateFormat('yyyy-MM-dd').format(DateTime.now().add(const Duration(days: 7)))}';
@@ -241,12 +242,65 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
     );
   }
 
+  void _openEditDescriptionDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        TextEditingController _editedDescriptionController =
+            TextEditingController(text: _descriptionController.text);
+
+        return AlertDialog(
+          title: const Text("Edit Description"),
+          content: TextField(
+            controller: _editedDescriptionController,
+            maxLines: null,
+            keyboardType: TextInputType.multiline,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  _descriptionController.text =
+                      _editedDescriptionController.text;
+                });
+                FirebaseFirestore.instance
+                    .collection("groups")
+                    .doc(widget.groupId)
+                    .update({
+                  'description': _editedDescriptionController.text,
+                });
+                Navigator.pop(context);
+              },
+              child: const Text(
+                "Save",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       executeAfterBuild();
     });
+  }
+
+  @override
+  void dispose() {
+    _eventNameController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
   }
 
   Future<void> _pickImage() async {
@@ -341,43 +395,38 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
           ),
           child: Row(
             children: [
-              // const Icon(
-              //   Icons.photo,
-              //   color: Colors.white,
-              //   size: 30,
-              // ),
               // clickable button to change group photo
               // but with a placeholder icon if there's no photo
-              // FutureBuilder<String>(
-              //     builder: (context, snapshot) {
-              //       if (snapshot.connectionState == ConnectionState.waiting) {
-              //         // While the future is still loading, you can show a loading indicator
-              //         return const CircularProgressIndicator();
-              //       } else if (snapshot.hasError) {
-              //         // If an error occurred while fetching the value, you can handle it here
-              //         return Text('Error: ${snapshot.error}');
-              //       } else {
-              //         // The future has completed successfully, and you have obtained the boolean value
-              //         final String grpPhotoStatus = snapshot.data!;
-              //         // if grpphoto exists,
-              //         // display the photo from firebase storage
-              //         // else display a placeholder icon
-              //         return IconButton(
-              //           icon: grpPhotoStatus != "NA"
-              //               ? CircleAvatar(
-              //                   backgroundImage: NetworkImage(grpPhotoStatus),
-              //                   radius: 20,
-              //                 )
-              //               : const Icon(
-              //                   Icons.photo,
-              //                   color: Colors.white,
-              //                   size: 30,
-              //                 ),
-              //           onPressed: _pickImage,
-              //         );
-              //       }
-              //     },
-              //     future: grpPhotoExists),
+              FutureBuilder<String>(
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      // While the future is still loading, you can show a loading indicator
+                      return const CircularProgressIndicator();
+                    } else if (snapshot.hasError) {
+                      // If an error occurred while fetching the value, you can handle it here
+                      return Text('Error: ${snapshot.error}');
+                    } else {
+                      // The future has completed successfully, and you have obtained the boolean value
+                      final String grpPhotoStatus = snapshot.data!;
+                      // if grpphoto exists,
+                      // display the photo from firebase storage
+                      // else display a placeholder icon
+                      return IconButton(
+                        icon: grpPhotoStatus != "NA"
+                            ? CircleAvatar(
+                                backgroundImage: NetworkImage(grpPhotoStatus),
+                                radius: 20,
+                              )
+                            : const Icon(
+                                Icons.photo,
+                                color: Colors.white,
+                                size: 30,
+                              ),
+                        onPressed: _pickImage,
+                      );
+                    }
+                  },
+                  future: grpPhotoExists),
               const SizedBox(width: 5),
               Expanded(
                 child: SingleChildScrollView(
@@ -965,6 +1014,67 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                               },
                             ),
                           ),
+                          const SizedBox(height: 20),
+                          Container(
+                            height: 200,
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      "Description",
+                                      style: TextStyle(
+                                        color: Colors.orange.shade800,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.edit,
+                                          size: 15, color: Colors.black),
+                                      onPressed: () {
+                                        _openEditDescriptionDialog();
+                                      },
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                Expanded(
+                                  child: StreamBuilder<DocumentSnapshot>(
+                                    stream: FirebaseFirestore.instance
+                                        .collection("groups")
+                                        .doc(widget.groupId)
+                                        .snapshots(),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasData) {
+                                        final data = snapshot.data!.data()
+                                            as Map<String, dynamic>;
+                                        final description =
+                                            data['description'] as String;
+                                        _descriptionController.text =
+                                            description;
+                                        return Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Text(
+                                            description,
+                                            style: const TextStyle(
+                                              fontSize: 15,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                        );
+                                      } else {
+                                        return const Center(
+                                          child: CircularProgressIndicator(),
+                                        );
+                                      }
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -1015,7 +1125,7 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                 // all events for the day:
                 const SizedBox(height: 10),
                 FutureBuilder<List<cal.Event>>(
-                    initialData: [],
+                    initialData: const [],
                     future: _handleGetEvents(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {

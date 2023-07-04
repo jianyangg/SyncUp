@@ -157,10 +157,10 @@ class _AccountPageState extends State<AccountPage> {
         backgroundColor: Colors.blue.shade800,
         shadowColor: Colors.transparent,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {},
-          ),
+          // IconButton(
+          //   icon: const Icon(Icons.settings),
+          //   onPressed: () {},
+          // ),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {

@@ -8,6 +8,7 @@ import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sig
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SyncCalendar {
+  // can be changed accordingly
   static int daysToSync = 14;
 
   static Future<void> syncCalendarByDay(
@@ -18,26 +19,50 @@ class SyncCalendar {
     final scaffoldMessengerState = ScaffoldMessenger.of(context);
     final SnackBar syncSnackbar = SnackBar(
       content: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          CircularProgressIndicator(),
-          SizedBox(width: 16.0),
+          const SizedBox(
+            width: 5,
+          ),
+          // reduce size of circular progress indicator
+          const SizedBox(
+            height: 20,
+            width: 20,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+            ),
+          ),
+          const SizedBox(width: 16.0),
           Expanded(
             child: Text(
               "Syncing calendar for $daysToSync days...",
-              style: TextStyle(fontFamily: "Lato"),
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontFamily: "Lato",
+                fontSize: 15,
+                color: Colors.white,
+              ),
             ),
           ),
         ],
       ),
-      duration: Duration(seconds: 3),
+      duration: const Duration(seconds: 3),
       behavior: SnackBarBehavior.floating,
-      margin: EdgeInsets.only(
+      elevation: 0,
+      backgroundColor: Colors.grey.shade400,
+      // round corners
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15.0),
+      ),
+
+      margin: const EdgeInsets.only(
         bottom: 80,
         left: 20,
         right: 20,
       ),
     );
-    print('syncing calendar...');
+    print('Syncing calendar for $daysToSync days...');
     scaffoldMessengerState.showSnackBar(syncSnackbar);
 
     final auth.AuthClient? client = await googleSignIn.authenticatedClient();
@@ -105,11 +130,24 @@ class SyncCalendar {
     }
 
     print('Syncing done!');
-    final SnackBar doneSnackbar = SnackBar(
-      content: Text('Syncing done!'),
-      duration: Duration(seconds: 1),
+    SnackBar doneSnackbar = SnackBar(
+      content: const Text(
+        'Syncing done!',
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontFamily: "Lato",
+          fontSize: 15,
+        ),
+      ),
+      duration: const Duration(seconds: 1),
+      elevation: 0,
+      backgroundColor: Colors.grey.shade400,
+      // round corners
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15.0),
+      ),
       behavior: SnackBarBehavior.floating,
-      margin: EdgeInsets.only(
+      margin: const EdgeInsets.only(
         bottom: 80,
         left: 20,
         right: 20,

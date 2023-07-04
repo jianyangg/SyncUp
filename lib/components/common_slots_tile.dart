@@ -8,7 +8,6 @@ import 'package:sync_up/components/time_slot_tile.dart';
 import 'package:sync_up/services/get_common_time.dart';
 import 'package:googleapis/calendar/v3.dart' as cal;
 import "package:googleapis_auth/auth_io.dart" as auth;
-import 'package:sync_up/services/sync_calendar.dart';
 
 import '../pages/group_events_page.dart';
 

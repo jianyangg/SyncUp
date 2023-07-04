@@ -8,7 +8,9 @@ import 'account_page.dart';
 
 class UserSearchPage extends StatefulWidget {
   final String groupName;
-  const UserSearchPage({super.key, required this.groupName});
+  final String groupDescription;
+  const UserSearchPage(
+      {super.key, required this.groupName, required this.groupDescription});
 
   @override
   State<UserSearchPage> createState() => _UserSearchPageState();
@@ -31,6 +33,7 @@ class _UserSearchPageState extends State<UserSearchPage> {
       "owner": currentUserID,
       "members": selectedUsers.map((user) => user['uid']).toList(),
       "requests": [],
+      "description": widget.groupDescription,
     });
 
     for (final user in selectedUsers) {
