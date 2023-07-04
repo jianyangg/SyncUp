@@ -59,7 +59,7 @@ class _GroupPageState extends State<GroupPage> {
         Navigator.pushReplacement(
           context,
           PageRouteBuilder(
-            pageBuilder: (context, animation1, animation2) => const HomePage(),
+            pageBuilder: (context, animation1, animation2) => const GroupPage(),
             transitionDuration: Duration.zero,
             reverseTransitionDuration: Duration.zero,
           ),
