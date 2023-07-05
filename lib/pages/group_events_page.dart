@@ -103,7 +103,15 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
     }
   }
 
-  int memberCount = 5;
+  // retrieve number of members in group
+  Future<int> getMemberCount() async {
+    final doc = await _firestore.collection("groups").doc(widget.groupId).get();
+    if (doc.exists && doc.data() != null) {
+      return doc.data()!['members'].length;
+    }
+    return 0;
+  }
+
   List<String> _selectedUserIds = [];
   void handleUserSelectionChanged(List<String> selectedUserIds) {
     setState(() {
@@ -216,10 +224,10 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
   String selectedDateRangeText =
       '${DateFormat('yyyy-MM-dd').format(DateTime.now())} to ${DateFormat('yyyy-MM-dd').format(DateTime.now().add(const Duration(days: 7)))}';
 
+  int memberCount = 1;
   @override
   void initState() {
     super.initState();
-
     DateTime now = DateTime.now();
     selectedDate = DateTime(now.year, now.month, now.day);
     _googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
@@ -233,13 +241,16 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
     _googleSignIn.signInSilently();
   }
 
-  void executeAfterBuild() {
+  void executeAfterBuild() async {
     updateSelectedDate(DateTime.now());
-    SyncCalendar.syncCalendarByDay(
-      DateTime(selectedDate.year, selectedDate.month, selectedDate.day),
-      _googleSignIn,
-      context,
-    );
+    // TODO: No point syncing calendar all the time because we only need to sync when the user adds an event
+    // TODO: plus, we already did it once in the beginning when the user logs in.
+    // SyncCalendar.syncCalendarByDay(
+    //   DateTime(selectedDate.year, selectedDate.month, selectedDate.day),
+    //   _googleSignIn,
+    //   context,
+    // );
+    memberCount = await getMemberCount();
   }
 
   void _openEditDescriptionDialog() {
@@ -351,11 +362,11 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
         final downloadURL = await storageRef.getDownloadURL();
 
         // Use the downloadURL as needed (e.g., display the image)
-        print('Download URL: $downloadURL');
+        // print('Download URL: $downloadURL');
         return downloadURL;
       }
     } catch (e) {
-      print('Error checking if the file exists: $e');
+      print('Error: $e');
     }
     return 'NA';
   }
@@ -366,24 +377,11 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
     // using text widget for now
     Future<String> grpPhotoExists = doesGrpPhotoExist();
 
-    return
-        // MaterialApp(
-        //   // supposedly allows for swipe back gesture
-        //   // for easier access to general group page.
-        //   theme: ThemeData(
-        //     pageTransitionsTheme: const PageTransitionsTheme(
-        //       builders: {
-        //         TargetPlatform.android: CupertinoPageTransitionsBuilder(),
-        //         TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-        //       },
-        //     ),
-        //   ),
-        //   debugShowCheckedModeBanner: false,
-        //   home:
-        Scaffold(
+    return Scaffold(
       backgroundColor: Colors.grey.shade100,
       extendBody: true,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.grey.shade100,
         shadowColor: Colors.transparent,
         title: Container(
@@ -491,6 +489,14 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                       padding: const EdgeInsets.all(15.0),
                       child: Column(
                         children: [
+                          Container(
+                            height: 3,
+                            width: 50,
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade400,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
                           Row(
                             children: [
                               TextButton(
@@ -506,7 +512,7 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                   Navigator.pop(context);
                                 },
                                 child: Text(
-                                  "< Back",
+                                  "Back",
                                   style: TextStyle(
                                       fontSize: 20,
                                       color: Colors.orange.shade800),
@@ -618,18 +624,28 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                                   .height *
                                               14 /
                                               15,
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(15.0),
-                                            child: Column(
-                                              children: [
-                                                Row(
+                                          child: Column(
+                                            children: [
+                                              Container(
+                                                height: 3,
+                                                width: 50,
+                                                decoration: BoxDecoration(
+                                                  color: Colors.grey.shade400,
+                                                  borderRadius:
+                                                      BorderRadius.circular(10),
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.all(15.0),
+                                                child: Row(
                                                   children: [
                                                     TextButton(
                                                       onPressed: () {
                                                         Navigator.pop(context);
                                                       },
                                                       child: Text(
-                                                        "< Back",
+                                                        "Back",
                                                         style: TextStyle(
                                                             color: Colors.orange
                                                                 .shade800,
@@ -639,25 +655,25 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                                     const Spacer(),
                                                   ],
                                                 ),
-                                                const SizedBox(height: 20),
-                                                CommonSlotsTile(
-                                                  eventName:
-                                                      _eventNameController.text
-                                                          .trim(),
-                                                  selectedPeriod:
-                                                      _selectedPeriod!,
-                                                  selectedDateRangeText:
-                                                      selectedDateRangeText,
-                                                  startDate: startDate,
-                                                  endDate: endDate,
-                                                  userId: widget.userId,
-                                                  groupId: widget.groupId,
-                                                  groupName: widget.groupName,
-                                                  userIds: _selectedUserIds,
-                                                  memberCount: memberCount,
-                                                )
-                                              ],
-                                            ),
+                                              ),
+                                              const SizedBox(height: 20),
+                                              CommonSlotsTile(
+                                                eventName: _eventNameController
+                                                    .text
+                                                    .trim(),
+                                                selectedPeriod:
+                                                    _selectedPeriod!,
+                                                selectedDateRangeText:
+                                                    selectedDateRangeText,
+                                                startDate: startDate,
+                                                endDate: endDate,
+                                                userId: widget.userId,
+                                                groupId: widget.groupId,
+                                                groupName: widget.groupName,
+                                                userIds: _selectedUserIds,
+                                                memberCount: memberCount,
+                                              )
+                                            ],
                                           ),
                                         );
                                       },
@@ -952,52 +968,52 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                           const SizedBox(
                             height: 20,
                           ),
-                          Expanded(
-                            child: StreamBuilder<DocumentSnapshot>(
-                              stream: _firestore
-                                  .collection("groups")
-                                  .doc(widget.groupId)
-                                  .snapshots(),
-                              builder: (context, snapshot) {
-                                if (snapshot.hasData) {
-                                  final data = snapshot.data!.data()
-                                      as Map<String, dynamic>;
-                                  final members =
-                                      data['members'] as List<dynamic>;
-                                  List<Widget> memberWidgets = [];
-                                  // save member count
-                                  memberCount = members.length;
-                                  for (var member in members) {
-                                    final memberWidget =
-                                        FutureBuilder<DocumentSnapshot>(
-                                      future: _firestore
-                                          .collection("users")
-                                          .doc(member as String)
-                                          .get(),
-                                      builder: (context, snapshot) {
-                                        if (snapshot.hasData) {
-                                          final data = snapshot.data!.data()
-                                              as Map<String, dynamic>;
-                                          final memberName =
-                                              data['name'] as String;
-                                          final memberPhotoUrl =
-                                              data['photoUrl'] as String;
-                                          return ProfileTile(
-                                              memberPhotoUrl: memberPhotoUrl,
-                                              memberName: memberName);
-                                        } else if (snapshot.hasError) {
-                                          return Text(
-                                              'Error: ${snapshot.error}');
-                                        } else {
-                                          return const Center(
-                                            child: CircularProgressIndicator(),
-                                          );
-                                        }
-                                      },
-                                    );
-                                    memberWidgets.add(memberWidget);
-                                  }
-                                  return GridView(
+                          StreamBuilder<DocumentSnapshot>(
+                            stream: _firestore
+                                .collection("groups")
+                                .doc(widget.groupId)
+                                .snapshots(),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                final data = snapshot.data!.data()
+                                    as Map<String, dynamic>;
+                                final members =
+                                    data['members'] as List<dynamic>;
+                                List<Widget> memberWidgets = [];
+                                // save member count
+                                memberCount = members.length;
+                                for (var member in members) {
+                                  final memberWidget =
+                                      FutureBuilder<DocumentSnapshot>(
+                                    future: _firestore
+                                        .collection("users")
+                                        .doc(member as String)
+                                        .get(),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasData) {
+                                        final data = snapshot.data!.data()
+                                            as Map<String, dynamic>;
+                                        final memberName =
+                                            data['name'] as String;
+                                        final memberPhotoUrl =
+                                            data['photoUrl'] as String;
+                                        return ProfileTile(
+                                            memberPhotoUrl: memberPhotoUrl,
+                                            memberName: memberName);
+                                      } else if (snapshot.hasError) {
+                                        return Text('Error: ${snapshot.error}');
+                                      } else {
+                                        return const Center(
+                                          child: CircularProgressIndicator(),
+                                        );
+                                      }
+                                    },
+                                  );
+                                  memberWidgets.add(memberWidget);
+                                }
+                                return SizedBox(
+                                  height: 200,
+                                  child: GridView(
                                     gridDelegate:
                                         const SliverGridDelegateWithFixedCrossAxisCount(
                                       crossAxisCount: 3,
@@ -1005,14 +1021,14 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                       mainAxisSpacing: 10,
                                     ),
                                     children: memberWidgets,
-                                  );
-                                } else {
-                                  return const Center(
-                                    child: CircularProgressIndicator(),
-                                  );
-                                }
-                              },
-                            ),
+                                  ),
+                                );
+                              } else {
+                                return const Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
+                            },
                           ),
                           const SizedBox(height: 20),
                           Container(
@@ -1040,37 +1056,34 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                   ],
                                 ),
                                 const SizedBox(height: 10),
-                                Expanded(
-                                  child: StreamBuilder<DocumentSnapshot>(
-                                    stream: FirebaseFirestore.instance
-                                        .collection("groups")
-                                        .doc(widget.groupId)
-                                        .snapshots(),
-                                    builder: (context, snapshot) {
-                                      if (snapshot.hasData) {
-                                        final data = snapshot.data!.data()
-                                            as Map<String, dynamic>;
-                                        final description =
-                                            data['description'] as String;
-                                        _descriptionController.text =
-                                            description;
-                                        return Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Text(
-                                            description,
-                                            style: const TextStyle(
-                                              fontSize: 15,
-                                              color: Colors.black,
-                                            ),
+                                StreamBuilder<DocumentSnapshot>(
+                                  stream: FirebaseFirestore.instance
+                                      .collection("groups")
+                                      .doc(widget.groupId)
+                                      .snapshots(),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasData) {
+                                      final data = snapshot.data!.data()
+                                          as Map<String, dynamic>;
+                                      final description =
+                                          data['description'] as String;
+                                      _descriptionController.text = description;
+                                      return Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Text(
+                                          description,
+                                          style: const TextStyle(
+                                            fontSize: 15,
+                                            color: Colors.black,
                                           ),
-                                        );
-                                      } else {
-                                        return const Center(
-                                          child: CircularProgressIndicator(),
-                                        );
-                                      }
-                                    },
-                                  ),
+                                        ),
+                                      );
+                                    } else {
+                                      return const Center(
+                                        child: CircularProgressIndicator(),
+                                      );
+                                    }
+                                  },
                                 ),
                               ],
                             ),

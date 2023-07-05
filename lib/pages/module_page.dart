@@ -51,10 +51,10 @@ class _ModulePageState extends State<ModulePage> {
           ],
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {},
-          ),
+          // IconButton(
+          //   icon: const Icon(Icons.add),
+          //   onPressed: () {},
+          // ),
         ],
       ),
       extendBody: true,

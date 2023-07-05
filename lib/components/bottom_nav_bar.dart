@@ -13,11 +13,18 @@ class BottomNavBar extends StatelessWidget {
     return DotNavigationBar(
       backgroundColor: color,
       enableFloatingNavBar: true,
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.1),
+          spreadRadius: 0,
+          blurRadius: 10,
+          offset: const Offset(0, 3), // changes position of shadow
+        ),
+      ],
       margin: const EdgeInsets.only(left: 10, right: 10),
       currentIndex: currentIndex,
       dotIndicatorColor: Colors.white,
       unselectedItemColor: Colors.grey[350],
-      // enableFloatingNavBar: false,
       onTap: onTap,
       items: [
         /// Home

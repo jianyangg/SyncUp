@@ -9,7 +9,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SyncCalendar {
   // can be changed accordingly
-  static int daysToSync = 14;
+  static int daysToSync = 31;
 
   static Future<void> syncCalendarByDay(
     DateTime selectedDate,
@@ -64,6 +64,7 @@ class SyncCalendar {
     );
     print('Syncing calendar for $daysToSync days...');
     scaffoldMessengerState.showSnackBar(syncSnackbar);
+    final startTime = DateTime.now();
 
     final auth.AuthClient? client = await googleSignIn.authenticatedClient();
     final cal.CalendarApi gcalApi = cal.CalendarApi(client!);
@@ -105,6 +106,11 @@ class SyncCalendar {
         } else {
           endTimeString = "0000";
         }
+        // if full day event, set start time to 0000 and end time to 2359
+        if (startTimeString == "0000" && endTimeString == "0000") {
+          startTimeString = "0000";
+          endTimeString = "2359";
+        }
         return "$startTimeString-$endTimeString";
       }).toList();
 
@@ -116,6 +122,26 @@ class SyncCalendar {
     final db = FirebaseFirestore.instance;
     final userId = FirebaseAuth.instance.currentUser!.uid;
     final userRef = db.collection('users').doc(userId);
+
+    // Delete past availability
+    final today = DateTime.now().toLocal();
+    final userSnapshot = await userRef.get();
+    final Map<String, dynamic>? userData = userSnapshot.data();
+
+    if (userData != null && userData.containsKey('availability')) {
+      final availabilityData = userData['availability'] as Map<String, dynamic>;
+
+      final batch = db.batch();
+      availabilityData.forEach((date, eventData) {
+        final eventDate = DateTime.parse(date);
+        if (eventDate.isBefore(today)) {
+          batch.update(userRef, {'availability.$date': FieldValue.delete()});
+        }
+      });
+
+      await batch.commit();
+      print('Deleted past availability');
+    }
 
     for (int i = 0; i < eventsData.length; i++) {
       final date =
@@ -130,6 +156,9 @@ class SyncCalendar {
     }
 
     print('Syncing done!');
+    final endTime = DateTime.now();
+    final timeTaken = endTime.difference(startTime).inSeconds;
+    print('Time taken: $timeTaken seconds');
     SnackBar doneSnackbar = SnackBar(
       content: const Text(
         'Syncing done!',
@@ -154,6 +183,10 @@ class SyncCalendar {
       ),
     );
 
-    scaffoldMessengerState.showSnackBar(doneSnackbar);
+    try {
+      scaffoldMessengerState.showSnackBar(doneSnackbar);
+    } catch (e) {
+      print(e);
+    }
   }
 }

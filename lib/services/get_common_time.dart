@@ -20,6 +20,9 @@ class GetCommonTime {
       }
     }
 
+    // of empty array means no events scheduled.
+    print("availabilityDataList: $availabilityDataList");
+
     // Find the common free slots among users
     List<List<String>> commonBusySlots = [];
 
@@ -43,6 +46,7 @@ class GetCommonTime {
       }
 
       for (DateTime date in datesInRange) {
+        print("date: $date");
         String formattedDate = date.toIso8601String().split('T')[0];
         List<String> freeSlots = [];
 
@@ -55,6 +59,7 @@ class GetCommonTime {
         commonBusySlots.add(freeSlots);
       }
     }
+    print("commonBusySlots: $commonBusySlots");
 
     // Merge overlapping slots within each day
     for (int i = 0; i < commonBusySlots.length; i++) {
@@ -135,12 +140,24 @@ class GetCommonTime {
           workingHoursSlots.add(
               '$formattedPreviousEndMinute-$formattedEndHour:$formattedEndMinute');
         }
+      } else {
+        // Add the free slot for the whole day
+        int startHour = 9;
+        int startMinute = 0;
+        int endHour = 17;
+        int endMinute = 0;
+
+        String formattedStartHour = startHour.toString().padLeft(2, '0');
+        String formattedStartMinute = startMinute.toString().padLeft(2, '0');
+        String formattedEndHour = endHour.toString().padLeft(2, '0');
+        String formattedEndMinute = endMinute.toString().padLeft(2, '0');
+
+        workingHoursSlots.add(
+            '$formattedStartHour:$formattedStartMinute-$formattedEndHour:$formattedEndMinute');
       }
 
       workingHoursFreeSlots.add(workingHoursSlots);
     }
-
-    print(workingHoursFreeSlots);
     return workingHoursFreeSlots;
   }
 }

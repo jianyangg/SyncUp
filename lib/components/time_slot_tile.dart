@@ -21,20 +21,6 @@ class TimeSlotTile extends StatelessWidget {
     double proportion = numAvailable / numTotal;
     Color? color;
 
-    // if (proportion < 0.5) {
-    //   color = Color.lerp(Colors.red, Colors.yellow, proportion * 2)!;
-    // } else {
-    //   color = Color.lerp(Colors.yellow, Colors.green, (proportion - 0.5) * 2)!;
-    // }
-    // int shade = 230;
-
-    // if (proportion < 0.5) {
-    //   color = Color.lerp(Color.fromARGB(shade, 219, 68, 55),
-    //       Color.fromARGB(shade, 244, 180, 0), proportion * 2)!;
-    // } else {
-    //   color = Color.lerp(Color.fromARGB(shade, 244, 180, 0),
-    //       Color.fromARGB(shade, 15, 157, 88), (proportion - 0.5) * 2)!;
-    // }
     final ColorTween colorTween = ColorTween(
       begin: Colors.orange.shade200, // Faint Orange
       end: Colors.orange.shade700, // Dark Orange
@@ -55,49 +41,54 @@ class TimeSlotTile extends StatelessWidget {
             border: Border.all(color: Colors.grey, width: 1.0),
             color: Colors.white,
           ),
-          child: Row(children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  startDateTime.day.toString(),
-                  style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              const SizedBox(width: 10),
+              Text(
+                startDateTime.day.toString(),
+                style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black),
+              ),
+              const SizedBox(width: 25),
+              // Spacer(),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    DateFormat('MMMM').format(startDateTime),
+                    style: const TextStyle(
+                        fontFamily: "Lato",
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    "${DateFormat('HH:mm').format(startDateTime)} - ${DateFormat('HH:mm').format(endDateTime)}",
+                    style: const TextStyle(fontSize: 13, fontFamily: "Lato"),
+                  ),
+                ],
+              ),
+              const Spacer(),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Container(
+                  padding: const EdgeInsets.all(15),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12), color: color),
+                  child: Text(
+                    '$numAvailable/$numTotal',
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, color: Colors.black54),
+                  ),
                 ),
-                const SizedBox(width: 20),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      DateFormat('MMMM').format(startDateTime),
-                      style: const TextStyle(
-                          fontFamily: "Lato",
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      "${DateFormat('HH:mm').format(startDateTime)} - ${DateFormat('HH:mm').format(endDateTime)}",
-                      style: const TextStyle(fontSize: 13, fontFamily: "Lato"),
-                    ),
-                  ],
-                ),
-                Align(
-                    alignment: Alignment.centerRight,
-                    child: Container(
-                        padding: const EdgeInsets.all(15),
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            color: color),
-                        child: Text('$numAvailable/$numTotal',
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black54))))
-              ],
-            ),
-          ]),
+              ),
+              const SizedBox(width: 10),
+            ],
+          ),
         ),
       ),
     );

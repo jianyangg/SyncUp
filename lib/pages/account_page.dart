@@ -239,7 +239,7 @@ class _AccountPageState extends State<AccountPage> {
                             },
                             style: ButtonStyle(
                               backgroundColor: MaterialStateProperty.all<Color>(
-                                  Colors.orange.shade400),
+                                  Colors.blue.shade800),
                             ),
                             label: const Text(
                               'Sync with Google',

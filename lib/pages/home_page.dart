@@ -182,22 +182,29 @@ class _HomeState extends State<HomePage> {
         backgroundColor: Colors.blue.shade800,
         shadowColor: Colors.transparent,
         actions: [
+          // IconButton(
+          //   // TODO: display notification page
+          //   onPressed: () {},
+          //   icon: FutureBuilder<bool>(
+          //     future: checkAllRequests(),
+          //     builder: (context, snapshot) {
+          //       if (snapshot.hasData && snapshot.data == true) {
+          //         return const Icon(
+          //           Icons.notifications_active_sharp,
+          //           color: Colors.red,
+          //         );
+          //       } else {
+          //         return const Icon(Icons.notifications, color: Colors.white);
+          //       }
+          //     },
+          //   ),
+          // ),
           IconButton(
-            // TODO: display notification page
-            onPressed: () {},
-            icon: FutureBuilder<bool>(
-              future: checkAllRequests(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData && snapshot.data == true) {
-                  return const Icon(
-                    Icons.notifications_active_sharp,
-                    color: Colors.red,
-                  );
-                } else {
-                  return const Icon(Icons.notifications, color: Colors.white);
-                }
-              },
-            ),
+            icon: Icon(Icons.sync),
+            onPressed: () {
+              SyncCalendar.syncCalendarByDay(
+                  dateTodayFormatted, _googleSignIn, context);
+            },
           ),
           const SizedBox(
             width: 15,

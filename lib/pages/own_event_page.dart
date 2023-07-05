@@ -1,5 +1,7 @@
 import "package:flutter/material.dart";
+import 'package:intl/intl.dart';
 import 'package:sync_up/components/bottom_nav_bar.dart';
+import 'package:sync_up/pages/create_own_event_page.dart';
 import 'package:sync_up/pages/group_page.dart';
 import 'package:sync_up/pages/home_page.dart';
 import 'package:sync_up/pages/account_page.dart';
@@ -259,11 +261,16 @@ class _OwnEventPageState extends State<OwnEventPage> {
 
   void executeAfterBuild() {
     updateSelectedDate(DateTime.now());
-    SyncCalendar.syncCalendarByDay(
-      DateTime(selectedDate.year, selectedDate.month, selectedDate.day),
-      _googleSignIn,
-      context,
-    );
+    // TODO: Uncommented the SyncCalendar because:
+    //  Similar to group events page, we do not want to sync calendar on every build
+    //  because we already did it in the home page and
+    //  we have limited number of calendar API queries per minute
+    //  and quick transitions between pages will cause the app to crash
+    // SyncCalendar.syncCalendarByDay(
+    //   DateTime(selectedDate.year, selectedDate.month, selectedDate.day),
+    //   _googleSignIn,
+    //   context,
+    // );
   }
 
   @override
@@ -273,6 +280,43 @@ class _OwnEventPageState extends State<OwnEventPage> {
       executeAfterBuild();
     });
   }
+
+  Future<void> _showNewEventStartDatePicker() async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: _newEventStart,
+      firstDate: _newEventStart.subtract(const Duration(days: 365)),
+      lastDate: _newEventStart.add(const Duration(days: 365)),
+    );
+
+    if (pickedDate != null) {
+      setState(() {
+        _newEventStart = pickedDate;
+      });
+    }
+  }
+
+  Future<void> _showNewEventEndDatePicker() async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: _newEventEnd,
+      firstDate: _newEventEnd.subtract(const Duration(days: 365)),
+      lastDate: _newEventEnd.add(const Duration(days: 365)),
+    );
+
+    if (pickedDate != null) {
+      setState(() {
+        _newEventEnd = pickedDate;
+      });
+    }
+  }
+
+  // controllers for creating calendar events
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  bool _isAllDay = false;
+  DateTime _newEventStart = DateTime.now();
+  DateTime _newEventEnd = DateTime.now().add(const Duration(hours: 1));
 
   @override
   Widget build(BuildContext context) {
@@ -312,6 +356,171 @@ class _OwnEventPageState extends State<OwnEventPage> {
           ],
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) {
+                    return CreateOwnEventPage();
+                  },
+                ),
+              );
+              // this feature is exactly the same as google calendar
+              // on pressed, assume create event directly.
+              // then pop up showmodalbottomsheet
+              // with a cancel and save button
+              // save button will save the event to the database
+              // and then sync the calendar by calling SyncCalendar
+              // cancel button will just pop the bottom sheet
+              // showModalBottomSheet(
+              //   isScrollControlled: true,
+              //   shape: RoundedRectangleBorder(
+              //     borderRadius: BorderRadius.circular(30.0),
+              //   ),
+              //   context: context,
+              //   builder: (context) {
+              //     return SizedBox(
+              //       height: MediaQuery.of(context).size.height * 14 / 15,
+              //       child: Padding(
+              //         padding: const EdgeInsets.all(15.0),
+              //         child: Column(
+              //           children: [
+              //             Container(
+              //               height: 3,
+              //               width: 50,
+              //               decoration: BoxDecoration(
+              //                 color: Colors.grey.shade400,
+              //                 borderRadius: BorderRadius.circular(10),
+              //               ),
+              //             ),
+              //             Row(
+              //               children: [
+              //                 TextButton(
+              //                   onPressed: () {
+              //                     Navigator.pop(context);
+              //                     _titleController.clear();
+              //                     _descriptionController.clear();
+              //                   },
+              //                   child: Text(
+              //                     "Back",
+              //                     style: TextStyle(
+              //                         color: Colors.blue.shade800,
+              //                         fontSize: 18),
+              //                   ),
+              //                 ),
+              //                 const Spacer(),
+              //                 TextButton(
+              //                   child: Text(
+              //                     "Save",
+              //                     style: TextStyle(
+              //                       color: Colors.blue.shade800,
+              //                       fontSize: 18,
+              //                       fontWeight: FontWeight.bold,
+              //                     ),
+              //                   ),
+              //                   onPressed: () {
+              //                     Navigator.pop(context);
+              //                     _titleController.clear();
+              //                     _descriptionController.clear();
+              //                     // TODO: Integrate with Calendar API
+              //                   },
+              //                 ),
+              //               ],
+              //             ),
+              //             const SizedBox(
+              //               height: 10,
+              //             ),
+              //             SingleChildScrollView(
+              //               child: Padding(
+              //                 padding: const EdgeInsets.only(left: 15.0),
+              //                 child: TextField(
+              //                   controller: _titleController,
+              //                   style: const TextStyle(
+              //                     color: Colors.black,
+              //                     fontSize: 25,
+              //                     fontWeight: FontWeight.normal,
+              //                   ),
+              //                   cursorColor: Colors.grey.shade500,
+              //                   decoration: InputDecoration(
+              //                     hintText: "Add title",
+              //                     hintStyle: TextStyle(
+              //                       color: Colors.grey.shade500,
+              //                       fontSize: 25,
+              //                     ),
+              //                     border: InputBorder.none,
+              //                   ),
+              //                 ),
+              //               ),
+              //             ),
+              //             const Divider(),
+              //             SizedBox(
+              //               width: MediaQuery.of(context).size.width,
+              //               child: Row(
+              //                 // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //                 children: [
+              //                   Column(
+              //                     children: [
+              //                       Row(
+              //                         mainAxisAlignment:
+              //                             MainAxisAlignment.start,
+              //                         children: [
+              //                           const Padding(
+              //                             padding: EdgeInsets.only(right: 8.0),
+              //                             child: Icon(Icons.access_time),
+              //                           ),
+              //                           const SizedBox(width: 10),
+              //                           const Text(
+              //                             "All day",
+              //                             style: TextStyle(
+              //                               fontSize: 15,
+              //                             ),
+              //                           ),
+              //                           Switch(
+              //                             value: _isAllDay,
+              //                             onChanged: (value) {
+              //                               setState(() {
+              //                                 _isAllDay = value;
+              //                               });
+              //                             },
+              //                           ),
+              //                         ],
+              //                       ),
+              //                       Row(
+              //                         mainAxisAlignment:
+              //                             MainAxisAlignment.start,
+              //                         children: [
+              //                           const SizedBox(width: 60),
+              //                           TextButton(
+              //                             child: Text(
+              //                               DateFormat('EEEE, d MMM')
+              //                                   .format(_newEventStart),
+              //                               style: const TextStyle(
+              //                                 color: Colors.black,
+              //                                 fontWeight: FontWeight.normal,
+              //                                 fontSize: 15,
+              //                               ),
+              //                             ),
+              //                             onPressed: () {
+              //                               _showNewEventStartDatePicker();
+              //                             },
+              //                           ),
+              //                         ],
+              //                       ),
+              //                     ],
+              //                   ),
+              //                 ],
+              //               ),
+              //             ),
+              //           ],
+              //         ),
+              //       ),
+              //     );
+              //   },
+              // );
+            },
+          ),
           IconButton(
             onPressed: _showDatePicker,
             icon: const Icon(Icons.calendar_month),
