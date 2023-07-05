@@ -624,21 +624,21 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                                   .height *
                                               14 /
                                               15,
-                                          child: Column(
-                                            children: [
-                                              Container(
-                                                height: 3,
-                                                width: 50,
-                                                decoration: BoxDecoration(
-                                                  color: Colors.grey.shade400,
-                                                  borderRadius:
-                                                      BorderRadius.circular(10),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(15.0),
+                                            child: Column(
+                                              children: [
+                                                Container(
+                                                  height: 3,
+                                                  width: 50,
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.grey.shade400,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10),
+                                                  ),
                                                 ),
-                                              ),
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.all(15.0),
-                                                child: Row(
+                                                Row(
                                                   children: [
                                                     TextButton(
                                                       onPressed: () {
@@ -655,25 +655,25 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                                     const Spacer(),
                                                   ],
                                                 ),
-                                              ),
-                                              const SizedBox(height: 20),
-                                              CommonSlotsTile(
-                                                eventName: _eventNameController
-                                                    .text
-                                                    .trim(),
-                                                selectedPeriod:
-                                                    _selectedPeriod!,
-                                                selectedDateRangeText:
-                                                    selectedDateRangeText,
-                                                startDate: startDate,
-                                                endDate: endDate,
-                                                userId: widget.userId,
-                                                groupId: widget.groupId,
-                                                groupName: widget.groupName,
-                                                userIds: _selectedUserIds,
-                                                memberCount: memberCount,
-                                              )
-                                            ],
+                                                const SizedBox(height: 20),
+                                                CommonSlotsTile(
+                                                  eventName:
+                                                      _eventNameController.text
+                                                          .trim(),
+                                                  selectedPeriod:
+                                                      _selectedPeriod!,
+                                                  selectedDateRangeText:
+                                                      selectedDateRangeText,
+                                                  startDate: startDate,
+                                                  endDate: endDate,
+                                                  userId: widget.userId,
+                                                  groupId: widget.groupId,
+                                                  groupName: widget.groupName,
+                                                  userIds: _selectedUserIds,
+                                                  memberCount: memberCount,
+                                                )
+                                              ],
+                                            ),
                                           ),
                                         );
                                       },

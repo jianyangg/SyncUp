@@ -24,8 +24,12 @@ class EventTile extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           color: event.extendedProperties?.shared?['CREATOR'] == "SYNCUP"
-              ? Colors.orange.shade700
-              : color,
+              ? event.end?.dateTime?.isBefore(DateTime.now()) ?? false
+                  ? Colors.grey.shade400
+                  : Colors.orange.shade700
+              : event.end?.dateTime?.isBefore(DateTime.now()) ?? false
+                  ? Colors.grey.shade400
+                  : Colors.blue.shade700,
         ),
         child: Row(children: [
           Expanded(
