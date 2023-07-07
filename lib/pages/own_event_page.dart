@@ -373,7 +373,7 @@ class _OwnEventPageState extends State<OwnEventPage> {
             onPressed: _showDatePicker,
             icon: const Icon(Icons.calendar_month),
           ),
-          // User shoudl go to group to create event.
+          // User should go to group to create event.
           // we can add an additional feature to shortcut this using the add button in future versions
           // IconButton(
           //   onPressed: () {},

@@ -2,6 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sync_up/pages/group_events_page.dart';
 import 'package:sync_up/pages/own_event_page.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:googleapis/calendar/v3.dart' as cal;
+import "package:googleapis_auth/auth_io.dart" as auth;
+import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
+
+final GoogleSignIn _googleSignIn = GoogleSignIn(
+  scopes: [cal.CalendarApi.calendarScope],
+);
 
 class CreateOwnEventPage extends StatefulWidget {
   const CreateOwnEventPage({super.key});
@@ -16,6 +24,54 @@ class _CreateOwnEventPageState extends State<CreateOwnEventPage> {
   DateTime _newEventStart = DateTime.now();
   DateTime _newEventEnd = DateTime.now().add(const Duration(hours: 1));
   bool _isAllDay = false;
+
+  GoogleSignInAccount? _currentUser;
+  late DateTime selectedDate;
+  DateTime now = DateTime.now();
+  @override
+  void initState() {
+    super.initState();
+
+    now = DateTime.now();
+    selectedDate = DateTime(now.year, now.month, now.day);
+    _googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
+      setState(() {
+        _currentUser = account;
+      });
+      if (_currentUser != null) {
+        _authenticateUserAndInstantiateAPI();
+        // might not need to do anything here
+      }
+    });
+    _googleSignIn.signInSilently();
+  }
+
+  Future<cal.CalendarApi> _authenticateUserAndInstantiateAPI() async {
+    // Retrieve an [auth.AuthClient] from the current [GoogleSignIn] instance.
+    final auth.AuthClient? client = await _googleSignIn.authenticatedClient();
+    assert(client != null, 'Authenticated client missing!');
+
+    // Prepare a gcal authenticated client. ORIGINAL. KEEP THIS CODE
+    return cal.CalendarApi(client!);
+  }
+
+  Future<bool> createEventAndBackToOwnEventsPage(cal.Event event) async {
+    try {
+      cal.CalendarApi calendarApi = await _authenticateUserAndInstantiateAPI();
+      calendarApi.events.insert(event, "primary").then((value) {
+        print("ADDEDDD_________________${value.status}");
+        if (value.status == "confirmed") {
+          print('Event added in personal google calendar');
+          return true;
+        } else {
+          print("Unable to add event in personal google calendar");
+        }
+      });
+    } catch (e) {
+      print('Error creating event $e');
+    }
+    return false;
+  }
 
   Future<void> _showNewEventStartDatePicker() async {
     final DateTime? pickedDate = await showDatePicker(
@@ -132,11 +188,29 @@ class _CreateOwnEventPageState extends State<CreateOwnEventPage> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    onPressed: () {
-                      Navigator.pop(context);
+                    onPressed: () async {
+                      DateTime dateOnly = DateTime(_newEventStart.year,
+                          _newEventStart.month, _newEventStart.day);
+                      cal.Event eventToAdd = cal.Event(
+                        summary: _titleController.text,
+                        description: _descriptionController.text,
+                        start: _isAllDay
+                            ? cal.EventDateTime(date: dateOnly)
+                            : cal.EventDateTime(dateTime: _newEventStart),
+                        end: _isAllDay
+                            ? cal.EventDateTime(date: dateOnly)
+                            : cal.EventDateTime(dateTime: _newEventEnd),
+                      );
+                      await createEventAndBackToOwnEventsPage(eventToAdd);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => OwnEventPage(),
+                        ),
+                      );
+
                       _titleController.clear();
                       _descriptionController.clear();
-                      // TODO: Integrate with Calendar API
                     },
                   ),
                 ],
@@ -199,79 +273,99 @@ class _CreateOwnEventPageState extends State<CreateOwnEventPage> {
                                 ),
                               ],
                             ),
-                            Row(
-                              children: [
-                                const Padding(
-                                  padding: EdgeInsets.only(right: 8.0),
-                                  child: Icon(Icons.calendar_today,
-                                      color: Colors.white),
-                                ),
-                                TextButton(
-                                  child: Text(
-                                    DateFormat('EEEE, d MMM')
-                                        .format(_newEventStart),
-                                    style: const TextStyle(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.normal,
-                                      fontSize: 15,
+                            AnimatedOpacity(
+                              opacity: !_isAllDay ? 1.0 : 0.0,
+                              duration: Duration(milliseconds: 500),
+                              curve: Curves.easeInOut,
+                              child: Visibility(
+                                visible: !_isAllDay,
+                                child: Row(
+                                  children: [
+                                    const Padding(
+                                      padding: EdgeInsets.only(right: 8.0),
+                                      child: Icon(Icons.calendar_today,
+                                          color: Colors.white),
                                     ),
-                                  ),
-                                  onPressed: () {
-                                    _showNewEventStartDatePicker();
-                                  },
-                                ),
-                                TextButton(
-                                  child: Text(
-                                    // format time
-                                    DateFormat('h:mm a').format(_newEventStart),
-                                    style: const TextStyle(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.normal,
-                                      fontSize: 15,
+                                    TextButton(
+                                      child: Text(
+                                        DateFormat('EEEE, d MMM')
+                                            .format(_newEventStart),
+                                        style: const TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.normal,
+                                          fontSize: 15,
+                                        ),
+                                      ),
+                                      onPressed: () {
+                                        _showNewEventStartDatePicker();
+                                      },
                                     ),
-                                  ),
-                                  onPressed: () {
-                                    _showNewEventStartTimePicker();
-                                  },
+                                    TextButton(
+                                      child: Text(
+                                        // format time
+                                        DateFormat('h:mm a')
+                                            .format(_newEventStart),
+                                        style: const TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.normal,
+                                          fontSize: 15,
+                                        ),
+                                      ),
+                                      onPressed: () {
+                                        _showNewEventStartTimePicker();
+                                      },
+                                    ),
+                                  ],
                                 ),
-                              ],
+                              ),
                             ),
-                            Row(
-                              children: [
-                                const Padding(
-                                  padding: EdgeInsets.only(right: 8.0),
-                                  child: Icon(Icons.calendar_today,
-                                      color: Colors.white),
-                                ),
-                                TextButton(
-                                  child: Text(
-                                    DateFormat('EEEE, d MMM')
-                                        .format(_newEventEnd),
-                                    style: const TextStyle(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.normal,
-                                      fontSize: 15,
+                            AnimatedOpacity(
+                              opacity: !_isAllDay ? 1.0 : 0.0,
+                              duration: Duration(
+                                  milliseconds:
+                                      500), // Adjust the duration as needed
+                              curve: Curves.easeInOut, //
+                              child: Visibility(
+                                visible: !_isAllDay,
+                                child: Row(
+                                  children: [
+                                    const Padding(
+                                      padding: EdgeInsets.only(right: 8.0),
+                                      child: Icon(Icons.calendar_today,
+                                          color: Colors.white),
                                     ),
-                                  ),
-                                  onPressed: () {
-                                    _showNewEventEndDatePicker();
-                                  },
-                                ),
-                                TextButton(
-                                  child: Text(
-                                    // format time
-                                    DateFormat('h:mm a').format(_newEventEnd),
-                                    style: const TextStyle(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.normal,
-                                      fontSize: 15,
+                                    TextButton(
+                                      child: Text(
+                                        DateFormat('EEEE, d MMM')
+                                            .format(_newEventEnd),
+                                        style: const TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.normal,
+                                          fontSize: 15,
+                                        ),
+                                      ),
+                                      onPressed: () {
+                                        _showNewEventEndDatePicker();
+                                      },
                                     ),
-                                  ),
-                                  onPressed: () {
-                                    _showNewEventEndTimePicker();
-                                  },
+                                    TextButton(
+                                      child: Text(
+                                        // format time
+                                        DateFormat('h:mm a')
+                                            .format(_newEventEnd),
+                                        style: const TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.normal,
+                                          fontSize: 15,
+                                        ),
+                                      ),
+                                      onPressed: () {
+                                        _showNewEventEndTimePicker();
+                                      },
+                                    ),
+                                  ],
                                 ),
-                              ],
+                              ),
                             ),
                           ],
                         ),
