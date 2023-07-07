@@ -1,13 +1,16 @@
 import 'package:googleapis/calendar/v3.dart' as cal;
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_html/flutter_html.dart';
 
 class EventTile extends StatelessWidget {
   final cal.Event event;
   final Color color;
-  const EventTile(this.event, {super.key, required this.color});
+  final String groupName;
+  const EventTile(this.event,
+      {super.key, required this.color, required this.groupName});
+
+  // Then for own_events_page, we should all of the current user's events, but colour code according to the group.
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +23,13 @@ class EventTile extends StatelessWidget {
         //  width: SizeConfig.screenWidth * 0.78,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          color: color,
+          color: event.extendedProperties?.shared?['CREATOR'] == "SYNCUP"
+              ? event.end?.dateTime?.isBefore(DateTime.now()) ?? false
+                  ? Colors.grey.shade400
+                  : Colors.orange.shade700
+              : event.end?.dateTime?.isBefore(DateTime.now()) ?? false
+                  ? Colors.grey.shade400
+                  : Colors.blue.shade700,
         ),
         child: Row(children: [
           Expanded(
@@ -29,12 +38,11 @@ class EventTile extends StatelessWidget {
               children: [
                 Text(
                   event.summary ?? "N/A",
-                  style: GoogleFonts.lato(
-                    textStyle: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white),
-                  ),
+                  style: const TextStyle(
+                      fontFamily: "Lato",
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
                 ),
                 const SizedBox(
                   height: 12,
@@ -53,9 +61,10 @@ class EventTile extends StatelessWidget {
                               event.end?.dateTime != null)
                           ? '${DateFormat('HH:mm').format(event.start!.dateTime!.toLocal())} to ${DateFormat('HH:mm').format(event.end!.dateTime!.toLocal())}'
                           : 'All Day',
-                      style: GoogleFonts.lato(
-                        textStyle:
-                            TextStyle(fontSize: 13, color: Colors.grey[100]),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey[100],
+                        fontFamily: "Lato",
                       ),
                     ),
                   ],
@@ -63,7 +72,7 @@ class EventTile extends StatelessWidget {
                 const SizedBox(height: 12),
                 DefaultTextStyle(
                   style: TextStyle(
-                    fontFamily: GoogleFonts.lato().fontFamily,
+                    fontFamily: "Lato",
                     color: Colors.grey[100],
                   ),
                   child: Html(
@@ -85,37 +94,22 @@ class EventTile extends StatelessWidget {
             width: 0.5,
             color: Colors.grey[200]!.withOpacity(0.7),
           ),
-
-          //TODO: using this code could be for indicating when an event is an individually created event,
-          // or a group event (color code or change the text according to the group name)
-          // It's text that appears on the right side of the event, separated by some divider
-          // RotatedBox(
-          //   quarterTurns: 3,
-          //   child: Text(
-          //     task!.isCompleted == 1 ? "COMPLETED" : "TODO",
-          //     style: GoogleFonts.lato(
-          //       textStyle: TextStyle(
-          //           fontSize: 10,
-          //           fontWeight: FontWeight.bold,
-          //           color: Colors.white),
-          //     ),
-          //   ),
-          // ),
+          Visibility(
+            visible: event.extendedProperties?.shared?['CREATOR'] == "SYNCUP",
+            child: RotatedBox(
+              quarterTurns: 3,
+              child: Text(
+                event.extendedProperties?.shared?['GROUP_NAME'] ?? "",
+                style: const TextStyle(
+                    fontFamily: "Lato",
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
+              ),
+            ),
+          ),
         ]),
       ),
     );
   }
-
-  // _getBGClr(int no) {
-  //   switch (no) {
-  //     case 0:
-  //       return bluishClr;
-  //     case 1:
-  //       return pinkClr;
-  //     case 2:
-  //       return yellowClr;
-  //     default:
-  //       return bluishClr;
-  //   }
-  // }
 }

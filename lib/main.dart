@@ -19,11 +19,20 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: const MainPage(),
-        theme: ThemeData(
-            primaryColor: Colors.blue.shade800,
-            primaryColorLight: Colors.blue.shade700,
-            highlightColor: Colors.red));
+      debugShowCheckedModeBanner: false,
+      home: const MainPage(),
+      theme: ThemeData(
+        primaryColor: Colors.blue.shade800,
+        primaryColorLight: Colors.blue.shade700,
+        highlightColor: Colors.red,
+        snackBarTheme: SnackBarThemeData(
+          backgroundColor: Colors.blue.shade800,
+          contentTextStyle: const TextStyle(
+            color: Colors.white,
+            fontFamily: 'Lato',
+          ),
+        ),
+      ),
+    );
   }
 }

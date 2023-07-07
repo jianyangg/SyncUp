@@ -1,15 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:dot_navigation_bar/dot_navigation_bar.dart';
 import 'package:sync_up/pages/own_event_page.dart';
 import 'package:sync_up/pages/group_page.dart';
 import 'package:sync_up/pages/home_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:sync_up/pages/main_page.dart';
-
 import '../components/bottom_nav_bar.dart';
+import 'package:googleapis/calendar/v3.dart' as cal;
+import 'package:sync_up/services/sync_calendar.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
-// this will be the logout page.
+final GoogleSignIn _googleSignIn = GoogleSignIn(
+  scopes: [cal.CalendarApi.calendarScope],
+);
+
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
 
@@ -46,6 +50,23 @@ Future<String> getUserPhotoUrl() async {
 class _AccountPageState extends State<AccountPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   var _selectedTab = _SelectedTab.account;
+
+  GoogleSignInAccount? _currentUser;
+  late DateTime dateTodayFormatted;
+
+  @override
+  void initState() {
+    super.initState();
+
+    DateTime now = DateTime.now();
+    dateTodayFormatted = DateTime(now.year, now.month, now.day);
+    _googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
+      setState(() {
+        _currentUser = account;
+      });
+    });
+    _googleSignIn.signInSilently();
+  }
 
   void _handleIndexChanged(int i) {
     setState(() {
@@ -110,33 +131,36 @@ class _AccountPageState extends State<AccountPage> {
         title: Row(
           children: [
             const SizedBox(width: 10),
-            FutureBuilder<String>(
-              future: getUserName(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData && snapshot.data != null) {
-                  userName = snapshot.data!;
-                  return Text(
-                    "Hello, ${snapshot.data}",
-                    style: const TextStyle(
-                        fontSize: 25, fontWeight: FontWeight.bold),
-                  );
-                } else {
-                  return const Text(
-                    "Hello, User",
-                    style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                  );
-                }
-              },
+            Expanded(
+              child: FutureBuilder<String>(
+                future: getUserName(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData && snapshot.data != null) {
+                    userName = snapshot.data!;
+                    return Text(
+                      "Hello, ${snapshot.data}",
+                      style: const TextStyle(
+                          fontSize: 25, fontWeight: FontWeight.bold),
+                    );
+                  } else {
+                    return const Text(
+                      "Hello, User",
+                      style:
+                          TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                    );
+                  }
+                },
+              ),
             ),
           ],
         ),
         backgroundColor: Colors.blue.shade800,
         shadowColor: Colors.transparent,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {},
-          ),
+          // IconButton(
+          //   icon: const Icon(Icons.settings),
+          //   onPressed: () {},
+          // ),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {
@@ -204,30 +228,24 @@ class _AccountPageState extends State<AccountPage> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          TextButton(
-                            onPressed: () {},
+                          TextButton.icon(
+                            icon: const Icon(
+                              Icons.calendar_month,
+                              color: Colors.white,
+                            ),
+                            onPressed: () {
+                              SyncCalendar.syncCalendarByDay(
+                                  dateTodayFormatted, _googleSignIn, context);
+                            },
                             style: ButtonStyle(
                               backgroundColor: MaterialStateProperty.all<Color>(
-                                  Colors.orange.shade400),
+                                  Colors.blue.shade800),
                             ),
-                            child: const Text(
+                            label: const Text(
                               'Sync with Google',
                               style: TextStyle(
                                   color: Colors.white,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          TextButton(
-                            style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all<Color>(
-                                  Colors.blueAccent.shade100),
-                            ),
-                            onPressed: () {},
-                            child: const Text(
-                              'Sync with Apple',
-                              style: TextStyle(
-                                  color: Colors.white,
+                                  fontSize: 15,
                                   fontWeight: FontWeight.bold),
                             ),
                           ),
@@ -245,6 +263,7 @@ class _AccountPageState extends State<AccountPage> {
       bottomNavigationBar: BottomNavBar(
         _SelectedTab.values.indexOf(_selectedTab),
         _handleIndexChanged,
+        color: Colors.blue.shade700,
       ),
     );
   }

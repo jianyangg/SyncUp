@@ -1,5 +1,7 @@
 import "package:flutter/material.dart";
+import 'package:intl/intl.dart';
 import 'package:sync_up/components/bottom_nav_bar.dart';
+import 'package:sync_up/pages/create_own_event_page.dart';
 import 'package:sync_up/pages/group_page.dart';
 import 'package:sync_up/pages/home_page.dart';
 import 'package:sync_up/pages/account_page.dart';
@@ -7,15 +9,11 @@ import 'package:googleapis/calendar/v3.dart' as cal;
 import "package:googleapis_auth/auth_io.dart" as auth;
 import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
 import 'package:date_picker_timeline/date_picker_timeline.dart';
-import 'package:http/http.dart' as http;
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
-
-/// Provides the `GoogleSignIn` class
 import 'package:google_sign_in/google_sign_in.dart';
 import '../components/date_scroller.dart';
 import '../components/date_tile.dart';
 import '../components/event_tile.dart';
+import '../services/sync_calendar.dart';
 
 final GoogleSignIn _googleSignIn = GoogleSignIn(
   scopes: [cal.CalendarApi.calendarScope],
@@ -31,7 +29,6 @@ class OwnEventPage extends StatefulWidget {
 enum _SelectedTab { home, calendar, group, account }
 
 class _OwnEventPageState extends State<OwnEventPage> {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   GoogleSignInAccount? _currentUser;
   late DateTime selectedDate;
 
@@ -52,34 +49,96 @@ class _OwnEventPageState extends State<OwnEventPage> {
     _googleSignIn.signInSilently();
   }
 
+  bool isBefore(DateTime a, DateTime b) {
+    int compareStartHours = a.hour.compareTo(b.hour);
+    if (compareStartHours < 0) {
+      return true;
+    } else if (compareStartHours > 0) {
+      return false;
+    }
+
+    // If start hours are the same, compare start times by minutes
+    int compareStartMinutes = a.minute.compareTo(b.minute);
+    if (compareStartMinutes < 0) {
+      return true;
+    }
+
+    return false;
+  }
+
+  bool isAfter(DateTime a, DateTime b) {
+    int compareStartHours = a.hour.compareTo(b.hour);
+    if (compareStartHours > 0) {
+      return true;
+    } else if (compareStartHours < 0) {
+      return false;
+    }
+
+    // If start hours are the same, compare start times by minutes
+    int compareStartMinutes = a.minute.compareTo(b.minute);
+    if (compareStartMinutes > 0) {
+      return true;
+    }
+
+    return false;
+  }
+
   Future<List<cal.Event>> _handleGetEvents() async {
     // Retrieve an [auth.AuthClient] from the current [GoogleSignIn] instance.
+
     final auth.AuthClient? client = await _googleSignIn.authenticatedClient();
     assert(client != null, 'Authenticated client missing!');
 
     // Prepare a gcal authenticated client. ORIGINAL. KEEP THIS CODE
     final cal.CalendarApi gcalApi = cal.CalendarApi(client!);
 
-    // calEvents should contain the events on the selected date.
-    final cal.Events calEvents = await gcalApi.events.list(
+    final cal.Events dayEvents = await gcalApi.events.list(
       "primary",
       timeMin: selectedDate,
-      timeMax:
-          selectedDate.add(const Duration(hours: 23, minutes: 59, seconds: 59)),
+      timeMax: DateTime(selectedDate.year, selectedDate.month, selectedDate.day,
+              23, 59, 59)
+          .toUtc(),
     );
-    final List<cal.Event> appointments = <cal.Event>[];
+    List<cal.Event> dayAppts = [];
 
-    // add all events to appointments which is a Future<List<Event>>
-    if (calEvents.items != null) {
-      for (int i = 0; i < calEvents.items!.length; i++) {
-        final cal.Event event = calEvents.items![i];
-        if (event.start == null) {
-          continue;
+    if (dayEvents.items != null) {
+      dayAppts = dayEvents.items!.where((event) => event.end != null).toList();
+
+      dayAppts.sort((a, b) {
+        final DateTime startA = a.start!.dateTime ?? a.start!.date!;
+        final DateTime startB = b.start!.dateTime ?? b.start!.date!;
+        final DateTime endA = a.end!.dateTime ?? a.end!.date!;
+        final DateTime endB = b.end!.dateTime ?? b.end!.date!;
+
+        // Compare start times by hours
+        int compareStartHours = startA.hour.compareTo(startB.hour);
+        if (compareStartHours != 0) {
+          return compareStartHours;
         }
-        appointments.add(event);
-      }
+
+        // If start hours are the same, compare start times by minutes
+        int compareStartMinutes = startA.minute.compareTo(startB.minute);
+        if (compareStartMinutes != 0) {
+          return compareStartMinutes;
+        }
+
+        // If start times are equal, compare end times by hours
+        int compareEndHours = endA.hour.compareTo(endB.hour);
+        if (compareEndHours != 0) {
+          return compareEndHours;
+        }
+
+        // If end hours are the same, compare end times by minutes
+        int compareEndMinutes = endA.minute.compareTo(endB.minute);
+        if (compareEndMinutes != 0) {
+          return compareEndMinutes;
+        }
+
+        // If both start and end times are equal, compare by event title
+        return a.summary!.compareTo(b.summary!);
+      });
     }
-    return appointments;
+    return dayAppts;
   }
 
   var _selectedTab = _SelectedTab.calendar;
@@ -202,6 +261,16 @@ class _OwnEventPageState extends State<OwnEventPage> {
 
   void executeAfterBuild() {
     updateSelectedDate(DateTime.now());
+    // TODO: Uncommented the SyncCalendar because:
+    //  Similar to group events page, we do not want to sync calendar on every build
+    //  because we already did it in the home page and
+    //  we have limited number of calendar API queries per minute
+    //  and quick transitions between pages will cause the app to crash
+    // SyncCalendar.syncCalendarByDay(
+    //   DateTime(selectedDate.year, selectedDate.month, selectedDate.day),
+    //   _googleSignIn,
+    //   context,
+    // );
   }
 
   @override
@@ -211,6 +280,43 @@ class _OwnEventPageState extends State<OwnEventPage> {
       executeAfterBuild();
     });
   }
+
+  Future<void> _showNewEventStartDatePicker() async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: _newEventStart,
+      firstDate: _newEventStart.subtract(const Duration(days: 365)),
+      lastDate: _newEventStart.add(const Duration(days: 365)),
+    );
+
+    if (pickedDate != null) {
+      setState(() {
+        _newEventStart = pickedDate;
+      });
+    }
+  }
+
+  Future<void> _showNewEventEndDatePicker() async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: _newEventEnd,
+      firstDate: _newEventEnd.subtract(const Duration(days: 365)),
+      lastDate: _newEventEnd.add(const Duration(days: 365)),
+    );
+
+    if (pickedDate != null) {
+      setState(() {
+        _newEventEnd = pickedDate;
+      });
+    }
+  }
+
+  // controllers for creating calendar events
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  bool _isAllDay = false;
+  DateTime _newEventStart = DateTime.now();
+  DateTime _newEventEnd = DateTime.now().add(const Duration(hours: 1));
 
   @override
   Widget build(BuildContext context) {
@@ -251,6 +357,19 @@ class _OwnEventPageState extends State<OwnEventPage> {
         ),
         actions: [
           IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) {
+                    return const CreateOwnEventPage();
+                  },
+                ),
+              );
+            },
+          ),
+          IconButton(
             onPressed: _showDatePicker,
             icon: const Icon(Icons.calendar_month),
           ),
@@ -290,10 +409,14 @@ class _OwnEventPageState extends State<OwnEventPage> {
                 ),
               ),
               // Currently selected Date:
-              DateTile(selectedDate, Colors.blue.shade700, Colors.white),
+              DateTile(
+                  dateToDisplay: selectedDate,
+                  bgColor: Colors.blue.shade700,
+                  textColor: Colors.white),
               // all events for the day:
               const SizedBox(height: 10),
               FutureBuilder<List<cal.Event>>(
+                  initialData: const [],
                   future: _handleGetEvents(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
@@ -314,20 +437,26 @@ class _OwnEventPageState extends State<OwnEventPage> {
                                 itemCount: events.length,
                                 itemBuilder: (context, index) {
                                   final event = events[index];
-                                  return EventTile(event,
-                                      color: Colors.blue.shade700);
+                                  return EventTile(
+                                    event,
+                                    color: Colors.blue.shade700,
+                                    groupName: '',
+                                  );
                                 },
                               ),
                             )
-                          : Padding(
-                              padding: const EdgeInsets.only(top: 25.0),
+                          : const Padding(
+                              padding: EdgeInsets.only(top: 25.0),
                               child: Center(
-                                  child: Text('You\'re clear for the day!',
-                                      style: TextStyle(
-                                          fontSize: 15,
-                                          color: Colors.green.shade600,
-                                          fontWeight: FontWeight.bold))),
-                            );
+                                child: Text(
+                                  'No events to show.',
+                                  style: TextStyle(
+                                      fontFamily: "Lato",
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color.fromARGB(106, 0, 0, 0)),
+                                ),
+                              ));
                     } else {
                       return const Center(
                         child: Text(
@@ -342,6 +471,7 @@ class _OwnEventPageState extends State<OwnEventPage> {
       bottomNavigationBar: BottomNavBar(
         _SelectedTab.values.indexOf(_selectedTab),
         _handleIndexChanged,
+        color: Colors.blue.shade700,
       ),
     );
   }

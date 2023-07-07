@@ -8,7 +8,9 @@ import 'account_page.dart';
 
 class UserSearchPage extends StatefulWidget {
   final String groupName;
-  const UserSearchPage({super.key, required this.groupName});
+  final String groupDescription;
+  const UserSearchPage(
+      {super.key, required this.groupName, required this.groupDescription});
 
   @override
   State<UserSearchPage> createState() => _UserSearchPageState();
@@ -31,6 +33,7 @@ class _UserSearchPageState extends State<UserSearchPage> {
       "owner": currentUserID,
       "members": selectedUsers.map((user) => user['uid']).toList(),
       "requests": [],
+      "description": widget.groupDescription,
     });
 
     for (final user in selectedUsers) {
@@ -153,22 +156,22 @@ class _UserSearchPageState extends State<UserSearchPage> {
                     title: Text(
                       userName,
                       style: TextStyle(
-                        color: selectedUsers
-                                .any((user) => user['name'] == userName)
+                        color: selectedUsers.any((selectedUser) =>
+                                selectedUser['uid'] == user.id)
                             ? Colors.blue.shade800
                             : null,
-                        fontWeight: selectedUsers
-                                .any((user) => user['name'] == userName)
+                        fontWeight: selectedUsers.any((selectedUser) =>
+                                selectedUser['uid'] == user.id)
                             ? FontWeight.bold
                             : FontWeight.normal,
                       ),
                     ),
                     onTap: () {
                       setState(() {
-                        if (selectedUsers
-                            .any((user) => user['name'] == userName)) {
-                          selectedUsers
-                              .removeWhere((user) => user['name'] == userName);
+                        if (selectedUsers.any(
+                            (selectedUser) => selectedUser['uid'] == user.id)) {
+                          selectedUsers.removeWhere((selectedUser) =>
+                              selectedUser['name'] == user.id);
                         } else {
                           // only add if not already added
                           selectedUsers.add({
@@ -178,10 +181,10 @@ class _UserSearchPageState extends State<UserSearchPage> {
                         }
                       });
                     },
-                    iconColor:
-                        selectedUsers.any((user) => user['name'] == userName)
-                            ? Colors.blue.shade700
-                            : Colors.black,
+                    iconColor: selectedUsers.any(
+                            (selectedUser) => selectedUser['uid'] == user.id)
+                        ? Colors.blue.shade700
+                        : Colors.black,
                   );
                   userWidgets.add(userWidget);
                 }

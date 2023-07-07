@@ -108,9 +108,35 @@ class _GroupSearchPageState extends State<GroupSearchPage> {
                             ),
                             // TODO: for content, create horizontal scrollable list view showing all members
                             // for now we will settle with the group description.
-                            content: const Text(
-                              'Description: Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-                              textAlign: TextAlign.center,
+                            // content: const Text(
+                            //   'Description: Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+                            //   textAlign: TextAlign.center,
+                            // ),
+                            content: FutureBuilder<DocumentSnapshot>(
+                              future: _firestore
+                                  .collection("groups")
+                                  .doc(group.id)
+                                  .get(),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return const Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                }
+                                if (!snapshot.hasData) {
+                                  return const Center(
+                                    child: Text('No data found.'),
+                                  );
+                                }
+                                final groupData = snapshot.data!;
+                                final groupDescription =
+                                    groupData['description'];
+                                return Text(
+                                  'Description: $groupDescription',
+                                  textAlign: TextAlign.center,
+                                );
+                              },
                             ),
                             actions: [
                               TextButton(
