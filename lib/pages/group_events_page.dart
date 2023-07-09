@@ -4,7 +4,6 @@ import 'package:sync_up/components/common_slots_tile.dart';
 import 'package:sync_up/components/user_selection_widget.dart';
 import 'package:sync_up/components/users/profile_tile.dart';
 import '../components/bottom_nav_bar.dart';
-import '../services/sync_calendar.dart';
 import 'account_page.dart';
 import 'notification_page.dart';
 import 'own_event_page.dart';
@@ -257,13 +256,13 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
     showDialog(
       context: context,
       builder: (context) {
-        TextEditingController _editedDescriptionController =
+        TextEditingController editedDescriptionController =
             TextEditingController(text: _descriptionController.text);
 
         return AlertDialog(
           title: const Text("Edit Description"),
           content: TextField(
-            controller: _editedDescriptionController,
+            controller: editedDescriptionController,
             maxLines: null,
             keyboardType: TextInputType.multiline,
           ),
@@ -278,13 +277,13 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
               onPressed: () {
                 setState(() {
                   _descriptionController.text =
-                      _editedDescriptionController.text;
+                      editedDescriptionController.text;
                 });
                 FirebaseFirestore.instance
                     .collection("groups")
                     .doc(widget.groupId)
                     .update({
-                  'description': _editedDescriptionController.text,
+                  'description': editedDescriptionController.text,
                 });
                 Navigator.pop(context);
               },
@@ -1031,7 +1030,7 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                             },
                           ),
                           const SizedBox(height: 20),
-                          Container(
+                          SizedBox(
                             height: 200,
                             child: Column(
                               children: [

@@ -1,5 +1,4 @@
 import "package:flutter/material.dart";
-import 'package:intl/intl.dart';
 import 'package:sync_up/components/bottom_nav_bar.dart';
 import 'package:sync_up/pages/create_own_event_page.dart';
 import 'package:sync_up/pages/group_page.dart';
@@ -13,7 +12,6 @@ import 'package:google_sign_in/google_sign_in.dart';
 import '../components/date_scroller.dart';
 import '../components/date_tile.dart';
 import '../components/event_tile.dart';
-import '../services/sync_calendar.dart';
 
 final GoogleSignIn _googleSignIn = GoogleSignIn(
   scopes: [cal.CalendarApi.calendarScope],
@@ -314,7 +312,7 @@ class _OwnEventPageState extends State<OwnEventPage> {
   // controllers for creating calendar events
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
-  bool _isAllDay = false;
+  final bool _isAllDay = false;
   DateTime _newEventStart = DateTime.now();
   DateTime _newEventEnd = DateTime.now().add(const Duration(hours: 1));
 

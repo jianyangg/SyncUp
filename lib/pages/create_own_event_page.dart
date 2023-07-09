@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:sync_up/pages/group_events_page.dart';
 import 'package:sync_up/pages/own_event_page.dart';
 
 class CreateOwnEventPage extends StatefulWidget {
@@ -279,10 +278,10 @@ class _CreateOwnEventPageState extends State<CreateOwnEventPage> {
                       const Divider(),
                       Row(
                         children: [
-                          Container(
+                          const SizedBox(
                             height: 30,
                             width: 40,
-                            child: const Padding(
+                            child: Padding(
                               padding: EdgeInsets.only(right: 8.0, top: 5.0),
                               child: Icon(
                                 Icons.notes,

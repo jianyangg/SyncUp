@@ -1,28 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class GetCommonTime {
-  // Function to find the common free slots among users
-  static Future<List<List<String>>> findFreeSlots(
-      List<String> userIds, DateTime startDate, DateTime endDate) async {
-    List<Map<String, List<String>>> availabilityDataList = [];
-
-    // Retrieve availability data for each user
-    for (String userId in userIds) {
-      final userRef =
-          FirebaseFirestore.instance.collection('users').doc(userId);
-      final userDoc = await userRef.get();
-      final availabilityData =
-          userDoc.data()?['availability'] as Map<String, dynamic>?;
-
-      if (availabilityData != null) {
-        availabilityDataList.add(availabilityData
-            .map((key, value) => MapEntry(key, List<String>.from(value))));
-      }
-    }
-
-    // of empty array means no events scheduled.
-    print("availabilityDataList: $availabilityDataList");
-
+  static List<List<String>> findCommonBusySlots(
+      List<Map<String, List<String>>> availabilityDataList,
+      DateTime startDate,
+      DateTime endDate) {
     // Find the common free slots among users
     List<List<String>> commonBusySlots = [];
 
@@ -46,7 +28,7 @@ class GetCommonTime {
       }
 
       for (DateTime date in datesInRange) {
-        print("date: $date");
+        // print("date: $date");
         String formattedDate = date.toIso8601String().split('T')[0];
         List<String> freeSlots = [];
 
@@ -59,7 +41,6 @@ class GetCommonTime {
         commonBusySlots.add(freeSlots);
       }
     }
-    print("commonBusySlots: $commonBusySlots");
 
     // Merge overlapping slots within each day
     for (int i = 0; i < commonBusySlots.length; i++) {
@@ -89,7 +70,14 @@ class GetCommonTime {
 
       commonBusySlots[i] = mergedSlots;
     }
+    // print("common busy slots: $commonBusySlots");
 
+    return commonBusySlots;
+  }
+
+  static List<List<String>> findWorkingHoursFreeSlots(
+      List<List<String>> commonBusySlots) {
+    // print("input: $commonBusySlots");
     List<List<String>> workingHoursFreeSlots = [];
 
     // formatting and adding working hours to the free slots
@@ -158,6 +146,40 @@ class GetCommonTime {
 
       workingHoursFreeSlots.add(workingHoursSlots);
     }
+    // print("output: $workingHoursFreeSlots");
     return workingHoursFreeSlots;
+  }
+
+  // Function to find the common free slots among users
+  static Future<List<List<String>>> findFreeSlots(
+      List<String> userIds, DateTime startDate, DateTime endDate) async {
+    List<Map<String, List<String>>> availabilityDataList = [];
+
+    // Retrieve availability data for each user
+    for (String userId in userIds) {
+      final userRef =
+          FirebaseFirestore.instance.collection('users').doc(userId);
+      final userDoc = await userRef.get();
+      final availabilityData =
+          userDoc.data()?['availability'] as Map<String, dynamic>?;
+
+      if (availabilityData != null) {
+        availabilityDataList.add(availabilityData
+            .map((key, value) => MapEntry(key, List<String>.from(value))));
+      }
+    }
+
+    // // of empty array means no events scheduled.
+    // print("availabilityDataList: $availabilityDataList");
+    // // print truncated output
+    // // now don't truncate output
+    // for (int i = 0; i < availabilityDataList.length; i++) {
+    //   print("availabilityDataList[$i]: ${availabilityDataList[i]}");
+    // }
+
+    List<List<String>> commonBusySlots =
+        findCommonBusySlots(availabilityDataList, startDate, endDate);
+
+    return findWorkingHoursFreeSlots(commonBusySlots);
   }
 }
