@@ -6,7 +6,9 @@ import 'package:sync_up/pages/module_page.dart';
 
 class FacultyMaterials extends StatefulWidget {
   final String folderName;
-  const FacultyMaterials({super.key, required this.folderName});
+
+  const FacultyMaterials({Key? key, required this.folderName})
+      : super(key: key);
 
   @override
   State<FacultyMaterials> createState() => _FacultyMaterialsState();
@@ -14,6 +16,8 @@ class FacultyMaterials extends StatefulWidget {
 
 class _FacultyMaterialsState extends State<FacultyMaterials> {
   late Future<List<String>> _moduleFolders;
+  List<String> _filteredModuleFolders = [];
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -23,6 +27,24 @@ class _FacultyMaterialsState extends State<FacultyMaterials> {
         .child('academicDatabase/${widget.folderName}/')
         .listAll()
         .then((result) => result.prefixes.map((e) => e.name).toList());
+  }
+
+  void _filterModuleFolders(String searchText) async {
+    List<String> filteredList = [];
+    List<String> moduleFolders = await _moduleFolders;
+
+    if (searchText.isNotEmpty) {
+      filteredList = moduleFolders
+          .where((folder) =>
+              folder.toLowerCase().contains(searchText.toLowerCase()))
+          .toList();
+    } else {
+      filteredList = List.from(moduleFolders);
+    }
+
+    setState(() {
+      _filteredModuleFolders = filteredList;
+    });
   }
 
   @override
@@ -49,61 +71,94 @@ class _FacultyMaterialsState extends State<FacultyMaterials> {
         ),
       ),
       extendBody: true,
-      body: FutureBuilder<List<String>>(
-        future: _moduleFolders,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          } else if (snapshot.hasError) {
-            return Text('Error: ${snapshot.error}');
-          } else {
-            return ListView.builder(
-              itemCount: snapshot.data!.length,
-              itemBuilder: (context, index) {
-                Color randomColor =
-                    Colors.primaries[Random().nextInt(Colors.primaries.length)];
-                return Column(
-                  children: [
-                    const SizedBox(height: 10),
-                    Container(
-                      height: 60,
-                      width: MediaQuery.of(context).size.width * 0.95,
-                      decoration: BoxDecoration(
-                        color: randomColor,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Center(
-                        child: ListTile(
-                          title: Text(
-                            snapshot.data![index],
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 17,
-                              fontWeight: FontWeight.bold,
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+                controller: _searchController,
+                onChanged: (value) {
+                  _filterModuleFolders(value);
+                },
+                decoration: InputDecoration(
+                  hintText: 'Search by module code',
+                  prefixIcon: const Icon(
+                    Icons.search,
+                    size: 17,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.normal,
+                )),
+          ),
+          Expanded(
+            child: FutureBuilder<List<String>>(
+              future: _moduleFolders,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                } else if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                } else {
+                  final List<String> moduleFolders =
+                      _searchController.text.isEmpty
+                          ? snapshot.data!
+                          : _filteredModuleFolders;
+                  return ListView.builder(
+                    itemCount: moduleFolders.length,
+                    itemBuilder: (context, index) {
+                      Color randomColor = Colors
+                          .primaries[Random().nextInt(Colors.primaries.length)];
+                      return Column(
+                        children: [
+                          const SizedBox(height: 10),
+                          Container(
+                            height: 60,
+                            width: MediaQuery.of(context).size.width * 0.95,
+                            decoration: BoxDecoration(
+                              color: randomColor,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Center(
+                              child: ListTile(
+                                title: Text(
+                                  moduleFolders[index],
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ModulePage(
+                                        folderName: widget.folderName,
+                                        moduleName: moduleFolders[index],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
                           ),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ModulePage(
-                                    folderName: widget.folderName,
-                                    moduleName: snapshot.data![index]),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                  ],
-                );
+                        ],
+                      );
+                    },
+                  );
+                }
               },
-            );
-          }
-        },
+            ),
+          ),
+        ],
       ),
     );
   }

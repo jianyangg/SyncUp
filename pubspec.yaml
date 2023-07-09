@@ -57,6 +57,7 @@ dependencies:
   mockito: ^5.4.2
   firebase_auth_mocks: ^0.11.0
   google_sign_in_mocks: ^0.2.2
+  flutter_rating_bar: ^4.0.1
 
 dev_dependencies:
   flutter_test:
