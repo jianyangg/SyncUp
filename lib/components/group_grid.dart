@@ -49,15 +49,8 @@ class GroupGrid extends StatelessWidget {
       child: FutureBuilder(
         future: getGroupIds(),
         builder: (context, snapshot) {
-          // TODO: This first if statement isn't working
           if (snapshot.data == null) {
             return Container();
-            // return const Center(
-            //   child: Text(
-            //     "No groups found. Create one now!",
-            //     style: TextStyle(fontSize: 20),
-            //   ),
-            // );
           } else if (snapshot.connectionState == ConnectionState.done &&
               snapshot.hasData) {
             final groupIds = snapshot.data!;
@@ -69,7 +62,7 @@ class GroupGrid extends StatelessWidget {
                 // make it blue and evenly spaced out with 2 columns
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
-                  crossAxisSpacing: 15,
+                  // crossAxisSpacing: 0,
                 ),
                 itemBuilder: (context, index) {
                   return GestureDetector(
@@ -94,14 +87,20 @@ class GroupGrid extends StatelessWidget {
                     child: Stack(
                       children: [
                         Container(
-                          margin: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: Colors.orange.shade600,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Center(
+                          height: MediaQuery.of(context).size.width * 0.4,
+                          width: MediaQuery.of(context).size.width * 0.4,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.orange.shade600,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            onPressed: () {
+                              // Add your button onPressed logic here
+                            },
                             child: Padding(
-                              padding: const EdgeInsets.all(8.0),
+                              padding: const EdgeInsets.all(3.0),
                               child: Text(
                                 // retrieve group name from firestore
                                 groupNames[index],
@@ -116,8 +115,8 @@ class GroupGrid extends StatelessWidget {
                           ),
                         ),
                         Positioned(
-                          top: 10,
-                          right: 4,
+                          top: 9,
+                          right: 10,
                           child: PopupMenuButton(
                             itemBuilder: (context) => [
                               PopupMenuItem(
