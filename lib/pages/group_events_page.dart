@@ -505,6 +505,8 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                     _selectedPeriod = -1;
                                     // clear selected users
                                     _selectedUserIds.clear();
+                                    startDate = DateTime.now();
+                                    endDate = DateTime.now();
                                     selectedDateRangeText =
                                         '${DateFormat('yyyy-MM-dd').format(DateTime.now())} to ${DateFormat('yyyy-MM-dd').format(DateTime.now().add(const Duration(days: 7)))}';
                                   });
@@ -609,8 +611,6 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                     );
                                   } else {
                                     showModalBottomSheet(
-                                      // window to come in from the right instead of bottom
-
                                       shape: RoundedRectangleBorder(
                                           borderRadius:
                                               BorderRadius.circular(30)),
@@ -879,9 +879,23 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                                 DateTime.now();
                                         endDate = pickedDateRange!.endDate ??
                                             DateTime.now();
-                                        selectedDateRangeText =
-                                            '${DateFormat('yyyy-MM-dd').format(startDate)} to ${DateFormat('yyyy-MM-dd').format(endDate)}';
                                         setState(() {
+                                          startDate =
+                                              pickedDateRange!.startDate ??
+                                                  DateTime.now();
+                                          endDate = pickedDateRange!.endDate ??
+                                              DateTime.now();
+                                          print(
+                                              "previous startdate: $startDate}");
+                                          print("previous enddate: $endDate}");
+                                          if (endDate.isBefore(startDate)) {
+                                            endDate = startDate
+                                                .add(Duration(microseconds: 1));
+                                          }
+
+                                          print("new startDate: $startDate}");
+                                          print("new endDate: $endDate}");
+
                                           selectedDateRangeText =
                                               '${DateFormat('yyyy-MM-dd').format(startDate)} to ${DateFormat('yyyy-MM-dd').format(endDate)}';
                                         });

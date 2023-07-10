@@ -62,40 +62,65 @@ List<List<String>> getSlotsSuggestionsHelper(
     }
     slicedFreeSlots.add(slicedDay);
   }
-  // print(slicedFreeSlots);
+  // print("slicedFreeSlots: $slicedFreeSlots");
   List<List<String>> formattedSlots = [];
 
   for (var slots in slicedFreeSlots) {
     List<String> formattedList = [];
 
     for (var slot in slots) {
+      // DateTime now looks like that: 2023-07-12T09:00:00.000
       DateTime dateTime = DateTime.parse(slot);
       // if dateTime plus selectedPeriod is after 1700 which is endTime, do not add to list
       if (dateTime.add(Duration(minutes: selectedPeriod)).hour > 17) {
+        // print output for debugging
+        // print(
+        //     "dateTime.add(Duration(minutes: selectedPeriod)).hour: ${dateTime.add(Duration(minutes: selectedPeriod)).hour}");
         continue;
       }
       String formattedTime =
           '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+      // print("formattedTime: $formattedTime");
       formattedList.add(formattedTime);
     }
+    // print("formattedListNext: $formattedList");
 
     formattedSlots.add(formattedList);
+    // print("formattedSlots: $formattedSlots");
   }
   // Modify the first row (representing the current day) to only show timings after the current time
-  List<String> firstRow = formattedSlots[0];
-  List<String> modifiedFirstRow = [];
-  for (String time in firstRow) {
-    List<String> timeSplit = time.split(':');
-    int hour = int.parse(timeSplit[0]);
-    int minute = int.parse(timeSplit[1]);
-    if (hour > now.hour) {
-      modifiedFirstRow.add(time);
-    } else if (hour == now.hour && minute > now.minute) {
-      modifiedFirstRow.add(time);
+  // this is only if the startDate has the same date as today
+  if (startDate.year == DateTime.now().year &&
+      startDate.month == DateTime.now().month &&
+      startDate.day == DateTime.now().day) {
+    List<String> firstRow = formattedSlots[0];
+    List<String> modifiedFirstRow = [];
+    for (String time in firstRow) {
+      List<String> timeSplit = time.split(':');
+      int hour = int.parse(timeSplit[0]);
+      int minute = int.parse(timeSplit[1]);
+      if (hour > now.hour) {
+        modifiedFirstRow.add(time);
+      } else if (hour == now.hour && minute > now.minute) {
+        modifiedFirstRow.add(time);
+      }
     }
+    formattedSlots[0] = modifiedFirstRow;
   }
-  formattedSlots[0] = modifiedFirstRow;
-  // print(formattedSlots);
+  // List<String> firstRow = formattedSlots[0];
+  // List<String> modifiedFirstRow = [];
+  // for (String time in firstRow) {
+  //   List<String> timeSplit = time.split(':');
+  //   int hour = int.parse(timeSplit[0]);
+  //   int minute = int.parse(timeSplit[1]);
+  //   if (hour > now.hour) {
+  //     modifiedFirstRow.add(time);
+  //   } else if (hour == now.hour && minute > now.minute) {
+  //     modifiedFirstRow.add(time);
+  //   }
+  // }
+  // formattedSlots[0] = modifiedFirstRow;
+  // print("formattedSlotsFinal: $formattedSlots");
   return formattedSlots;
 }
 
@@ -317,7 +342,10 @@ class _CommonSlotsTileState extends State<CommonSlotsTile> {
                               .reduce((a, b) => a.length > b.length ? a : b)
                               .length;
 
+                          maxLength = maxLength == 0 ? 1 : maxLength;
                           double proportion = slots.length / maxLength;
+                          // print('slots length: ${slots.length}');
+                          // print('max length: $maxLength');
                           Color? expBgColor;
                           final ColorTween colorTween = ColorTween(
                             begin: Colors.orange.shade200, // Faint Orange
@@ -332,10 +360,10 @@ class _CommonSlotsTileState extends State<CommonSlotsTile> {
                             children: [
                               ExpansionTile(
                                   collapsedShape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
+                                    borderRadius: BorderRadius.circular(16.0),
                                   ),
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
+                                    borderRadius: BorderRadius.circular(16.0),
                                   ),
                                   backgroundColor: expBgColor,
                                   collapsedBackgroundColor: expBgColor,

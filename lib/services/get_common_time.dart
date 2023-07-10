@@ -22,10 +22,11 @@ class GetCommonTime {
       // Filter free slots within the date range
       List<DateTime> datesInRange = [];
       for (DateTime date = startDate;
-          date.isBefore(endDate) || date == endDate;
+          date.isBefore(endDate) || date.isAtSameMomentAs(endDate);
           date = date.add(const Duration(days: 1))) {
         datesInRange.add(date);
       }
+      // print("datesInRange: $datesInRange");
 
       for (DateTime date in datesInRange) {
         // print("date: $date");
@@ -180,6 +181,7 @@ class GetCommonTime {
     List<List<String>> commonBusySlots =
         findCommonBusySlots(availabilityDataList, startDate, endDate);
 
+    // print("getCommonTime: ${findWorkingHoursFreeSlots(commonBusySlots)}");
     return findWorkingHoursFreeSlots(commonBusySlots);
   }
 }
