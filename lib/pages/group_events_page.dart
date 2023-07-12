@@ -890,7 +890,7 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                           print("previous enddate: $endDate}");
                                           if (endDate.isBefore(startDate)) {
                                             endDate = startDate
-                                                .add(Duration(microseconds: 1));
+                                                .add(const Duration(microseconds: 1));
                                           }
 
                                           print("new startDate: $startDate}");
