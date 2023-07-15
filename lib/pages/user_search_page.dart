@@ -34,6 +34,7 @@ class _UserSearchPageState extends State<UserSearchPage> {
       "members": selectedUsers.map((user) => user['uid']).toList(),
       "requests": [],
       "description": widget.groupDescription,
+      "isRecreational": false,
     });
 
     for (final user in selectedUsers) {

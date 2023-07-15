@@ -49,15 +49,8 @@ class GroupGrid extends StatelessWidget {
       child: FutureBuilder(
         future: getGroupIds(),
         builder: (context, snapshot) {
-          // TODO: This first if statement isn't working
           if (snapshot.data == null) {
             return Container();
-            // return const Center(
-            //   child: Text(
-            //     "No groups found. Create one now!",
-            //     style: TextStyle(fontSize: 20),
-            //   ),
-            // );
           } else if (snapshot.connectionState == ConnectionState.done &&
               snapshot.hasData) {
             final groupIds = snapshot.data!;
@@ -69,133 +62,135 @@ class GroupGrid extends StatelessWidget {
                 // make it blue and evenly spaced out with 2 columns
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
-                  crossAxisSpacing: 15,
+                  // crossAxisSpacing: 0,
                 ),
                 itemBuilder: (context, index) {
-                  return GestureDetector(
-                    onTap: () {
-                      // navigate to group page
-                      // print(context);
-                      // push to group_events_page
-                      Navigator.pushReplacement(
-                        context,
-                        PageRouteBuilder(
-                          pageBuilder: (context, animation1, animation2) =>
-                              GroupEventsPage(
-                            userId: userId,
-                            groupId: groupIds[index],
-                            groupName: groupNames[index],
+                  return Stack(
+                    children: [
+                      SizedBox(
+                        height: MediaQuery.of(context).size.width * 0.4,
+                        width: MediaQuery.of(context).size.width * 0.4,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange.shade600,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
-                          transitionDuration: Duration.zero,
-                          reverseTransitionDuration: Duration.zero,
-                        ),
-                      );
-                    },
-                    child: Stack(
-                      children: [
-                        Container(
-                          margin: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: Colors.orange.shade600,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                // retrieve group name from firestore
-                                groupNames[index],
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
+                          onPressed: () {
+                            // navigate to group page
+                            // print(context);
+                            // push to group_events_page
+                            Navigator.pushReplacement(
+                              context,
+                              PageRouteBuilder(
+                                pageBuilder:
+                                    (context, animation1, animation2) =>
+                                        GroupEventsPage(
+                                  userId: userId,
+                                  groupId: groupIds[index],
+                                  groupName: groupNames[index],
                                 ),
+                                transitionDuration: Duration.zero,
+                                reverseTransitionDuration: Duration.zero,
+                              ),
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(3.0),
+                            child: Text(
+                              // retrieve group name from firestore
+                              groupNames[index],
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
                         ),
-                        Positioned(
-                          top: 10,
-                          right: 4,
-                          child: PopupMenuButton(
-                            itemBuilder: (context) => [
-                              PopupMenuItem(
-                                value: 'leave_group',
-                                child: const Text('Leave Group'),
-                                onTap: () {
-                                  // remove the group from the user's list of groups
-                                  // if the user is the owner of the group,
-                                  // delete the group
-                                  firestore
-                                      .collection("groups")
-                                      .doc(groupIds[index])
-                                      .get()
-                                      .then((value) {
-                                    final data = value.data();
-                                    final ownerId = data?["owner"] as String;
-                                    if (ownerId == userId) {
-                                      // delete the group from all users
-                                      firestore
-                                          .collection("users")
-                                          .get()
-                                          .then((value) {
-                                        for (var doc in value.docs) {
-                                          final userData = doc.data();
-                                          final userGroups =
-                                              userData["groups"] as List;
-                                          if (userGroups
-                                              .contains(groupIds[index])) {
-                                            firestore
-                                                .collection("users")
-                                                .doc(doc.id)
-                                                .update({
-                                              "groups": FieldValue.arrayRemove(
-                                                  [groupIds[index]])
-                                            });
-                                          }
+                      ),
+                      Positioned(
+                        top: 9,
+                        right: 10,
+                        child: PopupMenuButton(
+                          itemBuilder: (context) => [
+                            PopupMenuItem(
+                              value: 'leave_group',
+                              child: const Text('Leave Group'),
+                              onTap: () {
+                                // remove the group from the user's list of groups
+                                // if the user is the owner of the group,
+                                // delete the group
+                                firestore
+                                    .collection("groups")
+                                    .doc(groupIds[index])
+                                    .get()
+                                    .then((value) {
+                                  final data = value.data();
+                                  final ownerId = data?["owner"] as String;
+                                  if (ownerId == userId) {
+                                    // delete the group from all users
+                                    firestore
+                                        .collection("users")
+                                        .get()
+                                        .then((value) {
+                                      for (var doc in value.docs) {
+                                        final userData = doc.data();
+                                        final userGroups =
+                                            userData["groups"] as List;
+                                        if (userGroups
+                                            .contains(groupIds[index])) {
+                                          firestore
+                                              .collection("users")
+                                              .doc(doc.id)
+                                              .update({
+                                            "groups": FieldValue.arrayRemove(
+                                                [groupIds[index]])
+                                          });
                                         }
-                                      });
-                                      firestore
-                                          .collection("groups")
-                                          .doc(groupIds[index])
-                                          .delete();
-                                    } else {
-                                      firestore
-                                          .collection("groups")
-                                          .doc(groupIds[index])
-                                          .update({
-                                        "members":
-                                            FieldValue.arrayRemove([userId])
-                                      });
-                                      firestore
-                                          .collection("users")
-                                          .doc(userId)
-                                          .update({
-                                        "groups": FieldValue.arrayRemove(
-                                            [groupIds[index]])
-                                      });
-                                    }
-                                  });
-                                },
-                              ),
-                              PopupMenuItem(
-                                value: 'copy_grp_name',
-                                child: const Text('Copy Group Name'),
-                                onTap: () {
-                                  Clipboard.setData(
-                                      ClipboardData(text: groupNames[index]));
-                                },
-                              ),
-                              const PopupMenuItem(
-                                  value: 'back', child: Text('Back')),
-                            ],
-                            icon: const Icon(Icons.more_vert),
-                            color: Colors.white,
-                          ),
+                                      }
+                                    });
+                                    firestore
+                                        .collection("groups")
+                                        .doc(groupIds[index])
+                                        .delete();
+                                  } else {
+                                    firestore
+                                        .collection("groups")
+                                        .doc(groupIds[index])
+                                        .update({
+                                      "members":
+                                          FieldValue.arrayRemove([userId])
+                                    });
+                                    firestore
+                                        .collection("users")
+                                        .doc(userId)
+                                        .update({
+                                      "groups": FieldValue.arrayRemove(
+                                          [groupIds[index]])
+                                    });
+                                  }
+                                });
+                              },
+                            ),
+                            PopupMenuItem(
+                              value: 'copy_grp_name',
+                              child: const Text('Copy Group Name'),
+                              onTap: () {
+                                Clipboard.setData(
+                                    ClipboardData(text: groupNames[index]));
+                              },
+                            ),
+                            const PopupMenuItem(
+                                value: 'back', child: Text('Back')),
+                          ],
+                          icon: const Icon(Icons.more_vert),
+                          color: Colors.white,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   );
                 },
               ),

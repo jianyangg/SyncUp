@@ -25,7 +25,7 @@ class HomePage extends StatefulWidget {
 
 class _HomeState extends State<HomePage> {
   var _selectedTab = _SelectedTab.home;
-  TextEditingController _feedbackController = TextEditingController();
+  final TextEditingController _feedbackController = TextEditingController();
   late Future<List<String>> _folders;
   // late Future<List<String>> _groupIds;
   // late Future<List<String>> _groupNames;
@@ -200,7 +200,7 @@ class _HomeState extends State<HomePage> {
           //   ),
           // ),
           IconButton(
-            icon: Icon(Icons.sync),
+            icon: const Icon(Icons.sync),
             onPressed: () {
               SyncCalendar.syncCalendarByDay(
                   dateTodayFormatted, _googleSignIn, context);
@@ -685,6 +685,8 @@ class _HomeState extends State<HomePage> {
                       ],
                     ),
                   ),
+                  // allow more space for scrolling
+                  const SizedBox(height: 150),
                 ],
               ),
             ),

@@ -15,6 +15,116 @@ final GoogleSignIn _googleSignIn = GoogleSignIn(
   scopes: [cal.CalendarApi.calendarScope],
 );
 
+List<List<String>> getSlotsSuggestionsHelper(
+    List<List<String>> workingHourFreeSlots,
+    DateTime startDate,
+    int selectedPeriod,
+    DateTime now,
+    bool isRecreational) {
+  List<List<String>> slicedFreeSlots = [];
+  int countDays = 0;
+  for (List<String> day in workingHourFreeSlots) {
+    List<String> slicedDay = [];
+    DateTime currentDay = startDate.add(Duration(days: countDays));
+    for (String timeSlot in day) {
+      // split the time slot into start and end time
+      List<String> timeSlotSplit = timeSlot.split("-");
+      // convert the start and end time into DateTime objects
+      // now convert 09:00 to DateTime object
+      List<String> startTimeStringSplit = timeSlotSplit[0].split(":");
+      int startHours = int.parse(startTimeStringSplit[0]);
+      int startMinutes = int.parse(startTimeStringSplit[1]);
+      List<String> endTimeStringSplit = timeSlotSplit[1].split(":");
+      int endHours = int.parse(endTimeStringSplit[0]);
+      int endMinutes = int.parse(endTimeStringSplit[1]);
+
+      // Create a DateTime object with today's date and the specified time
+      DateTime startTime = DateTime(
+        currentDay.year,
+        currentDay.month,
+        currentDay.day,
+        startHours,
+        startMinutes,
+      );
+
+      DateTime endTime = DateTime(
+        currentDay.year,
+        currentDay.month,
+        currentDay.day,
+        endHours,
+        endMinutes,
+      );
+
+      // slice the time slot into intervals
+      while (startTime.isBefore(endTime)) {
+        slicedDay.add(startTime.toIso8601String());
+        startTime = startTime.add(Duration(minutes: selectedPeriod));
+      }
+    }
+    slicedFreeSlots.add(slicedDay);
+  }
+  // print("slicedFreeSlots: $slicedFreeSlots");
+  List<List<String>> formattedSlots = [];
+
+  for (var slots in slicedFreeSlots) {
+    List<String> formattedList = [];
+
+    for (var slot in slots) {
+      DateTime slotStartTime = DateTime.parse(slot);
+
+      DateTime endTime = slotStartTime.add(Duration(minutes: selectedPeriod));
+      int endTimeHr = isRecreational ? 23 : 17;
+      int endTimeMin = isRecreational ? 59 : 0;
+      if (endTime.hour < slotStartTime.hour ||
+          endTime.hour > endTimeHr ||
+          (endTime.hour == endTimeHr && endTime.minute > endTimeMin)) {
+        continue; // Skip the slot if it goes past 17:00 or 23:59
+      } else {
+        String formattedTime =
+            '${slotStartTime.hour.toString().padLeft(2, '0')}:${slotStartTime.minute.toString().padLeft(2, '0')}';
+        formattedList.add(formattedTime);
+      }
+    }
+
+    formattedSlots.add(formattedList);
+  }
+
+  // Modify the first row (representing the current day) to only show timings after the current time
+  // this is only if the startDate has the same date as today
+  if (startDate.year == DateTime.now().year &&
+      startDate.month == DateTime.now().month &&
+      startDate.day == DateTime.now().day) {
+    List<String> firstRow = formattedSlots[0];
+    List<String> modifiedFirstRow = [];
+    for (String time in firstRow) {
+      List<String> timeSplit = time.split(':');
+      int hour = int.parse(timeSplit[0]);
+      int minute = int.parse(timeSplit[1]);
+      if (hour > now.hour) {
+        modifiedFirstRow.add(time);
+      } else if (hour == now.hour && minute > now.minute) {
+        modifiedFirstRow.add(time);
+      }
+    }
+    formattedSlots[0] = modifiedFirstRow;
+  }
+  // List<String> firstRow = formattedSlots[0];
+  // List<String> modifiedFirstRow = [];
+  // for (String time in firstRow) {
+  //   List<String> timeSplit = time.split(':');
+  //   int hour = int.parse(timeSplit[0]);
+  //   int minute = int.parse(timeSplit[1]);
+  //   if (hour > now.hour) {
+  //     modifiedFirstRow.add(time);
+  //   } else if (hour == now.hour && minute > now.minute) {
+  //     modifiedFirstRow.add(time);
+  //   }
+  // }
+  // formattedSlots[0] = modifiedFirstRow;
+  // print("formattedSlotsFinal: $formattedSlots");
+  return formattedSlots;
+}
+
 class CommonSlotsTile extends StatefulWidget {
   final String eventName;
   final int selectedPeriod;
@@ -46,6 +156,7 @@ class CommonSlotsTile extends StatefulWidget {
 
 class _CommonSlotsTileState extends State<CommonSlotsTile> {
   final firestore = FirebaseFirestore.instance;
+  bool isRecreational = false;
 
   GoogleSignInAccount? _currentUser;
   late DateTime selectedDate;
@@ -66,6 +177,18 @@ class _CommonSlotsTileState extends State<CommonSlotsTile> {
       }
     });
     _googleSignIn.signInSilently();
+    // read from firestore to see if group is recreational
+    FirebaseFirestore.instance
+        .collection("groups")
+        .doc(widget.groupId)
+        .get()
+        .then((DocumentSnapshot documentSnapshot) {
+      if (documentSnapshot.exists) {
+        setState(() {
+          isRecreational = documentSnapshot['isRecreational'];
+        });
+      }
+    });
   }
 
   Future<cal.CalendarApi> _authenticateUserAndInstantiateAPI() async {
@@ -79,86 +202,14 @@ class _CommonSlotsTileState extends State<CommonSlotsTile> {
 
   Future<List<List<String>>> getSlotsSuggestions() async {
     List<List<String>> workingHourFreeSlots = await GetCommonTime.findFreeSlots(
-        widget.userIds, widget.startDate, widget.endDate);
+        widget.userIds, widget.startDate, widget.endDate, isRecreational);
     // now we want to slice the free time slots into intervals accoridng to the selected period
     // e.g. if selected period is 30 mins, then we want to slice the free time slots into 30 mins intervals
-    List<List<String>> slicedFreeSlots = [];
-    int countDays = 0;
-    for (List<String> day in workingHourFreeSlots) {
-      List<String> slicedDay = [];
-      DateTime currentDay = widget.startDate.add(Duration(days: countDays));
-      for (String timeSlot in day) {
-        // split the time slot into start and end time
-        List<String> timeSlotSplit = timeSlot.split("-");
-        // convert the start and end time into DateTime objects
-        // now convert 09:00 to DateTime object
-        List<String> startTimeStringSplit = timeSlotSplit[0].split(":");
-        int startHours = int.parse(startTimeStringSplit[0]);
-        int startMinutes = int.parse(startTimeStringSplit[1]);
-        List<String> endTimeStringSplit = timeSlotSplit[1].split(":");
-        int endHours = int.parse(endTimeStringSplit[0]);
-        int endMinutes = int.parse(endTimeStringSplit[1]);
-
-        // Create a DateTime object with today's date and the specified time
-        DateTime startTime = DateTime(
-          currentDay.year,
-          currentDay.month,
-          currentDay.day,
-          startHours,
-          startMinutes,
-        );
-
-        DateTime endTime = DateTime(
-          currentDay.year,
-          currentDay.month,
-          currentDay.day,
-          endHours,
-          endMinutes,
-        );
-
-        // slice the time slot into intervals
-        while (startTime.isBefore(endTime)) {
-          slicedDay.add(startTime.toIso8601String());
-          startTime = startTime.add(Duration(minutes: widget.selectedPeriod));
-        }
-      }
-      slicedFreeSlots.add(slicedDay);
-    }
-    // print(slicedFreeSlots);
-    List<List<String>> formattedSlots = [];
-
-    for (var slots in slicedFreeSlots) {
-      List<String> formattedList = [];
-
-      for (var slot in slots) {
-        DateTime dateTime = DateTime.parse(slot);
-        // if dateTime plus selectedPeriod is after 1700 which is endTime, do not add to list
-        if (dateTime.add(Duration(minutes: widget.selectedPeriod)).hour > 17) {
-          continue;
-        }
-        String formattedTime =
-            '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
-        formattedList.add(formattedTime);
-      }
-
-      formattedSlots.add(formattedList);
-    }
-    // Modify the first row (representing the current day) to only show timings after the current time
-    List<String> firstRow = formattedSlots[0];
-    List<String> modifiedFirstRow = [];
-    for (String time in firstRow) {
-      List<String> timeSplit = time.split(':');
-      int hour = int.parse(timeSplit[0]);
-      int minute = int.parse(timeSplit[1]);
-      if (hour > now.hour) {
-        modifiedFirstRow.add(time);
-      } else if (hour == now.hour && minute > now.minute) {
-        modifiedFirstRow.add(time);
-      }
-    }
-    formattedSlots[0] = modifiedFirstRow;
-    // print(formattedSlots);
-    return formattedSlots;
+    // print(workingHourFreeSlots);
+    // print(getSlotsSuggestionsHelper(
+    //     workingHourFreeSlots, widget.startDate, widget.selectedPeriod, now));
+    return getSlotsSuggestionsHelper(workingHourFreeSlots, widget.startDate,
+        widget.selectedPeriod, now, isRecreational);
   }
 
   List<DateTime> getStartEndTime(
@@ -305,7 +356,10 @@ class _CommonSlotsTileState extends State<CommonSlotsTile> {
                               .reduce((a, b) => a.length > b.length ? a : b)
                               .length;
 
+                          maxLength = maxLength == 0 ? 1 : maxLength;
                           double proportion = slots.length / maxLength;
+                          // print('slots length: ${slots.length}');
+                          // print('max length: $maxLength');
                           Color? expBgColor;
                           final ColorTween colorTween = ColorTween(
                             begin: Colors.orange.shade200, // Faint Orange
@@ -320,10 +374,10 @@ class _CommonSlotsTileState extends State<CommonSlotsTile> {
                             children: [
                               ExpansionTile(
                                   collapsedShape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
+                                    borderRadius: BorderRadius.circular(16.0),
                                   ),
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
+                                    borderRadius: BorderRadius.circular(16.0),
                                   ),
                                   backgroundColor: expBgColor,
                                   collapsedBackgroundColor: expBgColor,
