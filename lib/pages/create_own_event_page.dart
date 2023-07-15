@@ -204,7 +204,7 @@ class _CreateOwnEventPageState extends State<CreateOwnEventPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => OwnEventPage(),
+                          builder: (context) => const OwnEventPage(),
                         ),
                       );
 
@@ -274,7 +274,7 @@ class _CreateOwnEventPageState extends State<CreateOwnEventPage> {
                             ),
                             AnimatedOpacity(
                               opacity: !_isAllDay ? 1.0 : 0.0,
-                              duration: Duration(milliseconds: 500),
+                              duration: const Duration(milliseconds: 500),
                               curve: Curves.easeInOut,
                               child: Visibility(
                                 visible: !_isAllDay,
@@ -320,7 +320,7 @@ class _CreateOwnEventPageState extends State<CreateOwnEventPage> {
                             ),
                             AnimatedOpacity(
                               opacity: !_isAllDay ? 1.0 : 0.0,
-                              duration: Duration(
+                              duration: const Duration(
                                   milliseconds:
                                       500), // Adjust the duration as needed
                               curve: Curves.easeInOut, //

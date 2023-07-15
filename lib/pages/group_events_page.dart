@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sync_up/components/common_slots_tile.dart';
 import 'package:sync_up/components/user_selection_widget.dart';
@@ -55,7 +54,7 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
   late DateTime selectedDate;
   DateTime startDate = DateTime.now();
   // change this if your default date range has changed!
-  DateTime endDate = DateTime.now().add(Duration(days: 5));
+  DateTime endDate = DateTime.now().add(const Duration(days: 5));
   var _selectedTab = _SelectedTab.group;
   void _handleIndexChanged(int i) {
     setState(() {
