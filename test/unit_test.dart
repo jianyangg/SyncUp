@@ -235,7 +235,11 @@ void main() {
     final fixedTimestamp = DateTime(2023, 7, 9, 15, 30, 0);
     const selectedPeriod = 90;
     final actualSlotsSuggestions = getSlotsSuggestionsHelper(
-        workingHoursFreeSlots, fixedTimestamp, selectedPeriod, fixedTimestamp);
+        workingHoursFreeSlots,
+        fixedTimestamp,
+        selectedPeriod,
+        fixedTimestamp,
+        false);
 
     // Verify that the actual output matches the expected output
     expect(actualSlotsSuggestions, expectedSlotsSuggestions);
