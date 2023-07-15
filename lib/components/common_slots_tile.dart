@@ -89,6 +89,31 @@ List<List<String>> getSlotsSuggestionsHelper(
     formattedSlots.add(formattedList);
   }
 
+  // sort formattedSlots
+  for (var slots in formattedSlots) {
+    slots.sort((a, b) {
+      List<String> aSplit = a.split(':');
+      List<String> bSplit = b.split(':');
+      int aHour = int.parse(aSplit[0]);
+      int aMinute = int.parse(aSplit[1]);
+      int bHour = int.parse(bSplit[0]);
+      int bMinute = int.parse(bSplit[1]);
+      if (aHour < bHour) {
+        return -1;
+      } else if (aHour == bHour) {
+        if (aMinute < bMinute) {
+          return -1;
+        } else if (aMinute == bMinute) {
+          return 0;
+        } else {
+          return 1;
+        }
+      } else {
+        return 1;
+      }
+    });
+  }
+
   // Modify the first row (representing the current day) to only show timings after the current time
   // this is only if the startDate has the same date as today
   if (startDate.year == DateTime.now().year &&
