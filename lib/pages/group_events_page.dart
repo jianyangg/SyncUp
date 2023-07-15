@@ -794,149 +794,161 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                             padding: const EdgeInsets.all(15.0),
                             child: Column(
                               children: [
-                                TextButton(
-                                  style: ButtonStyle(
-                                    shape: MaterialStateProperty.all<
-                                            RoundedRectangleBorder>(
-                                        RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10.0),
-                                    )),
-                                    backgroundColor:
-                                        MaterialStateProperty.all<Color>(
-                                            const Color.fromARGB(
-                                                211, 244, 244, 244)),
-                                    padding:
-                                        MaterialStateProperty.all<EdgeInsets>(
-                                            const EdgeInsets.all(15)),
-                                  ),
-                                  onPressed: () async {
-                                    PickerDateRange? pickedDateRange;
-
-                                    // show the sf date range picker
-                                    // and allow user to select date range
-                                    await showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return AlertDialog(
-                                          content: SizedBox(
-                                            height: 500,
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width *
-                                                0.8,
-                                            child: SfDateRangePicker(
-                                              view: DateRangePickerView.month,
-                                              todayHighlightColor:
-                                                  Colors.orange.shade800,
-                                              selectionColor:
-                                                  Colors.orange.shade300,
-                                              rangeSelectionColor:
-                                                  Colors.orange.shade100,
-                                              startRangeSelectionColor:
-                                                  Colors.orange.shade700,
-                                              endRangeSelectionColor:
-                                                  Colors.orange.shade700,
-                                              onSelectionChanged:
-                                                  (DateRangePickerSelectionChangedArgs
-                                                      args) {
-                                                if (args.value
-                                                    is PickerDateRange) {
-                                                  setState(() {
-                                                    pickedDateRange =
-                                                        args.value!;
-                                                  });
-                                                }
-                                              },
-                                              selectionMode:
-                                                  DateRangePickerSelectionMode
-                                                      .range,
-                                              initialSelectedRange:
-                                                  PickerDateRange(
-                                                DateTime.now(),
-                                                DateTime.now().add(Duration(
-                                                    days: pickerDateRange)),
+                                SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.85,
+                                  child: ElevatedButton(
+                                    style: ButtonStyle(
+                                      shape: MaterialStateProperty.all<
+                                              RoundedRectangleBorder>(
+                                          RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(10.0),
+                                      )),
+                                      backgroundColor:
+                                          MaterialStateProperty.all<Color>(
+                                              Colors.grey.shade200),
+                                      padding:
+                                          MaterialStateProperty.all<EdgeInsets>(
+                                              const EdgeInsets.all(15)),
+                                    ),
+                                    onPressed: () async {
+                                      PickerDateRange? pickedDateRange;
+                                      // show the sf date range picker
+                                      // and allow user to select date range
+                                      await showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            content: Container(
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                              ),
+                                              height: 500,
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  0.8,
+                                              child: SfDateRangePicker(
+                                                view: DateRangePickerView.month,
+                                                todayHighlightColor:
+                                                    Colors.orange.shade800,
+                                                selectionColor:
+                                                    Colors.orange.shade300,
+                                                rangeSelectionColor:
+                                                    Colors.orange.shade100,
+                                                startRangeSelectionColor:
+                                                    Colors.orange.shade700,
+                                                endRangeSelectionColor:
+                                                    Colors.orange.shade700,
+                                                onSelectionChanged:
+                                                    (DateRangePickerSelectionChangedArgs
+                                                        args) {
+                                                  if (args.value
+                                                      is PickerDateRange) {
+                                                    setState(() {
+                                                      pickedDateRange =
+                                                          args.value!;
+                                                    });
+                                                  }
+                                                },
+                                                selectionMode:
+                                                    DateRangePickerSelectionMode
+                                                        .range,
+                                                initialSelectedRange:
+                                                    PickerDateRange(
+                                                  DateTime.now(),
+                                                  DateTime.now().add(Duration(
+                                                      days: pickerDateRange)),
+                                                ),
+                                                minDate: DateTime.now(),
+                                                maxDate: DateTime.now().add(
+                                                    const Duration(days: 30)),
                                               ),
                                             ),
-                                          ),
-                                          actions: <Widget>[
-                                            TextButton(
-                                              child: Text(
-                                                'OK',
-                                                style: TextStyle(
-                                                    color:
-                                                        Colors.orange.shade800,
-                                                    fontSize: 15),
+                                            actions: <Widget>[
+                                              TextButton(
+                                                child: Text(
+                                                  'OK',
+                                                  style: TextStyle(
+                                                      color: Colors
+                                                          .orange.shade800,
+                                                      fontSize: 15),
+                                                ),
+                                                onPressed: () {
+                                                  Navigator.of(context)
+                                                      .pop(pickedDateRange);
+                                                },
                                               ),
-                                              onPressed: () {
-                                                Navigator.of(context)
-                                                    .pop(pickedDateRange);
-                                              },
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    ).then((value) {
-                                      if (value != null &&
-                                          value is PickerDateRange) {
-                                        setState(() {
-                                          pickedDateRange = value;
-                                        });
-                                      }
-                                      if (pickedDateRange != null) {
-                                        startDate =
-                                            pickedDateRange!.startDate ??
-                                                DateTime.now();
-                                        endDate = pickedDateRange!.endDate ??
-                                            DateTime.now();
-                                        setState(() {
+                                            ],
+                                          );
+                                        },
+                                      ).then((value) {
+                                        if (value != null &&
+                                            value is PickerDateRange) {
+                                          setState(() {
+                                            pickedDateRange = value;
+                                          });
+                                        }
+                                        if (pickedDateRange != null) {
                                           startDate =
                                               pickedDateRange!.startDate ??
                                                   DateTime.now();
                                           endDate = pickedDateRange!.endDate ??
                                               DateTime.now();
-                                          print(
-                                              "previous startdate: $startDate}");
-                                          print("previous enddate: $endDate}");
-                                          if (endDate.isBefore(startDate)) {
-                                            endDate = startDate.add(
-                                                const Duration(
-                                                    microseconds: 1));
-                                          }
+                                          setState(() {
+                                            startDate =
+                                                pickedDateRange!.startDate ??
+                                                    DateTime.now();
+                                            endDate =
+                                                pickedDateRange!.endDate ??
+                                                    DateTime.now();
+                                            print(
+                                                "previous startdate: $startDate}");
+                                            print(
+                                                "previous enddate: $endDate}");
+                                            if (endDate.isBefore(startDate)) {
+                                              endDate = startDate.add(
+                                                  const Duration(
+                                                      microseconds: 1));
+                                            }
 
-                                          print("new startDate: $startDate}");
-                                          print("new endDate: $endDate}");
+                                            print("new startDate: $startDate}");
+                                            print("new endDate: $endDate}");
 
-                                          selectedDateRangeText =
-                                              '${DateFormat('yyyy-MM-dd').format(startDate)} to ${DateFormat('yyyy-MM-dd').format(endDate)}';
-                                        });
-                                      }
-                                    });
-                                  },
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        'Select Date Range',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          color: Colors.orange.shade700,
-                                          fontWeight: FontWeight.bold,
+                                            selectedDateRangeText =
+                                                '${DateFormat('yyyy-MM-dd').format(startDate)} to ${DateFormat('yyyy-MM-dd').format(endDate)}';
+                                          });
+                                        }
+                                      });
+                                    },
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          'Select Date Range',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            fontSize: 20,
+                                            color: Colors.orange.shade700,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
-                                      ),
-                                      Text(
-                                        '(default: $pickerDateRange days)',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontSize: 15,
-                                          color: Colors.orange.shade700,
-                                          fontWeight: FontWeight.bold,
-                                          fontStyle: FontStyle.italic,
+                                        Text(
+                                          '(default: $pickerDateRange days)',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            color: Colors.orange.shade700,
+                                            fontWeight: FontWeight.bold,
+                                            fontStyle: FontStyle.italic,
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ],

@@ -162,6 +162,42 @@ class _AccountPageState extends State<AccountPage> {
           //   onPressed: () {},
           // ),
           IconButton(
+            icon: Icon(Icons.info_outline),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                    title: const Text(
+                      "Info",
+                      style: TextStyle(
+                          color: Colors.black, fontWeight: FontWeight.bold),
+                    ),
+                    content: const Text(
+                      "As of 15th July, this app only allows users to sync their Google Calendar up to 30 days from today. Ensure that all users in a group are logged in and have synchronised their calendar with the app before creating an event. We look forward to seeing your feedback and suggestions which you can send to us via the feedback form in the home page.\n\nHope you enjoy using SyncUp!",
+                      style: TextStyle(color: Colors.black),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          "OK",
+                          style: TextStyle(
+                              color: Colors.blue.shade800,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {
               _signOut();
@@ -228,25 +264,36 @@ class _AccountPageState extends State<AccountPage> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          TextButton.icon(
-                            icon: const Icon(
-                              Icons.calendar_month,
-                              color: Colors.white,
+                          Container(
+                            height: 45,
+                            width: MediaQuery.of(context).size.width * 0.7,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(30),
+                              color: Colors.blue.shade800,
                             ),
-                            onPressed: () {
-                              SyncCalendar.syncCalendarByDay(
-                                  dateTodayFormatted, _googleSignIn, context);
-                            },
-                            style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all<Color>(
-                                  Colors.blue.shade800),
-                            ),
-                            label: const Text(
-                              'Sync with Google',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold),
+                            child: TextButton.icon(
+                              icon: const Icon(
+                                Icons.calendar_month,
+                                color: Colors.white,
+                              ),
+                              onPressed: () {
+                                SyncCalendar.syncCalendarByDay(
+                                    dateTodayFormatted, _googleSignIn, context);
+                              },
+                              style: ButtonStyle(
+                                backgroundColor:
+                                    MaterialStateProperty.all<Color>(
+                                        Colors.blue.shade800),
+                                elevation:
+                                    MaterialStateProperty.all<double>(3.0),
+                              ),
+                              label: const Text(
+                                'Sync with Google',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold),
+                              ),
                             ),
                           ),
                         ],
