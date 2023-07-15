@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class GetCommonTime {
@@ -7,6 +9,9 @@ class GetCommonTime {
       DateTime endDate) {
     // Find the common free slots among users
     List<List<String>> commonBusySlots = [];
+
+    // display availabilityDataList
+    print("availabilityDataList: $availabilityDataList");
 
     if (availabilityDataList.isNotEmpty) {
       // Merge availability data
@@ -71,29 +76,26 @@ class GetCommonTime {
 
       commonBusySlots[i] = mergedSlots;
     }
-    // print("common busy slots: $commonBusySlots");
+    print("common busy slots: $commonBusySlots");
 
     return commonBusySlots;
   }
 
   static List<List<String>> findWorkingHoursFreeSlots(
       List<List<String>> commonBusySlots) {
-    // print("input: $commonBusySlots");
     List<List<String>> workingHoursFreeSlots = [];
 
-    // formatting and adding working hours to the free slots
+    int startHour = 9;
+    int startMinute = 0;
+    int endHour = 17;
+    int endMinute = 0;
+    int startMinuteOfDay = startHour * 60 + startMinute;
+    int endMinuteOfDay = endHour * 60 + endMinute;
+
     for (List<String> slots in commonBusySlots) {
       List<String> workingHoursSlots = [];
 
       if (slots.isNotEmpty) {
-        int startHour = 9;
-        int startMinute = 0;
-        int endHour = 17;
-        int endMinute = 0;
-
-        int startMinuteOfDay = startHour * 60 + startMinute;
-        int endMinuteOfDay = endHour * 60 + endMinute;
-
         int previousEndMinute = startMinuteOfDay;
 
         for (String slot in slots) {
@@ -102,7 +104,6 @@ class GetCommonTime {
           int slotStartMinuteOfDay = slotStartHour * 60 + slotStartMinute;
 
           if (slotStartMinuteOfDay > previousEndMinute) {
-            // Add the free slot before the current slot
             String formattedPreviousEndMinute =
                 '${(previousEndMinute ~/ 60).toString().padLeft(2, '0')}:${(previousEndMinute % 60).toString().padLeft(2, '0')}';
             String formattedSlotStartHour =
@@ -117,11 +118,12 @@ class GetCommonTime {
           int slotEndMinute = int.parse(slot.split('-')[1].substring(2));
           int slotEndMinuteOfDay = slotEndHour * 60 + slotEndMinute;
 
-          previousEndMinute = slotEndMinuteOfDay;
+          previousEndMinute = slotEndMinuteOfDay <= endMinuteOfDay
+              ? slotEndMinuteOfDay
+              : endMinuteOfDay;
         }
 
         if (previousEndMinute < endMinuteOfDay) {
-          // Add the free slot after the last slot
           String formattedPreviousEndMinute =
               '${(previousEndMinute ~/ 60).toString().padLeft(2, '0')}:${(previousEndMinute % 60).toString().padLeft(2, '0')}';
           String formattedEndHour = endHour.toString().padLeft(2, '0');
@@ -130,12 +132,6 @@ class GetCommonTime {
               '$formattedPreviousEndMinute-$formattedEndHour:$formattedEndMinute');
         }
       } else {
-        // Add the free slot for the whole day
-        int startHour = 9;
-        int startMinute = 0;
-        int endHour = 17;
-        int endMinute = 0;
-
         String formattedStartHour = startHour.toString().padLeft(2, '0');
         String formattedStartMinute = startMinute.toString().padLeft(2, '0');
         String formattedEndHour = endHour.toString().padLeft(2, '0');
@@ -147,7 +143,9 @@ class GetCommonTime {
 
       workingHoursFreeSlots.add(workingHoursSlots);
     }
-    // print("output: $workingHoursFreeSlots");
+
+    print("workingHoursFreeSlots: $workingHoursFreeSlots");
+
     return workingHoursFreeSlots;
   }
 

@@ -69,25 +69,22 @@ List<List<String>> getSlotsSuggestionsHelper(
     List<String> formattedList = [];
 
     for (var slot in slots) {
-      // DateTime now looks like that: 2023-07-12T09:00:00.000
       DateTime dateTime = DateTime.parse(slot);
-      // if dateTime plus selectedPeriod is after 1700 which is endTime, do not add to list
-      if (dateTime.add(Duration(minutes: selectedPeriod)).hour > 17) {
-        // print output for debugging
-        // print(
-        //     "dateTime.add(Duration(minutes: selectedPeriod)).hour: ${dateTime.add(Duration(minutes: selectedPeriod)).hour}");
-        continue;
+
+      DateTime endTime = dateTime.add(Duration(minutes: selectedPeriod));
+
+      if (endTime.hour > 17 || (endTime.hour == 17 && endTime.minute > 0)) {
+        continue; // Skip the slot if it goes past 17:00
+      } else {
+        String formattedTime =
+            '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+        formattedList.add(formattedTime);
       }
-      String formattedTime =
-          '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
-      // print("formattedTime: $formattedTime");
-      formattedList.add(formattedTime);
     }
-    // print("formattedListNext: $formattedList");
 
     formattedSlots.add(formattedList);
-    // print("formattedSlots: $formattedSlots");
   }
+
   // Modify the first row (representing the current day) to only show timings after the current time
   // this is only if the startDate has the same date as today
   if (startDate.year == DateTime.now().year &&

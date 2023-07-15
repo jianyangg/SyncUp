@@ -47,10 +47,12 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
   String? _imageUrl;
   final _picker = ImagePicker();
   final _storage = firebase_storage.FirebaseStorage.instance;
+  final int pickerDateRange = 5;
 
   late DateTime selectedDate;
   DateTime startDate = DateTime.now();
-  DateTime endDate = DateTime.now().add(const Duration(days: 7));
+  // change this if your default date range has changed!
+  DateTime endDate = DateTime.now().add(Duration(days: 5));
   var _selectedTab = _SelectedTab.group;
   void _handleIndexChanged(int i) {
     setState(() {
@@ -113,12 +115,12 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
 
   List<String> _selectedUserIds = [];
   void handleUserSelectionChanged(List<String> selectedUserIds) {
+    print(selectedUserIds);
     setState(() {
       _selectedUserIds = selectedUserIds;
     });
   }
 
-  final int pickerDateRange = 5;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   // have a future boolean method to check requests to join group
   Future<bool> checkRequests() async {
@@ -221,7 +223,7 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
   final TextEditingController _descriptionController = TextEditingController();
   int? _selectedPeriod = -1;
   String selectedDateRangeText =
-      '${DateFormat('yyyy-MM-dd').format(DateTime.now())} to ${DateFormat('yyyy-MM-dd').format(DateTime.now().add(const Duration(days: 7)))}';
+      '${DateFormat('yyyy-MM-dd').format(DateTime.now())} to ${DateFormat('yyyy-MM-dd').format(DateTime.now().add(const Duration(days: 5)))}';
 
   int memberCount = 1;
   @override
@@ -506,9 +508,10 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                     // clear selected users
                                     _selectedUserIds.clear();
                                     startDate = DateTime.now();
-                                    endDate = DateTime.now();
+                                    endDate = DateTime.now()
+                                        .add(Duration(days: pickerDateRange));
                                     selectedDateRangeText =
-                                        '${DateFormat('yyyy-MM-dd').format(DateTime.now())} to ${DateFormat('yyyy-MM-dd').format(DateTime.now().add(const Duration(days: 7)))}';
+                                        '${DateFormat('yyyy-MM-dd').format(startDate)} to ${DateFormat('yyyy-MM-dd').format(endDate)}';
                                   });
                                   Navigator.pop(context);
                                 },
@@ -768,14 +771,6 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                               ],
                             ),
                           ),
-                          // allow user to select which members must be present for the event
-                          // must be intuitive and easy to use
-                          // use a listview with checkboxes
-                          // each listtile will have a checkbox and a text
-                          // text will be the name of the member
-                          // checkbox will be used to select the member
-                          // use a list of strings to store the names of the members
-                          // use a list of bools to store the state of the checkboxes
                           UserSelectionWidget(
                             onUserSelectionChanged: handleUserSelectionChanged,
                             groupId: widget.groupId,
@@ -815,7 +810,6 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                                     .width *
                                                 0.8,
                                             child: SfDateRangePicker(
-                                              // round the corners of the date range picker
                                               view: DateRangePickerView.month,
                                               todayHighlightColor:
                                                   Colors.orange.shade800,
@@ -889,8 +883,9 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                               "previous startdate: $startDate}");
                                           print("previous enddate: $endDate}");
                                           if (endDate.isBefore(startDate)) {
-                                            endDate = startDate
-                                                .add(const Duration(microseconds: 1));
+                                            endDate = startDate.add(
+                                                const Duration(
+                                                    microseconds: 1));
                                           }
 
                                           print("new startDate: $startDate}");
