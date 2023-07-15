@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sync_up/components/common_slots_tile.dart';
 import 'package:sync_up/components/user_selection_widget.dart';
@@ -48,6 +49,8 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
   final _picker = ImagePicker();
   final _storage = firebase_storage.FirebaseStorage.instance;
   final int pickerDateRange = 5;
+  // initialised as false, overriden by data in firestore first, then by user input
+  bool isRecreational = false;
 
   late DateTime selectedDate;
   DateTime startDate = DateTime.now();
@@ -226,6 +229,7 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
       '${DateFormat('yyyy-MM-dd').format(DateTime.now())} to ${DateFormat('yyyy-MM-dd').format(DateTime.now().add(const Duration(days: 5)))}';
 
   int memberCount = 1;
+
   @override
   void initState() {
     super.initState();
@@ -240,6 +244,18 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
       }
     });
     _googleSignIn.signInSilently();
+    // read from firestore to see if group is recreational
+    _firestore
+        .collection("groups")
+        .doc(widget.groupId)
+        .get()
+        .then((DocumentSnapshot documentSnapshot) {
+      if (documentSnapshot.exists) {
+        setState(() {
+          isRecreational = documentSnapshot['isRecreational'];
+        });
+      }
+    });
   }
 
   void executeAfterBuild() async {
@@ -946,7 +962,8 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                 context: context,
                 builder: (context) {
                   return SizedBox(
-                    height: MediaQuery.of(context).size.height,
+                    height: MediaQuery.of(context).size.height * 14 / 15,
+                    // height: 900,
                     child: Padding(
                       padding: const EdgeInsets.all(15.0),
                       child: Column(
@@ -974,7 +991,7 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                             ],
                           ),
                           const SizedBox(
-                            height: 20,
+                            height: 3,
                           ),
                           StreamBuilder<DocumentSnapshot>(
                             stream: _firestore
@@ -1020,7 +1037,7 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                                   memberWidgets.add(memberWidget);
                                 }
                                 return SizedBox(
-                                  height: 200,
+                                  height: 130,
                                   child: GridView(
                                     gridDelegate:
                                         const SliverGridDelegateWithFixedCrossAxisCount(
@@ -1038,63 +1055,154 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
                               }
                             },
                           ),
-                          const SizedBox(height: 20),
-                          SizedBox(
-                            height: 200,
-                            child: Column(
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      "Description",
-                                      style: TextStyle(
-                                        color: Colors.orange.shade800,
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                          const SizedBox(height: 3),
+                          Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const SizedBox(width: 40),
+                                  Text(
+                                    "Description",
+                                    style: TextStyle(
+                                      color: Colors.orange.shade800,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                    IconButton(
-                                      icon: const Icon(Icons.edit,
-                                          size: 15, color: Colors.black),
-                                      onPressed: () {
-                                        _openEditDescriptionDialog();
-                                      },
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 10),
-                                StreamBuilder<DocumentSnapshot>(
-                                  stream: FirebaseFirestore.instance
-                                      .collection("groups")
-                                      .doc(widget.groupId)
-                                      .snapshots(),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.hasData) {
-                                      final data = snapshot.data!.data()
-                                          as Map<String, dynamic>;
-                                      final description =
-                                          data['description'] as String;
-                                      _descriptionController.text = description;
-                                      return Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Text(
-                                          description,
-                                          style: const TextStyle(
-                                            fontSize: 15,
-                                            color: Colors.black,
-                                          ),
-                                        ),
-                                      );
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.edit,
+                                        size: 15, color: Colors.black),
+                                    onPressed: () {
+                                      _openEditDescriptionDialog();
+                                    },
+                                  ),
+                                ],
+                              ),
+                              // const SizedBox(height: 3),
+                              StreamBuilder<DocumentSnapshot>(
+                                stream: FirebaseFirestore.instance
+                                    .collection("groups")
+                                    .doc(widget.groupId)
+                                    .snapshots(),
+                                builder: (context, snapshot) {
+                                  if (snapshot.hasData) {
+                                    final data = snapshot.data!.data()
+                                        as Map<String, dynamic>;
+                                    String description;
+                                    if (data['description'] == null) {
+                                      description =
+                                          "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
                                     } else {
-                                      return const Center(
-                                        child: CircularProgressIndicator(),
-                                      );
+                                      description =
+                                          data['description'] as String;
                                     }
-                                  },
-                                ),
-                              ],
-                            ),
+                                    _descriptionController.text = description;
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8.0),
+                                      child: Text(
+                                        description,
+                                        style: const TextStyle(
+                                          fontSize: 15,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    );
+                                  } else {
+                                    return const Center(
+                                      child: CircularProgressIndicator(),
+                                    );
+                                  }
+                                },
+                              ),
+                              const SizedBox(height: 20),
+                              // create a toggle button that toggles between recreational and work
+                              // and if recreational is selected, the text below displays "Recreational Hours: 0000 to 2359"
+                              // and if work is selected, the text below displays "Work Hours: 0900 to 1700"
+                              Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        "Recreational",
+                                        style: TextStyle(
+                                            color: Colors.orange.shade800,
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      Switch(
+                                        value: !isRecreational,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            isRecreational = !value;
+                                            // show dialog, informing user that the group type has been changed
+                                            showDialog(
+                                              context: context,
+                                              builder: (context) {
+                                                // update group type in firestore
+                                                FirebaseFirestore.instance
+                                                    .collection("groups")
+                                                    .doc(widget.groupId)
+                                                    .update({
+                                                  'isRecreational':
+                                                      isRecreational,
+                                                });
+                                                return AlertDialog(
+                                                  shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              10)),
+                                                  title: const Text(
+                                                    "Group type changed",
+                                                    style: TextStyle(
+                                                        color: Colors.black,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  ),
+                                                  content: Text(
+                                                    "Group type has been changed from ${isRecreational ? "Work" : "Recreational"} to ${isRecreational ? "Recreational" : "Work"}.",
+                                                    style: const TextStyle(
+                                                        color: Colors.black),
+                                                  ),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        Navigator.pop(context);
+                                                      },
+                                                      child: Text(
+                                                        "OK",
+                                                        style: TextStyle(
+                                                            color: Colors.orange
+                                                                .shade800),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                );
+                                              },
+                                            );
+                                            Navigator.pop(context);
+                                          });
+                                        },
+                                        activeTrackColor: Colors.orange,
+                                        activeColor: Colors.orange.shade800,
+                                      ),
+                                      Text(
+                                        "Work",
+                                        style: TextStyle(
+                                            color: Colors.orange.shade800,
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ],
+                                  ),
+                                  Text(isRecreational
+                                      ? "Recreational Hours: 0000 to 2359"
+                                      : "Work Hours: 0900 to 1700"),
+                                ],
+                              ),
+                            ],
                           ),
                         ],
                       ),

@@ -82,13 +82,13 @@ class GetCommonTime {
   }
 
   static List<List<String>> findWorkingHoursFreeSlots(
-      List<List<String>> commonBusySlots) {
+      List<List<String>> commonBusySlots, bool isRecreational) {
     List<List<String>> workingHoursFreeSlots = [];
 
-    int startHour = 9;
+    int startHour = isRecreational ? 0 : 9;
     int startMinute = 0;
-    int endHour = 17;
-    int endMinute = 0;
+    int endHour = isRecreational ? 23 : 17;
+    int endMinute = isRecreational ? 59 : 00;
     int startMinuteOfDay = startHour * 60 + startMinute;
     int endMinuteOfDay = endHour * 60 + endMinute;
 
@@ -150,8 +150,8 @@ class GetCommonTime {
   }
 
   // Function to find the common free slots among users
-  static Future<List<List<String>>> findFreeSlots(
-      List<String> userIds, DateTime startDate, DateTime endDate) async {
+  static Future<List<List<String>>> findFreeSlots(List<String> userIds,
+      DateTime startDate, DateTime endDate, bool isRecreational) async {
     List<Map<String, List<String>>> availabilityDataList = [];
 
     // Retrieve availability data for each user
@@ -180,6 +180,6 @@ class GetCommonTime {
         findCommonBusySlots(availabilityDataList, startDate, endDate);
 
     // print("getCommonTime: ${findWorkingHoursFreeSlots(commonBusySlots)}");
-    return findWorkingHoursFreeSlots(commonBusySlots);
+    return findWorkingHoursFreeSlots(commonBusySlots, isRecreational);
   }
 }

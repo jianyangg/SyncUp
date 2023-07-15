@@ -685,6 +685,8 @@ class _HomeState extends State<HomePage> {
                       ],
                     ),
                   ),
+                  // allow more space for scrolling
+                  const SizedBox(height: 150),
                 ],
               ),
             ),

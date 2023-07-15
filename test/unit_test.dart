@@ -195,7 +195,7 @@ void main() {
     ];
 
     final actualWorkingHoursFreeSlots =
-        GetCommonTime.findWorkingHoursFreeSlots(commonBusySlots);
+        GetCommonTime.findWorkingHoursFreeSlots(commonBusySlots, false);
 
     // Verify that the actual output matches the expected output
     expect(actualWorkingHoursFreeSlots, expectedWorkingHoursFreeSlots);

@@ -19,7 +19,8 @@ List<List<String>> getSlotsSuggestionsHelper(
     List<List<String>> workingHourFreeSlots,
     DateTime startDate,
     int selectedPeriod,
-    DateTime now) {
+    DateTime now,
+    bool isRecreational) {
   List<List<String>> slicedFreeSlots = [];
   int countDays = 0;
   for (List<String> day in workingHourFreeSlots) {
@@ -69,15 +70,18 @@ List<List<String>> getSlotsSuggestionsHelper(
     List<String> formattedList = [];
 
     for (var slot in slots) {
-      DateTime dateTime = DateTime.parse(slot);
+      DateTime slotStartTime = DateTime.parse(slot);
 
-      DateTime endTime = dateTime.add(Duration(minutes: selectedPeriod));
-
-      if (endTime.hour > 17 || (endTime.hour == 17 && endTime.minute > 0)) {
-        continue; // Skip the slot if it goes past 17:00
+      DateTime endTime = slotStartTime.add(Duration(minutes: selectedPeriod));
+      int endTimeHr = isRecreational ? 23 : 17;
+      int endTimeMin = isRecreational ? 59 : 0;
+      if (endTime.hour < slotStartTime.hour ||
+          endTime.hour > endTimeHr ||
+          (endTime.hour == endTimeHr && endTime.minute > endTimeMin)) {
+        continue; // Skip the slot if it goes past 17:00 or 23:59
       } else {
         String formattedTime =
-            '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+            '${slotStartTime.hour.toString().padLeft(2, '0')}:${slotStartTime.minute.toString().padLeft(2, '0')}';
         formattedList.add(formattedTime);
       }
     }
@@ -152,6 +156,7 @@ class CommonSlotsTile extends StatefulWidget {
 
 class _CommonSlotsTileState extends State<CommonSlotsTile> {
   final firestore = FirebaseFirestore.instance;
+  bool isRecreational = false;
 
   GoogleSignInAccount? _currentUser;
   late DateTime selectedDate;
@@ -172,6 +177,18 @@ class _CommonSlotsTileState extends State<CommonSlotsTile> {
       }
     });
     _googleSignIn.signInSilently();
+    // read from firestore to see if group is recreational
+    FirebaseFirestore.instance
+        .collection("groups")
+        .doc(widget.groupId)
+        .get()
+        .then((DocumentSnapshot documentSnapshot) {
+      if (documentSnapshot.exists) {
+        setState(() {
+          isRecreational = documentSnapshot['isRecreational'];
+        });
+      }
+    });
   }
 
   Future<cal.CalendarApi> _authenticateUserAndInstantiateAPI() async {
@@ -185,14 +202,14 @@ class _CommonSlotsTileState extends State<CommonSlotsTile> {
 
   Future<List<List<String>>> getSlotsSuggestions() async {
     List<List<String>> workingHourFreeSlots = await GetCommonTime.findFreeSlots(
-        widget.userIds, widget.startDate, widget.endDate);
+        widget.userIds, widget.startDate, widget.endDate, isRecreational);
     // now we want to slice the free time slots into intervals accoridng to the selected period
     // e.g. if selected period is 30 mins, then we want to slice the free time slots into 30 mins intervals
     // print(workingHourFreeSlots);
     // print(getSlotsSuggestionsHelper(
     //     workingHourFreeSlots, widget.startDate, widget.selectedPeriod, now));
-    return getSlotsSuggestionsHelper(
-        workingHourFreeSlots, widget.startDate, widget.selectedPeriod, now);
+    return getSlotsSuggestionsHelper(workingHourFreeSlots, widget.startDate,
+        widget.selectedPeriod, now, isRecreational);
   }
 
   List<DateTime> getStartEndTime(
