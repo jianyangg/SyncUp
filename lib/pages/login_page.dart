@@ -93,11 +93,11 @@ class _LoginState extends State<LoginPage> {
         child: Center(
           child: SingleChildScrollView(
             child: SizedBox(
-              height: MediaQuery.of(context).size.height * 0.8,
+              height: MediaQuery.of(context).size.height * 0.9,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.25),
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.27),
                   // logo
                   // const Row(
                   //   mainAxisAlignment: MainAxisAlignment.center,
@@ -125,7 +125,7 @@ class _LoginState extends State<LoginPage> {
                     height: 180,
                     width: 180,
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 13),
                   const Text(
                     'SyncUp',
                     textAlign: TextAlign.center,
@@ -134,6 +134,17 @@ class _LoginState extends State<LoginPage> {
                       fontSize: 40,
                       color: Colors.black,
                       fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    "Finding common time has never been easier!",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Arial',
+                      fontSize: 15,
+                      color: Colors.grey.shade500,
+                      fontStyle: FontStyle.italic,
                     ),
                   ),
                   // const SizedBox(height: 30),
@@ -274,9 +285,20 @@ class _LoginState extends State<LoginPage> {
                       ),
                     ),
                   ),
-                  const SizedBox(
-                    height: 7,
-                  ),
+                  // const SizedBox(height: 7),
+                  // Text(
+                  //   "Sync your calendars with your friends!",
+                  //   textAlign: TextAlign.center,
+                  //   style: TextStyle(
+                  //     fontFamily: 'Arial',
+                  //     fontSize: 15,
+                  //     color: Colors.grey.shade500,
+                  //     fontStyle: FontStyle.italic,
+                  //   ),
+                  // ),
+                  // const SizedBox(
+                  //   height: 7,
+                  // ),
                 ],
               ),
             ),
