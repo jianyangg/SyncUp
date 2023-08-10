@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:sync_up/components/common_slots_tile.dart';
 import 'package:sync_up/components/user_selection_widget.dart';
 import 'package:sync_up/components/users/profile_tile.dart';
+import 'package:sync_up/pages/chat_page.dart';
 import '../components/bottom_nav_bar.dart';
 import 'account_page.dart';
 import 'notification_page.dart';
@@ -1227,6 +1228,18 @@ class _GroupEventsPageState extends State<GroupEventsPage> {
               color: Colors.black,
             ),
           ),
+          IconButton(
+              icon: const Icon(Icons.chat_bubble_outline, color: Colors.black),
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ChatPage(
+                              groupId: widget.groupId,
+                              groupName: widget.groupName,
+                              userId: widget.userId,
+                            )));
+              }),
           const SizedBox(
             width: 15,
           ),
