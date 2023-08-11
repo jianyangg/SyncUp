@@ -1,10 +1,3 @@
-# README 
-![Imgur](https://i.imgur.com/BicGodO.jpg)
-
-$$
-\Huge \mathsf {SyncUp}
-$$
-
 # Foreword / Preamble
 
 Since we started university, finding a common time to collaborate has become a relevant problem more than ever before. As such, we took Orbital 2023 as an opportunity to find and implement an optimal solution to the problem of dealing with the hectic schedules of multiple people. Manually filling up availabilities is time-consuming and we wanted to improve on existing solutions like [when2meet](https://www.when2meet.com/). We brainstormed hard and `SyncUp` was the result.
