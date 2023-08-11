@@ -16,7 +16,7 @@ Our project aims to transform the way scheduling is done, making it a breeze for
 
 Refer to the video demonstration [here.](https://drive.google.com/file/d/1LGc6AX2wE4CcYYqdPj-0h5DyKWJsg-KK/view?usp=drive_link)
 
-Download the [APK here](https://drive.google.com/file/d/1BMh-zbdaa3cfozR6QrWLeccV9CYEn8VM/view?usp=sharing), or try out our application on [TestFlight](https://testflight.apple.com/join/CfB1z2tP) if you are using an iOS device.
+Download the [APK here]([https://drive.google.com/file/d/1BMh-zbdaa3cfozR6QrWLeccV9CYEn8VM/view?usp=sharing](https://drive.google.com/file/d/1wh4MhfOapJEHpQoG3AC5btiDd8iqRSEx/view?usp=share_link)), or try out our application on [TestFlight](https://testflight.apple.com/join/CfB1z2tP) if you are using an iOS device.
 
 ## Additional Installation Instructions
 
