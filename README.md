@@ -1,21 +1,8 @@
 # README 
-
-![icon.png](README%20for%20github%2002d87303e60f4faca255633a50f93962/icon.png)
+![Imgur](https://i.imgur.com/BicGodO.jpg)
 
 $$
 \Huge \mathsf {SyncUp}
-$$
-
-$$
-\Large \mathsf {Milestone~3}
-$$
-
-$$
-\small \mathsf {Lim~Jian~Yang}
-$$
-
-$$
-\small \mathsf {Timothy~Leow}
 $$
 
 # Foreword / Preamble
