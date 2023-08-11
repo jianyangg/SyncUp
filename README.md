@@ -22,7 +22,7 @@ Apollo 11
 
 ## Project Poster:
 
-![Imgur](https://i.imgur.com/PXl30FR.png)
+![Imgur](https://i.imgur.com/A98YDbq.png)
 
 ## Design plans and reasoning:
 
@@ -30,9 +30,9 @@ Apollo 11
 
 *****Fig 1: We decided to make the UI as clean as possible, with only 4 main pages after logging into the app:***** 
 
-1. **Homepage** (For convenient access of any feature in the app.
+1. **Homepage** (For convenient access of any feature in the app)
 2. **Self calendar page** (For viewing personal events)
-3. **Groups page** (For managing groups, viewing Group Event Calendars, and scheduling group events
+3. **Groups page** (For managing groups, viewing Group Event Calendars, and scheduling group events)
 4. **Account page** (For general settings)
 
 ![Imgur](https://i.imgur.com/XpEIaMR.png)
@@ -47,25 +47,29 @@ Apollo 11
 
 To install SyncUp, please follow these steps:
 
-1. Download the SyncUp APK file from the following link: [SyncUp APK](https://docs.google.com/spreadsheets/d/1hUErlQk9Z9O3w8OTrkZnbDOMF9CEwYTc1YUPhqLF26E/edit?usp=drive_link).
+1. Install the app as a beta tester through TestFlight using the following link: [TestFlight Link](https://testflight.apple.com/join/CfB1z2tP).
 
-2. Transfer the APK file to your Android device using any preferred method, such as email, USB cable, or cloud storage.
+*OR*
 
-3. On your Android device, go to **Settings**.
+2. Download the SyncUp APK file from the following link: [SyncUp APK](https://docs.google.com/spreadsheets/d/1hUErlQk9Z9O3w8OTrkZnbDOMF9CEwYTc1YUPhqLF26E/edit?usp=drive_link).
 
-4. Navigate to **Security** or **Privacy** (the exact location may vary depending on your device).
+3. Transfer the APK file to your Android device using any preferred method, such as email, USB cable, or cloud storage.
 
-5. Enable the **Unknown Sources** option. This allows the installation of apps from sources other than the Google Play Store.
+4. On your Android device, go to **Settings**.
 
-6. Use a file manager app to locate the transferred SyncUp APK file on your device.
+5. Navigate to **Security** or **Privacy** (the exact location may vary depending on your device).
 
-7. Tap on the APK file to start the installation process.
+6. Enable the **Unknown Sources** option. This allows the installation of apps from sources other than the Google Play Store.
 
-8. Review the permissions required by the app and tap **Install** to proceed with the installation.
+7. Use a file manager app to locate the transferred SyncUp APK file on your device.
 
-9. Wait for the installation to complete.
+8. Tap on the APK file to start the installation process.
 
-10. Once the installation is finished, you can open SyncUp from your app drawer and start using it to manage your schedules and collaborate with others effectively. Follow along with our walkthrough/video below!
+9.  Review the permissions required by the app and tap **Install** to proceed with the installation.
+
+10. Wait for the installation to complete.
+
+11. Once the installation is finished, you can open SyncUp from your app drawer and start using it to manage your schedules and collaborate with others effectively. Follow along with our walkthrough/video below!
 
 ## Main Features / Quick Walkthrough:
 
@@ -73,7 +77,7 @@ To install SyncUp, please follow these steps:
 
 <img src="https://i.imgur.com/vbjYKLQ.png" width="400" />
 
-- For Milestone 2, we have only worked with Google Calendar API, so it is best advised to Sign In With Google, otherwise the features would not work as expected.
+- As our app synchronises events using the Google Calendar API, users are required to Sign In With Google for the features would not work as expected.
 
 <img src="https://i.imgur.com/ZYSgZ3C.jpg" width="400" />
 
@@ -99,7 +103,9 @@ To install SyncUp, please follow these steps:
 
 - In the account page, users can sign out or request calendar synchronization with Google. Please note that our MVP has only implemented integrations with Google Calendar API, so syncing will only work if you are signed in with a Google account and have granted SyncUp permissions to access and modify your calendar data.
 
-*Note: For a more comprehensive demonstration, refer to our [video.](https://drive.google.com/file/d/10Npgv57ZQIYjrvMyE_42bKH9e9bbuplT/view?usp=drive_link)*
+- Users can also communicate with their group members using the chat feature to facilitate collaboration.
+
+*Note: For a more comprehensive demonstration, refer to our [video.](https://drive.google.com/file/d/1LGc6AX2wE4CcYYqdPj-0h5DyKWJsg-KK/view)*
 
 ## Testing:
 
@@ -127,7 +133,7 @@ In the group with both of them, an event scheduling is initiated from timothyleo
 As expected, the app only suggests the time slot on 27th June for 1330-1430. This shows that `SyncUp` correctly performs the algorithm to only suggest common free timings of the users within the group.
 
 
-# Motivation and Aim (Milestone 1 and before)
+# Motivation and Aim
 
 ---
 

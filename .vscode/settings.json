@@ -2,5 +2,6 @@
   "editor.parameterHints.enabled": false,
   "editor.parameterHints.cycle": false,
   "java.configuration.updateBuildConfiguration": "interactive",
-  "C_Cpp.errorSquiggles": "disabled"
+  "C_Cpp.errorSquiggles": "disabled",
+  "cmake.sourceDirectory": "/Users/jianyang/Documents/NUS/Orbital/SyncUp/linux"
 }
