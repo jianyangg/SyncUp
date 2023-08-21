@@ -2,25 +2,61 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sync_up/pages/group_events_page.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
 import '../pages/group_page.dart';
 
-class GroupGrid extends StatelessWidget {
+class GroupGrid extends StatefulWidget {
   final String userId;
   const GroupGrid({super.key, required this.userId});
+
+  @override
+  State<GroupGrid> createState() => _GroupGridState();
+}
+
+class _GroupGridState extends State<GroupGrid> {
+  Future<String> doesGrpPhotoExist(String groupId) async {
+    final fileName =
+        'groupImages/${groupId}_groupPhoto'; // Adjust the file path to match your desired location in Firebase Storage
+
+    final storageRef = firebase_storage.FirebaseStorage.instance.ref(fileName);
+
+    // if photo exists, return the downloadURL
+    try {
+      final metadata = await storageRef.getMetadata();
+      final doesExist = metadata.size != null;
+
+      if (doesExist) {
+        // Fetch the group photo from Firebase Storage
+        final downloadURL = await storageRef.getDownloadURL();
+
+        // Use the downloadURL as needed (e.g., display the image)
+        // print('Download URL: $downloadURL');
+        return downloadURL;
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+    return 'NA';
+  }
+
+  Map<String, String> groupIdsToGroupPhotos = {};
 
   @override
   Widget build(BuildContext context) {
     // create a firestore instnace to access the database
     final firestore = FirebaseFirestore.instance;
 
+    final _storage = firebase_storage.FirebaseStorage.instance;
+
     // using the userId, retrieve id of the groups associated with the user
     // and save it in a list
     List<String> groupNames = [];
 
     // return a future builder to get the data from the database
-    Future getGroupIds() async {
-      final snapshot = await firestore.collection("users").doc(userId).get();
+    Future<List<dynamic>> getGroupIds() async {
+      final snapshot =
+          await firestore.collection("users").doc(widget.userId).get();
       final data = snapshot.data();
       final groupIds = data?["groups"] as List<dynamic>;
       // retrieve the group names
@@ -30,7 +66,12 @@ class GroupGrid extends StatelessWidget {
         final groupData = groupSnapshot.data();
         final groupName = groupData?["name"] as String;
         groupNames.add(groupName);
+        // get the corresponding group photo
+        String url = await doesGrpPhotoExist(groupId);
+        groupIdsToGroupPhotos[groupId] = url;
       }
+
+      // return a map of groupIds and groupNames
       return groupIds;
     }
 
@@ -50,7 +91,7 @@ class GroupGrid extends StatelessWidget {
         future: getGroupIds(),
         builder: (context, snapshot) {
           if (snapshot.data == null) {
-            return Container();
+            return const Center(child: CircularProgressIndicator());
           } else if (snapshot.connectionState == ConnectionState.done &&
               snapshot.hasData) {
             final groupIds = snapshot.data!;
@@ -62,9 +103,11 @@ class GroupGrid extends StatelessWidget {
                 // make it blue and evenly spaced out with 2 columns
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
+                  // childAspectRatio: 0.8,
                   // crossAxisSpacing: 0,
                 ),
                 itemBuilder: (context, index) {
+                  String? url = groupIdsToGroupPhotos[groupIds[index]];
                   return Stack(
                     children: [
                       SizedBox(
@@ -87,7 +130,7 @@ class GroupGrid extends StatelessWidget {
                                 pageBuilder:
                                     (context, animation1, animation2) =>
                                         GroupEventsPage(
-                                  userId: userId,
+                                  userId: widget.userId,
                                   groupId: groupIds[index],
                                   groupName: groupNames[index],
                                 ),
@@ -96,18 +139,40 @@ class GroupGrid extends StatelessWidget {
                               ),
                             );
                           },
-                          child: Padding(
-                            padding: const EdgeInsets.all(3.0),
-                            child: Text(
-                              // retrieve group name from firestore
-                              groupNames[index],
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const SizedBox(height: 10),
+                              url == null || url == 'NA'
+                                  ? CircleAvatar(
+                                      backgroundImage: const AssetImage(
+                                          "lib/assets/icon.png"),
+                                      radius:
+                                          MediaQuery.of(context).size.width *
+                                              0.07,
+                                    )
+                                  : CircleAvatar(
+                                      backgroundImage: NetworkImage(url),
+                                      radius:
+                                          MediaQuery.of(context).size.width *
+                                              0.07,
+                                    ),
+                              Align(
+                                alignment: Alignment.bottomCenter,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    groupNames[index],
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
+                            ],
                           ),
                         ),
                       ),
@@ -130,7 +195,7 @@ class GroupGrid extends StatelessWidget {
                                     .then((value) {
                                   final data = value.data();
                                   final ownerId = data?["owner"] as String;
-                                  if (ownerId == userId) {
+                                  if (ownerId == widget.userId) {
                                     // delete the group from all users
                                     firestore
                                         .collection("users")
@@ -161,12 +226,12 @@ class GroupGrid extends StatelessWidget {
                                         .collection("groups")
                                         .doc(groupIds[index])
                                         .update({
-                                      "members":
-                                          FieldValue.arrayRemove([userId])
+                                      "members": FieldValue.arrayRemove(
+                                          [widget.userId])
                                     });
                                     firestore
                                         .collection("users")
-                                        .doc(userId)
+                                        .doc(widget.userId)
                                         .update({
                                       "groups": FieldValue.arrayRemove(
                                           [groupIds[index]])

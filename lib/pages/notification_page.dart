@@ -75,9 +75,9 @@ class _NotificationPageState extends State<NotificationPage> {
                                     return AlertDialog(
                                       title: const Text(
                                           "Approve or reject request"),
-                                      content: Text(
-                                          // TODO: see if can incorporate message from requester
-                                          "Message: ${requestData['msg']}"),
+                                      // content: Text(
+                                      //     // TODO: see if can incorporate message from requester
+                                      //     "Message: ${requestData['msg']}"),
                                       actions: [
                                         TextButton(
                                           onPressed: () {
